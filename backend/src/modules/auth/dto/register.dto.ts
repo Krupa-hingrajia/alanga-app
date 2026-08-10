@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 import { Role } from '@prisma/client';
 import { Match } from '../../../common/decorators/match.decorator';
 
@@ -46,4 +46,39 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsEnum(Role)
   role: Role;
+
+  @ApiProperty({ example: 'My Store', description: 'Business Name (Vendors only)', required: false })
+  @IsOptional()
+  @IsString()
+  businessName?: string;
+
+  @ApiProperty({ example: 'Retailer', description: 'Business Type (Vendors only)', required: false })
+  @IsOptional()
+  @IsString()
+  businessType?: string;
+
+  @ApiProperty({ example: 'Mumbai', description: 'City (Vendors only)', required: false })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiProperty({ example: 'Maharashtra', description: 'State (Vendors only)', required: false })
+  @IsOptional()
+  @IsString()
+  state?: string;
+
+  @ApiProperty({ example: '400001', description: 'Pincode (Vendors only)', required: false })
+  @IsOptional()
+  @IsString()
+  pincode?: string;
+
+  @ApiProperty({ example: '22AAAAA0000A1Z5', description: 'GST Number (Optional)', required: false })
+  @IsOptional()
+  @IsString()
+  gstNumber?: string;
+
+  @ApiProperty({ example: 'ABCDE1234F', description: 'PAN Number (Optional)', required: false })
+  @IsOptional()
+  @IsString()
+  panNumber?: string;
 }

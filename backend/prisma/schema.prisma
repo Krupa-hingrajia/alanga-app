@@ -14,17 +14,32 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
 model User {
-  id                 String   @id @default(uuid())
-  fullName           String   @map("full_name")
-  email              String   @unique
-  countryCode        String   @map("country_code")
-  mobileNumber       String   @unique @map("mobile_number")
+  id                 String     @id @default(uuid())
+  fullName           String     @map("full_name")
+  email              String     @unique
+  countryCode        String     @map("country_code")
+  mobileNumber       String     @unique @map("mobile_number")
   password           String
-  role               Role     @default(CUSTOMER)
-  hashedRefreshToken String?  @map("hashed_refresh_token")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  role               Role       @default(CUSTOMER)
+  status             UserStatus @default(ACTIVE)
+  businessName       String?    @map("business_name")
+  businessType       String?    @map("business_type")
+  city               String?
+  state              String?
+  pincode            String?
+  gstNumber          String?    @map("gst_number")
+  panNumber          String?    @map("pan_number")
+  hashedRefreshToken String?    @map("hashed_refresh_token")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
 
   @@map("users")
 }

@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserEntity {
@@ -12,6 +12,14 @@ export class UserEntity {
   password?: string;
 
   role: Role;
+  status: UserStatus;
+  businessName?: string | null;
+  businessType?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  gstNumber?: string | null;
+  panNumber?: string | null;
 
   @Exclude()
   hashedRefreshToken?: string | null;

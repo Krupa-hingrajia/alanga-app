@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
@@ -6,6 +6,7 @@ import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { UserEntity } from '../../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { Role, UserStatus } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +30,9 @@ export class AuthService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(registerDto.password, saltRounds);
 
+    const role = registerDto.role;
+    const status = role === Role.VENDOR ? UserStatus.PENDING : UserStatus.ACTIVE;
+
     return this.authRepository.createUser({
       fullName: registerDto.fullName,
       email: registerDto.email,
@@ -36,6 +40,14 @@ export class AuthService {
       mobileNumber: registerDto.mobileNumber,
       password: hashedPassword,
       role: registerDto.role,
+      status: status,
+      businessName: registerDto.businessName,
+      businessType: registerDto.businessType,
+      city: registerDto.city,
+      state: registerDto.state,
+      pincode: registerDto.pincode,
+      gstNumber: registerDto.gstNumber,
+      panNumber: registerDto.panNumber,
     });
   }
 
@@ -56,6 +68,19 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check status if vendor
+    if (user.role === Role.VENDOR && user.status !== UserStatus.ACTIVE) {
+      if (user.status === UserStatus.PENDING) {
+        throw new ForbiddenException('Your account is under verification.');
+      } else if (user.status === UserStatus.REJECTED) {
+        throw new ForbiddenException(
+          'Your registration was rejected. Please update your information and submit again.',
+        );
+      } else if (user.status === UserStatus.SUSPENDED) {
+        throw new ForbiddenException('Your account has been suspended. Please contact support.');
+      }
     }
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);

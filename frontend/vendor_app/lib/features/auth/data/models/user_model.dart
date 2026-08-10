@@ -11,6 +11,7 @@ class UserModel {
   final String countryCode;
   final String mobileNumber;
   final String role;
+  @JsonKey(defaultValue: 'PENDING')
   final String status;
   final String? businessName;
   final String? businessType;

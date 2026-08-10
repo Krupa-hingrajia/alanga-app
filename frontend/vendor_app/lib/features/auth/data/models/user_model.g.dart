@@ -13,7 +13,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   countryCode: json['countryCode'] as String,
   mobileNumber: json['mobileNumber'] as String,
   role: json['role'] as String,
-  status: json['status'] as String,
+  status: json['status'] as String? ?? 'PENDING',
   businessName: json['businessName'] as String?,
   businessType: json['businessType'] as String?,
   city: json['city'] as String?,

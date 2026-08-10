@@ -1,7 +1,7 @@
 class ApiEndpoints {
   // Use http://10.0.2.2:3000/api/v1 for Android emulator localhost
   // Use http://localhost:3000/api/v1 for iOS simulator localhost
-  static const String baseUrl = 'http://localhost:3000/api/v1';
+  static const String baseUrl = 'https://alanga-app.vercel.app/api/v1';
 
   // Auth endpoints
   static const String register = '/auth/register';

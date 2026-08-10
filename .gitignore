@@ -1,0 +1,18 @@
+# Root gitignore for E-Commerce Marketplace Monorepo
+
+# Backend
+backend/node_modules/
+backend/dist/
+backend/.env
+
+# Frontend
+frontend/.dart_tool/
+frontend/.packages
+frontend/pubspec.lock
+frontend/build/
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/flutter_export_environment.sh
+
+# General
+.DS_Store
+*.log

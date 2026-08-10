@@ -1,0 +1,30 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  fullName           String   @map("full_name")
+  email              String   @unique
+  countryCode        String   @map("country_code")
+  mobileNumber       String   @unique @map("mobile_number")
+  password           String
+  role               Role     @default(CUSTOMER)
+  hashedRefreshToken String?  @map("hashed_refresh_token")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}

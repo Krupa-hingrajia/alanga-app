@@ -21,6 +21,9 @@
       <excludeFolder url="file://$MODULE_DIR$/frontend/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/vendor_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/vendor_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/vendor_app/build" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/windows/flutter/ephemeral/.plugin_symlinks/flutter_secure_storage_windows/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/windows/flutter/ephemeral/.plugin_symlinks/flutter_secure_storage_windows/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/windows/flutter/ephemeral/.plugin_symlinks/flutter_secure_storage_windows/build" />

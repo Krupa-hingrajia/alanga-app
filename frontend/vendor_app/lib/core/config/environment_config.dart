@@ -4,10 +4,22 @@ import 'package:flutter/foundation.dart';
 enum AppEnvironment { development, production }
 
 class EnvironmentConfig {
-  static final String _devUrl = (!kIsWeb && Platform.isAndroid)
-      ? 'http://10.0.2.2:3000/api/v1'
-      : 'http://localhost:3000/api/v1';
+  static final String _devUrl = _getDevUrl();
   static const String _prodUrl = 'https://alanga-app.vercel.app/api/v1';
+
+  static String _getDevUrl() {
+    // Allows testing on physical devices by passing the laptop's local IP address:
+    // flutter run --dart-define=LOCAL_IP=192.168.1.XX
+    const localIp = String.fromEnvironment('LOCAL_IP');
+    if (localIp.isNotEmpty) {
+      return 'http://$localIp:3000/api/v1';
+    }
+
+    if (!kIsWeb && Platform.isAndroid) {
+      return 'http://10.0.2.2:3000/api/v1';
+    }
+    return 'http://localhost:3000/api/v1';
+  }
 
   static AppEnvironment get environment {
     if (kReleaseMode) {

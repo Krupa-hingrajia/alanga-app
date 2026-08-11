@@ -27,5 +27,6 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
       useClass: AuthRepository,
     },
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

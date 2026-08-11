@@ -89,3 +89,97 @@ model OrderItem {
 
   @@map("order_items")
 }
+
+model Category {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  description   String?
+  image         String?
+  sortOrder     Int           @default(0) @map("sort_order")
+  status        String        @default("ACTIVE")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  deletedAt     DateTime?     @map("deleted_at")
+  createdBy     String?       @map("created_by")
+  updatedBy     String?       @map("updated_by")
+  subCategories SubCategory[]
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id          String    @id @default(uuid())
+  categoryId  String    @map("category_id")
+  category    Category  @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0) @map("sort_order")
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+
+  @@map("sub_categories")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logo        String?
+  description String?
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+
+  @@map("brands")
+}
+
+model Unit {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  shortName String    @map("short_name")
+  status    String    @default("ACTIVE")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+
+  @@map("units")
+}
+
+model ProductAttribute {
+  id        String           @id @default(uuid())
+  name      String           @unique
+  status    String           @default("ACTIVE")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  deletedAt DateTime?        @map("deleted_at")
+  createdBy String?          @map("created_by")
+  updatedBy String?          @map("updated_by")
+  values    AttributeValue[]
+
+  @@map("product_attributes")
+}
+
+model AttributeValue {
+  id          String           @id @default(uuid())
+  attributeId String           @map("attribute_id")
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
+  value       String
+  sortOrder   Int              @default(0) @map("sort_order")
+  status      String           @default("ACTIVE")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  deletedAt   DateTime?        @map("deleted_at")
+  createdBy   String?          @map("created_by")
+  updatedBy   String?          @map("updated_by")
+
+  @@map("attribute_values")
+}

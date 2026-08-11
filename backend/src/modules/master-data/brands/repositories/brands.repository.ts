@@ -3,7 +3,6 @@ import { IBrandsRepository } from '../interfaces/brands-repository.interface';
 import { PrismaService } from '../../../../database/prisma.service';
 import { BrandEntity } from '../entities/brand.entity';
 import { CreateBrandDto } from '../dto/create-brand.dto';
-import { UpdateBrandDto } from '../dto/update-brand.dto';
 
 @Injectable()
 export class BrandsRepository implements IBrandsRepository {
@@ -21,25 +20,42 @@ export class BrandsRepository implements IBrandsRepository {
       deletedAt: brand.deletedAt,
       createdBy: brand.createdBy,
       updatedBy: brand.updatedBy,
+      createdByVendorId: brand.createdByVendorId,
+      approvedByAdminId: brand.approvedByAdminId,
+      approvedAt: brand.approvedAt,
+      rejectedReason: brand.rejectedReason,
     });
   }
 
-  async create(data: CreateBrandDto, userId: string): Promise<BrandEntity> {
+  async create(data: CreateBrandDto, vendorId: string): Promise<BrandEntity> {
     const brand = await this.prisma.brand.create({
       data: {
         name: data.name,
         logo: data.logo,
         description: data.description,
-        status: data.status ?? 'ACTIVE',
-        createdBy: userId,
+        status: 'PENDING',
+        createdByVendorId: vendorId,
       },
     });
     return this.mapToEntity(brand);
   }
 
-  async findMany(): Promise<BrandEntity[]> {
+  async findMany(filters?: { status?: string; createdByVendorId?: string }): Promise<BrandEntity[]> {
+    const whereClause: any = { deletedAt: null };
+    if (filters) {
+      if (filters.status && filters.createdByVendorId) {
+        whereClause.OR = [
+          { status: filters.status },
+          { createdByVendorId: filters.createdByVendorId, deletedAt: null }
+        ];
+      } else if (filters.status) {
+        whereClause.status = filters.status;
+      } else if (filters.createdByVendorId) {
+        whereClause.createdByVendorId = filters.createdByVendorId;
+      }
+    }
     const brands = await this.prisma.brand.findMany({
-      where: { deletedAt: null },
+      where: whereClause,
       orderBy: { name: 'asc' },
     });
     return brands.map((b) => this.mapToEntity(b));
@@ -59,7 +75,7 @@ export class BrandsRepository implements IBrandsRepository {
     return brand ? this.mapToEntity(brand) : null;
   }
 
-  async update(id: string, data: UpdateBrandDto, userId: string): Promise<BrandEntity> {
+  async update(id: string, data: any, userId: string): Promise<BrandEntity> {
     const brand = await this.prisma.brand.update({
       where: { id },
       data: {
@@ -67,6 +83,9 @@ export class BrandsRepository implements IBrandsRepository {
         logo: data.logo,
         description: data.description,
         status: data.status,
+        approvedByAdminId: data.approvedByAdminId,
+        approvedAt: data.approvedAt,
+        rejectedReason: data.rejectedReason,
         updatedBy: userId,
       },
     });

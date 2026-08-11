@@ -15,6 +15,7 @@ import { BrandsModule } from './modules/master-data/brands/brands.module';
 import { UnitsModule } from './modules/master-data/units/units.module';
 import { AttributesModule } from './modules/master-data/attributes/attributes.module';
 import { AttributeValuesModule } from './modules/master-data/attribute-values/attribute-values.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AttributeValuesModule } from './modules/master-data/attribute-values/at
     UnitsModule,
     AttributesModule,
     AttributeValuesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

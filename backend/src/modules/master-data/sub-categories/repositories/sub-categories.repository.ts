@@ -3,7 +3,6 @@ import { ISubCategoriesRepository } from '../interfaces/sub-categories-repositor
 import { PrismaService } from '../../../../database/prisma.service';
 import { SubCategoryEntity } from '../entities/sub-category.entity';
 import { CreateSubCategoryDto } from '../dto/create-sub-category.dto';
-import { UpdateSubCategoryDto } from '../dto/update-sub-category.dto';
 
 @Injectable()
 export class SubCategoriesRepository implements ISubCategoriesRepository {
@@ -23,10 +22,14 @@ export class SubCategoriesRepository implements ISubCategoriesRepository {
       deletedAt: subCategory.deletedAt,
       createdBy: subCategory.createdBy,
       updatedBy: subCategory.updatedBy,
+      createdByVendorId: subCategory.createdByVendorId,
+      approvedByAdminId: subCategory.approvedByAdminId,
+      approvedAt: subCategory.approvedAt,
+      rejectedReason: subCategory.rejectedReason,
     });
   }
 
-  async create(data: CreateSubCategoryDto, userId: string): Promise<SubCategoryEntity> {
+  async create(data: CreateSubCategoryDto, vendorId: string): Promise<SubCategoryEntity> {
     const subCategory = await this.prisma.subCategory.create({
       data: {
         categoryId: data.categoryId,
@@ -34,19 +37,32 @@ export class SubCategoriesRepository implements ISubCategoriesRepository {
         description: data.description,
         image: data.image,
         sortOrder: data.sortOrder ?? 0,
-        status: data.status ?? 'ACTIVE',
-        createdBy: userId,
+        status: 'PENDING',
+        createdByVendorId: vendorId,
       },
     });
     return this.mapToEntity(subCategory);
   }
 
-  async findMany(categoryId?: string): Promise<SubCategoryEntity[]> {
+  async findMany(filters?: { categoryId?: string; status?: string; createdByVendorId?: string }): Promise<SubCategoryEntity[]> {
+    const whereClause: any = { deletedAt: null };
+    if (filters) {
+      if (filters.categoryId) {
+        whereClause.categoryId = filters.categoryId;
+      }
+      if (filters.status && filters.createdByVendorId) {
+        whereClause.OR = [
+          { status: filters.status },
+          { createdByVendorId: filters.createdByVendorId, deletedAt: null }
+        ];
+      } else if (filters.status) {
+        whereClause.status = filters.status;
+      } else if (filters.createdByVendorId) {
+        whereClause.createdByVendorId = filters.createdByVendorId;
+      }
+    }
     const subCategories = await this.prisma.subCategory.findMany({
-      where: {
-        deletedAt: null,
-        ...(categoryId ? { categoryId } : {}),
-      },
+      where: whereClause,
       orderBy: { sortOrder: 'asc' },
     });
     return subCategories.map((sc) => this.mapToEntity(sc));
@@ -66,7 +82,7 @@ export class SubCategoriesRepository implements ISubCategoriesRepository {
     return subCategory ? this.mapToEntity(subCategory) : null;
   }
 
-  async update(id: string, data: UpdateSubCategoryDto, userId: string): Promise<SubCategoryEntity> {
+  async update(id: string, data: any, userId: string): Promise<SubCategoryEntity> {
     const subCategory = await this.prisma.subCategory.update({
       where: { id },
       data: {
@@ -76,6 +92,9 @@ export class SubCategoriesRepository implements ISubCategoriesRepository {
         image: data.image,
         sortOrder: data.sortOrder,
         status: data.status,
+        approvedByAdminId: data.approvedByAdminId,
+        approvedAt: data.approvedAt,
+        rejectedReason: data.rejectedReason,
         updatedBy: userId,
       },
     });

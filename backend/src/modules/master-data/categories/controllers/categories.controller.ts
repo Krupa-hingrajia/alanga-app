@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -6,89 +6,67 @@ import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { CategoriesService } from '../services/categories.service';
-import { CreateCategoryDto } from '../dto/create-category.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { RejectDto } from '../dto/reject.dto';
 
-@ApiTags('Categories')
+@ApiTags('Admin Categories Approval')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('admin/categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Post()
-  @Roles(Role.ADMIN)
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new category (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Category successfully created.' })
-  @ApiResponse({ status: 400, description: 'Validation failed.' })
-  @ApiResponse({ status: 409, description: 'Category name already exists.' })
-  async create(@Body() createCategoryDto: CreateCategoryDto, @CurrentUser('id') adminId: string) {
-    const data = await this.categoriesService.create(createCategoryDto, adminId);
-    return {
-      success: true,
-      message: 'Category created successfully',
-      data,
-      statusCode: HttpStatus.CREATED,
-    };
-  }
-
-  @Get()
-  @Roles(Role.ADMIN, Role.VENDOR)
+  @Get('pending')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get list of all categories (Admin and Vendor)' })
-  @ApiResponse({ status: 200, description: 'Categories retrieved successfully.' })
-  async findAll() {
-    const data = await this.categoriesService.findAll();
+  @ApiOperation({ summary: 'Get list of pending categories' })
+  @ApiResponse({ status: 200, description: 'Pending categories retrieved successfully.' })
+  async getPending() {
+    const data = await this.categoriesService.findAllPending();
     return {
       success: true,
-      message: 'Categories retrieved successfully',
+      message: 'Pending categories retrieved successfully',
       data,
       statusCode: HttpStatus.OK,
     };
   }
 
-  @Get(':id')
-  @Roles(Role.ADMIN, Role.VENDOR)
+  @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get category by ID (Admin and Vendor)' })
-  @ApiResponse({ status: 200, description: 'Category retrieved successfully.' })
+  @ApiOperation({ summary: 'Approve a pending category' })
+  @ApiResponse({ status: 200, description: 'Category approved successfully.' })
   @ApiResponse({ status: 404, description: 'Category not found.' })
-  async findOne(@Param('id') id: string) {
-    const data = await this.categoriesService.findOne(id);
+  async approve(@Param('id') id: string, @CurrentUser('id') adminId: string) {
+    const data = await this.categoriesService.approve(id, adminId);
     return {
       success: true,
-      message: 'Category retrieved successfully',
+      message: 'Category approved successfully',
       data,
       statusCode: HttpStatus.OK,
     };
   }
 
-  @Put(':id')
-  @Roles(Role.ADMIN)
+  @Put(':id/reject')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Update category (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Category successfully updated.' })
+  @ApiOperation({ summary: 'Reject a pending category' })
+  @ApiResponse({ status: 200, description: 'Category rejected successfully.' })
   @ApiResponse({ status: 404, description: 'Category not found.' })
-  @ApiResponse({ status: 409, description: 'Category name already exists.' })
-  async update(
+  async reject(
     @Param('id') id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body() rejectDto: RejectDto,
     @CurrentUser('id') adminId: string,
   ) {
-    const data = await this.categoriesService.update(id, updateCategoryDto, adminId);
+    const data = await this.categoriesService.reject(id, adminId, rejectDto.reason);
     return {
       success: true,
-      message: 'Category updated successfully',
+      message: 'Category rejected successfully',
       data,
       statusCode: HttpStatus.OK,
     };
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Soft delete category (Admin only)' })
+  @ApiOperation({ summary: 'Soft delete category' })
   @ApiResponse({ status: 200, description: 'Category successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Category not found.' })
   async remove(@Param('id') id: string, @CurrentUser('id') adminId: string) {

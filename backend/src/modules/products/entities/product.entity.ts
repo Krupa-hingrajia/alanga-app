@@ -1,11 +1,13 @@
-import { Category } from '@prisma/client';
+import { Product } from '@prisma/client';
 
-export class CategoryEntity implements Category {
+export class ProductEntity implements Product {
   id: string;
   name: string;
   description: string | null;
-  image: string | null;
-  sortOrder: number;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  vendorId: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +19,7 @@ export class CategoryEntity implements Category {
   approvedAt: Date | null;
   rejectedReason: string | null;
 
-  constructor(partial: Partial<CategoryEntity>) {
+  constructor(partial: Partial<ProductEntity>) {
     Object.assign(this, partial);
   }
 }

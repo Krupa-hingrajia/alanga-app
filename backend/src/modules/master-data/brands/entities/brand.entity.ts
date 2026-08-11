@@ -11,6 +11,10 @@ export class BrandEntity implements Brand {
   deletedAt: Date | null;
   createdBy: string | null;
   updatedBy: string | null;
+  createdByVendorId: string | null;
+  approvedByAdminId: string | null;
+  approvedAt: Date | null;
+  rejectedReason: string | null;
 
   constructor(partial: Partial<BrandEntity>) {
     Object.assign(this, partial);

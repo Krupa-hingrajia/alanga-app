@@ -47,17 +47,25 @@ model User {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  stock       Int
-  isActive    Boolean     @default(true) @map("is_active")
-  vendorId    String      @map("vendor_id")
-  vendor      User        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  id                String      @id @default(uuid())
+  name              String
+  description       String?
+  price             Float
+  stock             Int
+  isActive          Boolean     @default(true) @map("is_active")
+  vendorId          String      @map("vendor_id")
+  vendor            User        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  orderItems        OrderItem[]
+  status            String      @default("PENDING")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  deletedAt         DateTime?   @map("deleted_at")
+  createdBy         String?     @map("created_by")
+  updatedBy         String?     @map("updated_by")
+  createdByVendorId String?     @map("created_by_vendor_id")
+  approvedByAdminId String?     @map("approved_by_admin_id")
+  approvedAt        DateTime?   @map("approved_at")
+  rejectedReason    String?     @map("rejected_reason")
 
   @@map("products")
 }
@@ -91,51 +99,63 @@ model OrderItem {
 }
 
 model Category {
-  id            String        @id @default(uuid())
-  name          String        @unique
-  description   String?
-  image         String?
-  sortOrder     Int           @default(0) @map("sort_order")
-  status        String        @default("ACTIVE")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at")
-  createdBy     String?       @map("created_by")
-  updatedBy     String?       @map("updated_by")
-  subCategories SubCategory[]
+  id                String        @id @default(uuid())
+  name              String        @unique
+  description       String?
+  image             String?
+  sortOrder         Int           @default(0) @map("sort_order")
+  status            String        @default("PENDING")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  deletedAt         DateTime?     @map("deleted_at")
+  createdBy         String?       @map("created_by")
+  updatedBy         String?       @map("updated_by")
+  createdByVendorId String?       @map("created_by_vendor_id")
+  approvedByAdminId String?       @map("approved_by_admin_id")
+  approvedAt        DateTime?     @map("approved_at")
+  rejectedReason    String?       @map("rejected_reason")
+  subCategories     SubCategory[]
 
   @@map("categories")
 }
 
 model SubCategory {
-  id          String    @id @default(uuid())
-  categoryId  String    @map("category_id")
-  category    Category  @relation(fields: [categoryId], references: [id])
-  name        String
-  description String?
-  image       String?
-  sortOrder   Int       @default(0) @map("sort_order")
-  status      String    @default("ACTIVE")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
+  id                String    @id @default(uuid())
+  categoryId        String    @map("category_id")
+  category          Category  @relation(fields: [categoryId], references: [id])
+  name              String
+  description       String?
+  image             String?
+  sortOrder         Int       @default(0) @map("sort_order")
+  status            String    @default("PENDING")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+  createdBy         String?   @map("created_by")
+  updatedBy         String?   @map("updated_by")
+  createdByVendorId String?   @map("created_by_vendor_id")
+  approvedByAdminId String?   @map("approved_by_admin_id")
+  approvedAt        DateTime? @map("approved_at")
+  rejectedReason    String?   @map("rejected_reason")
 
   @@map("sub_categories")
 }
 
 model Brand {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  logo        String?
-  description String?
-  status      String    @default("ACTIVE")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
+  id                String    @id @default(uuid())
+  name              String    @unique
+  logo              String?
+  description       String?
+  status            String    @default("PENDING")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+  createdBy         String?   @map("created_by")
+  updatedBy         String?   @map("updated_by")
+  createdByVendorId String?   @map("created_by_vendor_id")
+  approvedByAdminId String?   @map("approved_by_admin_id")
+  approvedAt        DateTime? @map("approved_at")
+  rejectedReason    String?   @map("rejected_reason")
 
   @@map("brands")
 }

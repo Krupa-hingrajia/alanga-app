@@ -13,6 +13,10 @@ export class SubCategoryEntity implements SubCategory {
   deletedAt: Date | null;
   createdBy: string | null;
   updatedBy: string | null;
+  createdByVendorId: string | null;
+  approvedByAdminId: string | null;
+  approvedAt: Date | null;
+  rejectedReason: string | null;
 
   constructor(partial: Partial<SubCategoryEntity>) {
     Object.assign(this, partial);

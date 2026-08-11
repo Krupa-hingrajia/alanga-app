@@ -3,7 +3,6 @@ import { ICategoriesRepository } from '../interfaces/categories-repository.inter
 import { PrismaService } from '../../../../database/prisma.service';
 import { CategoryEntity } from '../entities/category.entity';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
 
 @Injectable()
 export class CategoriesRepository implements ICategoriesRepository {
@@ -22,26 +21,43 @@ export class CategoriesRepository implements ICategoriesRepository {
       deletedAt: category.deletedAt,
       createdBy: category.createdBy,
       updatedBy: category.updatedBy,
+      createdByVendorId: category.createdByVendorId,
+      approvedByAdminId: category.approvedByAdminId,
+      approvedAt: category.approvedAt,
+      rejectedReason: category.rejectedReason,
     });
   }
 
-  async create(data: CreateCategoryDto, userId: string): Promise<CategoryEntity> {
+  async create(data: CreateCategoryDto, vendorId: string): Promise<CategoryEntity> {
     const category = await this.prisma.category.create({
       data: {
         name: data.name,
         description: data.description,
         image: data.image,
         sortOrder: data.sortOrder ?? 0,
-        status: data.status ?? 'ACTIVE',
-        createdBy: userId,
+        status: 'PENDING',
+        createdByVendorId: vendorId,
       },
     });
     return this.mapToEntity(category);
   }
 
-  async findMany(): Promise<CategoryEntity[]> {
+  async findMany(filters?: { status?: string; createdByVendorId?: string }): Promise<CategoryEntity[]> {
+    const whereClause: any = { deletedAt: null };
+    if (filters) {
+      if (filters.status && filters.createdByVendorId) {
+        whereClause.OR = [
+          { status: filters.status },
+          { createdByVendorId: filters.createdByVendorId, deletedAt: null }
+        ];
+      } else if (filters.status) {
+        whereClause.status = filters.status;
+      } else if (filters.createdByVendorId) {
+        whereClause.createdByVendorId = filters.createdByVendorId;
+      }
+    }
     const categories = await this.prisma.category.findMany({
-      where: { deletedAt: null },
+      where: whereClause,
       orderBy: { sortOrder: 'asc' },
     });
     return categories.map((c) => this.mapToEntity(c));
@@ -61,7 +77,7 @@ export class CategoriesRepository implements ICategoriesRepository {
     return category ? this.mapToEntity(category) : null;
   }
 
-  async update(id: string, data: UpdateCategoryDto, userId: string): Promise<CategoryEntity> {
+  async update(id: string, data: any, userId: string): Promise<CategoryEntity> {
     const category = await this.prisma.category.update({
       where: { id },
       data: {
@@ -70,6 +86,9 @@ export class CategoriesRepository implements ICategoriesRepository {
         image: data.image,
         sortOrder: data.sortOrder,
         status: data.status,
+        approvedByAdminId: data.approvedByAdminId,
+        approvedAt: data.approvedAt,
+        rejectedReason: data.rejectedReason,
         updatedBy: userId,
       },
     });

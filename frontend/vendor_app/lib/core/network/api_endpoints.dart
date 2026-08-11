@@ -1,5 +1,7 @@
+import '../config/environment_config.dart';
+
 class ApiEndpoints {
-  static const String baseUrl = 'https://alanga-app.vercel.app/api/v1';
+  static String get baseUrl => EnvironmentConfig.baseUrl;
 
   // Auth endpoints
   static const String register = '/auth/register';

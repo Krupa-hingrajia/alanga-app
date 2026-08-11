@@ -1,6 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import { AppModule } from '../src/app.module';
@@ -26,11 +27,15 @@ async function bootstrap() {
     new ExpressAdapter(server),
   );
 
+  const configService = app.get(ConfigService);
+  const apiPrefix = configService.get<string>('apiPrefix') || 'api/v1';
+  const corsOrigin = configService.get<string>('corsOrigin') || '*';
+
   // Set API Versioning prefix
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(apiPrefix);
 
   // Enable CORS
-  app.enableCors();
+  app.enableCors({ origin: corsOrigin });
 
   // Serialization interceptor (exclude fields marked with @Exclude like password/refresh token)
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -84,7 +89,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1/docs', app, document, {
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',

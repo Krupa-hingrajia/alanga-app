@@ -13,12 +13,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+  const apiPrefix = configService.get<string>('apiPrefix') || 'api/v1';
+  const corsOrigin = configService.get<string>('corsOrigin') || '*';
 
   // Set API Versioning prefix
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(apiPrefix);
 
   // Enable CORS
-  app.enableCors();
+  app.enableCors({ origin: corsOrigin });
 
   // Serialization interceptor (to exclude fields marked with @Exclude like password/refresh token)
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -72,7 +74,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1/docs', app, document, {
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
     customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
     customJs: [
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
@@ -82,7 +84,7 @@ async function bootstrap() {
 
   const port = configService.get<number>('port') || 3000;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}/api/v1`);
-  console.log(`Swagger documentation is available at: http://localhost:${port}/api/v1/docs`);
+  console.log(`Application is running on: http://localhost:${port}/${apiPrefix}`);
+  console.log(`Swagger documentation is available at: http://localhost:${port}/${apiPrefix}/docs`);
 }
 bootstrap();

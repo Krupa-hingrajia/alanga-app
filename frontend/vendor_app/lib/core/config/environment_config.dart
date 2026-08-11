@@ -1,9 +1,12 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 enum AppEnvironment { development, production }
 
 class EnvironmentConfig {
-  static const String _devUrl = 'http://localhost:3000/api/v1';
+  static final String _devUrl = (!kIsWeb && Platform.isAndroid)
+      ? 'http://10.0.2.2:3000/api/v1'
+      : 'http://localhost:3000/api/v1';
   static const String _prodUrl = 'https://alanga-app.vercel.app/api/v1';
 
   static AppEnvironment get environment {

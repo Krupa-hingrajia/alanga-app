@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Delete, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -18,7 +18,7 @@ export class AdminProductsController {
 
   @Get('pending')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get list of pending products' })
+  @ApiOperation({ summary: 'Get list of pending products awaiting administrative approval' })
   @ApiResponse({ status: 200, description: 'Pending products retrieved successfully.' })
   async getPending() {
     const data = await this.productsService.findAllPending();
@@ -74,21 +74,6 @@ export class AdminProductsController {
     return {
       success: true,
       message: 'Product suspended successfully',
-      data,
-      statusCode: HttpStatus.OK,
-    };
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Soft delete product' })
-  @ApiResponse({ status: 200, description: 'Product successfully deleted.' })
-  @ApiResponse({ status: 404, description: 'Product not found.' })
-  async remove(@Param('id') id: string, @CurrentUser('id') adminId: string) {
-    const data = await this.productsService.remove(id, adminId);
-    return {
-      success: true,
-      message: 'Product deleted successfully',
       data,
       statusCode: HttpStatus.OK,
     };

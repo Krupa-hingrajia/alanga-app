@@ -13,11 +13,21 @@ export class ProductsRepository implements IProductsRepository {
       id: product.id,
       name: product.name,
       description: product.description,
-      price: product.price,
+      shortDescription: product.shortDescription,
+      categoryId: product.categoryId,
+      subCategoryId: product.subCategoryId,
+      brandId: product.brandId,
+      sellingPrice: product.sellingPrice,
+      mrp: product.mrp,
+      taxPercentage: product.taxPercentage,
       stock: product.stock,
-      isActive: product.isActive,
-      vendorId: product.vendorId,
+      weight: product.weight,
+      length: product.length,
+      width: product.width,
+      height: product.height,
+      sku: product.sku,
       status: product.status,
+      vendorId: product.vendorId,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
       deletedAt: product.deletedAt,
@@ -30,16 +40,53 @@ export class ProductsRepository implements IProductsRepository {
     });
   }
 
+  private async generateNextSku(): Promise<string> {
+    const lastProduct = await this.prisma.product.findFirst({
+      where: {
+        sku: {
+          startsWith: 'ALA-PRD-',
+        },
+      },
+      orderBy: {
+        sku: 'desc',
+      },
+    });
+
+    let nextNumber = 1;
+    if (lastProduct && lastProduct.sku) {
+      const parts = lastProduct.sku.split('-');
+      const numStr = parts[parts.length - 1];
+      const lastNum = parseInt(numStr, 10);
+      if (!isNaN(lastNum)) {
+        nextNumber = lastNum + 1;
+      }
+    }
+
+    return `ALA-PRD-${String(nextNumber).padStart(6, '0')}`;
+  }
+
   async create(data: CreateProductDto, vendorId: string): Promise<ProductEntity> {
+    const sku = await this.generateNextSku();
     const product = await this.prisma.product.create({
       data: {
         name: data.name,
         description: data.description,
-        price: data.price,
-        stock: data.stock,
+        shortDescription: data.shortDescription,
+        categoryId: data.categoryId,
+        subCategoryId: data.subCategoryId,
+        brandId: data.brandId,
+        sellingPrice: data.sellingPrice,
+        mrp: data.mrp,
+        taxPercentage: data.taxPercentage ?? 0,
+        stock: data.stock ?? 0,
+        weight: data.weight,
+        length: data.length,
+        width: data.width,
+        height: data.height,
+        sku: sku,
+        status: data.status ?? 'DRAFT',
         vendorId: vendorId,
         createdByVendorId: vendorId,
-        status: 'PENDING',
       },
     });
     return this.mapToEntity(product);
@@ -79,8 +126,18 @@ export class ProductsRepository implements IProductsRepository {
       data: {
         name: data.name,
         description: data.description,
-        price: data.price,
+        shortDescription: data.shortDescription,
+        categoryId: data.categoryId,
+        subCategoryId: data.subCategoryId,
+        brandId: data.brandId,
+        sellingPrice: data.sellingPrice,
+        mrp: data.mrp,
+        taxPercentage: data.taxPercentage,
         stock: data.stock,
+        weight: data.weight,
+        length: data.length,
+        width: data.width,
+        height: data.height,
         status: data.status,
         approvedByAdminId: data.approvedByAdminId,
         approvedAt: data.approvedAt,

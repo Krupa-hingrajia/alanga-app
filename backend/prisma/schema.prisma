@@ -50,13 +50,26 @@ model Product {
   id                String      @id @default(uuid())
   name              String
   description       String?
-  price             Float
-  stock             Int
-  isActive          Boolean     @default(true) @map("is_active")
+  shortDescription  String?     @map("short_description")
+  categoryId        String      @map("category_id")
+  category          Category    @relation(fields: [categoryId], references: [id])
+  subCategoryId     String      @map("sub_category_id")
+  subCategory       SubCategory @relation(fields: [subCategoryId], references: [id])
+  brandId           String      @map("brand_id")
+  brand             Brand       @relation(fields: [brandId], references: [id])
+  sellingPrice      Float       @map("selling_price")
+  mrp               Float
+  taxPercentage     Float       @default(0) @map("tax_percentage")
+  stock             Int         @default(0)
+  weight            Float?
+  length            Float?
+  width             Float?
+  height            Float?
+  sku               String      @unique
+  status            String      @default("DRAFT")
   vendorId          String      @map("vendor_id")
   vendor            User        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   orderItems        OrderItem[]
-  status            String      @default("PENDING")
   createdAt         DateTime    @default(now()) @map("created_at")
   updatedAt         DateTime    @updatedAt @map("updated_at")
   deletedAt         DateTime?   @map("deleted_at")
@@ -115,6 +128,7 @@ model Category {
   approvedAt        DateTime?     @map("approved_at")
   rejectedReason    String?       @map("rejected_reason")
   subCategories     SubCategory[]
+  products          Product[]
 
   @@map("categories")
 }
@@ -137,6 +151,7 @@ model SubCategory {
   approvedByAdminId String?   @map("approved_by_admin_id")
   approvedAt        DateTime? @map("approved_at")
   rejectedReason    String?   @map("rejected_reason")
+  products          Product[]
 
   @@map("sub_categories")
 }
@@ -156,6 +171,7 @@ model Brand {
   approvedByAdminId String?   @map("approved_by_admin_id")
   approvedAt        DateTime? @map("approved_at")
   rejectedReason    String?   @map("rejected_reason")
+  products          Product[]
 
   @@map("brands")
 }

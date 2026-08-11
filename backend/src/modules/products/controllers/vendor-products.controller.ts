@@ -1,4 +1,4 @@
-import { Controller, Post, Put, Get, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Put, Get, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -19,23 +19,54 @@ export class VendorProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Submit a new product for approval (Vendor only)' })
-  @ApiResponse({ status: 201, description: 'Product submitted successfully, status: PENDING.' })
-  @ApiResponse({ status: 400, description: 'Validation failed.' })
+  @ApiOperation({ summary: 'Create a new product (Vendor only, defaults status to DRAFT)' })
+  @ApiResponse({ status: 201, description: 'Product created successfully.' })
+  @ApiResponse({ status: 400, description: 'Validation failed (MRP must be > 0, Selling Price <= MRP).' })
   async create(@Body() createProductDto: CreateProductDto, @CurrentUser('id') vendorId: string) {
     const data = await this.productsService.create(createProductDto, vendorId);
     return {
       success: true,
-      message: 'Product submitted for approval successfully',
+      message: 'Product created successfully',
       data,
       statusCode: HttpStatus.CREATED,
     };
   }
 
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all products owned by current vendor' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully.' })
+  async findAll(@CurrentUser('id') vendorId: string) {
+    const data = await this.productsService.findVendorProducts(vendorId);
+    return {
+      success: true,
+      message: 'Products retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get details of owned product' })
+  @ApiResponse({ status: 200, description: 'Product details retrieved successfully.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. You do not own this product.' })
+  @ApiResponse({ status: 404, description: 'Product not found.' })
+  async findOne(@Param('id') id: string, @CurrentUser('id') vendorId: string) {
+    const data = await this.productsService.findOneByVendor(id, vendorId);
+    return {
+      success: true,
+      message: 'Product details retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Edit owned product (Vendor only). Resets status to PENDING.' })
-  @ApiResponse({ status: 200, description: 'Product updated successfully, status reset to PENDING.' })
+  @ApiOperation({ summary: 'Update owned product (resets status to DRAFT)' })
+  @ApiResponse({ status: 200, description: 'Product updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Validation failed.' })
   @ApiResponse({ status: 403, description: 'Forbidden. You do not own this product.' })
   @ApiResponse({ status: 404, description: 'Product not found.' })
   async update(
@@ -46,21 +77,40 @@ export class VendorProductsController {
     const data = await this.productsService.updateByVendor(id, updateProductDto, vendorId);
     return {
       success: true,
-      message: 'Product updated and resubmitted for approval successfully',
+      message: 'Product updated successfully',
       data,
       statusCode: HttpStatus.OK,
     };
   }
 
-  @Get()
+  @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get list of vendor\'s own products' })
-  @ApiResponse({ status: 200, description: 'Vendor products retrieved successfully.' })
-  async findAll(@CurrentUser('id') vendorId: string) {
-    const data = await this.productsService.findVendorProducts(vendorId);
+  @ApiOperation({ summary: 'Soft delete owned product' })
+  @ApiResponse({ status: 200, description: 'Product successfully deleted.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. You do not own this product.' })
+  @ApiResponse({ status: 404, description: 'Product not found.' })
+  async remove(@Param('id') id: string, @CurrentUser('id') vendorId: string) {
+    const data = await this.productsService.removeByVendor(id, vendorId);
     return {
       success: true,
-      message: 'Products retrieved successfully',
+      message: 'Product deleted successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Post(':id/submit')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Submit product for approval (changes status to PENDING)' })
+  @ApiResponse({ status: 200, description: 'Product submitted for approval successfully.' })
+  @ApiResponse({ status: 400, description: 'Product is not in DRAFT or REJECTED status.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. You do not own this product.' })
+  @ApiResponse({ status: 404, description: 'Product not found.' })
+  async submit(@Param('id') id: string, @CurrentUser('id') vendorId: string) {
+    const data = await this.productsService.submitForApproval(id, vendorId);
+    return {
+      success: true,
+      message: 'Product submitted for approval successfully',
       data,
       statusCode: HttpStatus.OK,
     };

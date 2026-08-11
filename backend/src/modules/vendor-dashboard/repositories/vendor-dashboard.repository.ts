@@ -12,9 +12,9 @@ export class VendorDashboardRepository implements IVendorDashboardRepository {
     outOfStock: number;
   }> {
     const [total, active, outOfStock] = await Promise.all([
-      this.prisma.product.count({ where: { vendorId } }),
-      this.prisma.product.count({ where: { vendorId, isActive: true } }),
-      this.prisma.product.count({ where: { vendorId, stock: 0 } }),
+      this.prisma.product.count({ where: { vendorId, deletedAt: null } }),
+      this.prisma.product.count({ where: { vendorId, status: 'ACTIVE', deletedAt: null } }),
+      this.prisma.product.count({ where: { vendorId, stock: 0, deletedAt: null } }),
     ]);
 
     return { total, active, outOfStock };
@@ -158,23 +158,32 @@ export class VendorDashboardRepository implements IVendorDashboardRepository {
       isActive: boolean;
     }>
   > {
-    return this.prisma.product.findMany({
+    const products = await this.prisma.product.findMany({
       where: {
         vendorId,
         stock: {
           lt: threshold,
         },
+        deletedAt: null,
       },
       select: {
         id: true,
         name: true,
-        price: true,
+        sellingPrice: true,
         stock: true,
-        isActive: true,
+        status: true,
       },
       orderBy: {
         stock: 'asc',
       },
     });
+
+    return products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: p.sellingPrice,
+      stock: p.stock,
+      isActive: p.status === 'ACTIVE',
+    }));
   }
 }

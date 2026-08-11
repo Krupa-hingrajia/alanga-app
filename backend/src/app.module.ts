@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { VendorDashboardModule } from './modules/vendor-dashboard/vendor-dashboard.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    VendorDashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

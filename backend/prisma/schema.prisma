@@ -40,6 +40,52 @@ model User {
   hashedRefreshToken String?    @map("hashed_refresh_token")
   createdAt          DateTime   @default(now()) @map("created_at")
   updatedAt          DateTime   @updatedAt @map("updated_at")
+  products           Product[]
+  customerOrders     Order[]    @relation("CustomerOrders")
 
   @@map("users")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  isActive    Boolean     @default(true) @map("is_active")
+  vendorId    String      @map("vendor_id")
+  vendor      User        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  orderNumber String      @unique @map("order_number")
+  customerId  String      @map("customer_id")
+  customer    User        @relation("CustomerOrders", fields: [customerId], references: [id])
+  status      String      @default("PENDING") // PENDING, PROCESSING, COMPLETED, CANCELLED
+  totalAmount Float       @map("total_amount")
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order_items")
 }

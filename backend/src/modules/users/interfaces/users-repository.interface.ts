@@ -7,4 +7,10 @@ export abstract class IUsersRepository {
   abstract findByEmail(email: string): Promise<UserEntity | null>;
   abstract findByMobileNumber(mobileNumber: string): Promise<UserEntity | null>;
   abstract update(id: string, data: Prisma.UserUpdateInput): Promise<UserEntity>;
+  abstract findManyVendors(filters?: {
+    status?: string;
+    search?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ items: UserEntity[]; total: number }>;
 }

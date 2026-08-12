@@ -80,6 +80,11 @@ export class CreateProductDto {
   @Min(0)
   height?: number;
 
+  @ApiProperty({ required: false, example: 'https://example.com/iphone.png', description: 'Product image URL or base64 data' })
+  @IsOptional()
+  @IsString()
+  image?: string;
+
   @ApiProperty({ required: false, example: 'DRAFT', enum: ['DRAFT', 'PENDING'], description: 'Product creation status' })
   @IsOptional()
   @IsString()

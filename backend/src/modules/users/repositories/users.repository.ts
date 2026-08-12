@@ -61,4 +61,39 @@ export class UsersRepository implements IUsersRepository {
     });
     return this.mapToEntity(user);
   }
+
+  async findManyVendors(filters?: {
+    status?: string;
+    search?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ items: UserEntity[]; total: number }> {
+    const whereClause: any = { role: 'VENDOR' };
+    if (filters) {
+      if (filters.status) {
+        whereClause.status = filters.status;
+      }
+      if (filters.search) {
+        whereClause.OR = [
+          { fullName: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { businessName: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+    }
+    const [items, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where: whereClause,
+        orderBy: { createdAt: 'desc' },
+        skip: filters?.skip,
+        take: filters?.take,
+      }),
+      this.prisma.user.count({ where: whereClause }),
+    ]);
+
+    return {
+      items: items.map((u) => this.mapToEntity(u)),
+      total,
+    };
+  }
 }

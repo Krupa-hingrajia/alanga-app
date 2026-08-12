@@ -1,7 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
+import '../core/widgets/main_navigation_screen.dart';
+
+// Categories imports
+import '../features/categories/data/models/category_model.dart';
+import '../features/categories/presentation/screens/category_products_screen.dart';
+
+// Products imports
+import '../features/products/data/models/product_model.dart';
+import '../features/products/presentation/screens/product_list_screen.dart';
+import '../features/products/presentation/screens/product_detail_screen.dart';
+
 import '../core/dependency_injection/injection.dart';
 import '../core/storage/secure_storage_service.dart';
 
@@ -37,25 +47,24 @@ class AppRouter {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Dashboard'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () async {
-                  await sl<SecureStorageService>().clearAll();
-                  router.go('/login');
-                },
-              ),
-            ],
-          ),
-          body: const Center(
-            child: Text(
-              'Welcome to E-Commerce Marketplace!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
+        builder: (context, state) => const MainNavigationScreen(),
+      ),
+      GoRoute(
+        path: '/products',
+        builder: (context, state) => ProductListScreen(
+          initialQuery: state.extra as String?,
+        ),
+      ),
+      GoRoute(
+        path: '/products/details',
+        builder: (context, state) => ProductDetailScreen(
+          product: state.extra as ProductModel,
+        ),
+      ),
+      GoRoute(
+        path: '/categories/products',
+        builder: (context, state) => CategoryProductsScreen(
+          category: state.extra as CategoryModel,
         ),
       ),
     ],

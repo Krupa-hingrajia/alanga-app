@@ -14,8 +14,12 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
     pendingVendorApprovals: number;
     totalProducts: number;
     totalCategories: number;
-    totalOrders: number;
-    totalRevenue: number;
+    pendingCategories: number;
+    totalBrands: number;
+    pendingBrands: number;
+    pendingProducts: number;
+    totalCompletedOrders: number;
+    totalCompletedOrdersRevenue: number;
   }> {
     const [
       totalCustomers,
@@ -24,7 +28,11 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       pendingVendorApprovals,
       totalProducts,
       totalCategories,
-      totalOrders,
+      pendingCategories,
+      totalBrands,
+      pendingBrands,
+      pendingProducts,
+      totalCompletedOrders,
       revenueAggregate,
     ] = await Promise.all([
       this.prisma.user.count({ where: { role: Role.CUSTOMER } }),
@@ -33,7 +41,11 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       this.prisma.user.count({ where: { role: Role.VENDOR, status: UserStatus.PENDING } }),
       this.prisma.product.count({ where: {} }),
       this.prisma.category.count({ where: { deletedAt: null } }),
-      this.prisma.order.count({ where: {} }),
+      this.prisma.category.count({ where: { status: 'PENDING', deletedAt: null } }),
+      this.prisma.brand.count({ where: { deletedAt: null } }),
+      this.prisma.brand.count({ where: { status: 'PENDING', deletedAt: null } }),
+      this.prisma.product.count({ where: { status: 'PENDING' } }),
+      this.prisma.order.count({ where: { status: 'COMPLETED' } }),
       this.prisma.order.aggregate({
         where: { status: 'COMPLETED' },
         _sum: {
@@ -49,8 +61,13 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       pendingVendorApprovals,
       totalProducts,
       totalCategories,
-      totalOrders,
-      totalRevenue: revenueAggregate._sum.totalAmount || 0,
+      pendingCategories,
+      totalBrands,
+      pendingBrands,
+      pendingProducts,
+      totalCompletedOrders,
+      totalCompletedOrdersRevenue: revenueAggregate._sum.totalAmount || 0,
     };
   }
 }
+

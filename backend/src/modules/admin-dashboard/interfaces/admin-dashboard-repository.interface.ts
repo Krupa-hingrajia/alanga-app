@@ -6,7 +6,11 @@ export abstract class IAdminDashboardRepository {
     pendingVendorApprovals: number;
     totalProducts: number;
     totalCategories: number;
-    totalOrders: number;
-    totalRevenue: number;
+    pendingCategories: number;
+    totalBrands: number;
+    pendingBrands: number;
+    pendingProducts: number;
+    totalCompletedOrders: number;
+    totalCompletedOrdersRevenue: number;
   }>;
 }

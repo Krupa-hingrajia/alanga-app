@@ -18,6 +18,7 @@ export class ProductEntity implements Product {
   height: number | null;
   sku: string;
   status: string;
+  image: string | null;
   vendorId: string;
   createdAt: Date;
   updatedAt: Date;

@@ -9,8 +9,12 @@ import { ValidationFilter } from './common/filters/validation.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { ValidationException } from './common/exceptions/validation.exception';
 
+import { json, urlencoded } from 'express';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ limit: '50mb', extended: true }));
 
   const configService = app.get(ConfigService);
   const apiPrefix = configService.get<string>('apiPrefix') || 'api/v1';

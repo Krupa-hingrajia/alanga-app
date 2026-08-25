@@ -1,18 +1,48 @@
-# Root gitignore for E-Commerce Marketplace Monorepo
+# Root gitignore for ALANGA Marketplace Monorepo
 
+# ============================================================
 # Backend
+# ============================================================
 backend/node_modules/
 backend/dist/
+backend/logs/
 backend/.env
+backend/.env.development
+backend/.env.production
 
-# Frontend
-frontend/.dart_tool/
-frontend/.packages
-frontend/pubspec.lock
-frontend/build/
-frontend/ios/Flutter/Generated.xcconfig
-frontend/ios/Flutter/flutter_export_environment.sh
+# ============================================================
+# Flutter — Android Signing (NEVER commit these)
+# ============================================================
+frontend/customer_app/android/key.properties
+frontend/customer_app/android/**/*.jks
+frontend/vendor_app/android/key.properties
+frontend/vendor_app/android/**/*.jks
 
+# Flutter generated
+frontend/customer_app/.dart_tool/
+frontend/customer_app/.packages
+frontend/customer_app/build/
+frontend/customer_app/ios/Flutter/Generated.xcconfig
+frontend/customer_app/ios/Flutter/flutter_export_environment.sh
+
+frontend/vendor_app/.dart_tool/
+frontend/vendor_app/.packages
+frontend/vendor_app/build/
+frontend/vendor_app/ios/Flutter/Generated.xcconfig
+frontend/vendor_app/ios/Flutter/flutter_export_environment.sh
+
+# ============================================================
+# Admin Panel
+# ============================================================
+frontend/admin_panel/.env.local
+frontend/admin_panel/.env.production
+frontend/admin_panel/node_modules/
+frontend/admin_panel/.next/
+
+# ============================================================
 # General
+# ============================================================
 .DS_Store
 *.log
+*.jks
+*.keystore

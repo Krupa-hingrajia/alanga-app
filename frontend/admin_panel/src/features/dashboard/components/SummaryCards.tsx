@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, FolderTree, Tag, ShoppingBag, Clock } from 'lucide-react';
+import { Users, FolderTree, FolderGit2, Tag, ShoppingBag, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardSummary } from '../api';
 
@@ -8,6 +8,16 @@ interface SummaryCardsProps {
 }
 
 export default function SummaryCards({ summary }: SummaryCardsProps) {
+  const activeCatCount = summary.activeCategories ?? summary.totalCategories;
+  const inactiveCatCount = summary.inactiveCategories ?? 0;
+  const totalSubCatCount = summary.totalSubCategories ?? 0;
+  const activeSubCatCount = summary.activeSubCategories ?? totalSubCatCount;
+  const inactiveSubCatCount = summary.inactiveSubCategories ?? 0;
+
+  const activeBrandCount = summary.activeBrands ?? summary.totalBrands;
+  const inactiveBrandCount = summary.inactiveBrands ?? 0;
+  const pendingBrandCount = summary.pendingBrands ?? 0;
+
   const cards = [
     {
       title: 'Total Vendors',
@@ -27,32 +37,73 @@ export default function SummaryCards({ summary }: SummaryCardsProps) {
     {
       title: 'Total Categories',
       value: summary.totalCategories,
-      description: 'Marketplace Categories',
+      description: `${activeCatCount} Active / ${inactiveCatCount} Inactive`,
       icon: FolderTree,
       color: 'from-emerald-500 to-teal-500',
     },
     {
-      title: 'Pending Categories',
-      value: summary.pendingCategories,
-      description: 'Vendor Submissions',
-      icon: Clock,
-      color: 'from-rose-500 to-pink-500',
-      badge: summary.pendingCategories > 0 ? 'action-required' : null,
+      title: 'Active Categories',
+      value: activeCatCount,
+      description: 'Visible to Vendors',
+      icon: CheckCircle2,
+      color: 'from-green-500 to-emerald-600',
+    },
+    {
+      title: 'Inactive Categories',
+      value: inactiveCatCount,
+      description: 'Disabled Taxonomy',
+      icon: XCircle,
+      color: 'from-zinc-400 to-zinc-600',
+    },
+    {
+      title: 'Total Sub Categories',
+      value: totalSubCatCount,
+      description: `${activeSubCatCount} Active / ${inactiveSubCatCount} Inactive`,
+      icon: FolderGit2,
+      color: 'from-purple-500 to-indigo-500',
+    },
+    {
+      title: 'Active Sub Categories',
+      value: activeSubCatCount,
+      description: 'Selectable Sub Categories',
+      icon: CheckCircle2,
+      color: 'from-teal-500 to-cyan-600',
+    },
+    {
+      title: 'Inactive Sub Categories',
+      value: inactiveSubCatCount,
+      description: 'Disabled Sub Categories',
+      icon: XCircle,
+      color: 'from-zinc-400 to-zinc-600',
     },
     {
       title: 'Total Brands',
       value: summary.totalBrands,
-      description: 'Approved Brands',
+      description: `${activeBrandCount} Active / ${inactiveBrandCount} Inactive`,
       icon: Tag,
       color: 'from-purple-500 to-violet-500',
     },
     {
-      title: 'Pending Brands',
-      value: summary.pendingBrands,
-      description: 'Awaiting Approvals',
+      title: 'Active Brands',
+      value: activeBrandCount,
+      description: 'Available to Vendors',
+      icon: CheckCircle2,
+      color: 'from-purple-600 to-indigo-600',
+    },
+    {
+      title: 'Inactive Brands',
+      value: inactiveBrandCount,
+      description: 'Hidden Marketplace Brands',
+      icon: XCircle,
+      color: 'from-zinc-400 to-zinc-600',
+    },
+    {
+      title: 'Pending Brand Requests',
+      value: pendingBrandCount,
+      description: 'Vendor Submissions',
       icon: Clock,
-      color: 'from-fuchsia-500 to-purple-500',
-      badge: summary.pendingBrands > 0 ? 'action-required' : null,
+      color: 'from-amber-500 to-orange-500',
+      badge: pendingBrandCount > 0 ? 'action-required' : null,
     },
     {
       title: 'Total Products',
@@ -60,14 +111,6 @@ export default function SummaryCards({ summary }: SummaryCardsProps) {
       description: 'Items in Catalogue',
       icon: ShoppingBag,
       color: 'from-sky-500 to-blue-500',
-    },
-    {
-      title: 'Pending Products',
-      value: summary.pendingProducts,
-      description: 'Awaiting Quality Check',
-      icon: Clock,
-      color: 'from-rose-500 to-orange-500',
-      badge: summary.pendingProducts > 0 ? 'action-required' : null,
     },
   ];
 

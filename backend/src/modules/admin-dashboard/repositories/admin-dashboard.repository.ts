@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IAdminDashboardRepository } from '../interfaces/admin-dashboard-repository.interface';
 import { PrismaService } from '../../../database/prisma.service';
-import { Role, UserStatus } from '@prisma/client';
+import { Role, AccountStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminDashboardRepository implements IAdminDashboardRepository {
@@ -27,31 +27,18 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       activeVendors,
       pendingVendorApprovals,
       totalProducts,
-      totalCategories,
-      pendingCategories,
-      totalBrands,
-      pendingBrands,
       pendingProducts,
-      totalCompletedOrders,
-      revenueAggregate,
+      totalCategories,
+      totalBrands,
     ] = await Promise.all([
       this.prisma.user.count({ where: { role: Role.CUSTOMER } }),
       this.prisma.user.count({ where: { role: Role.VENDOR } }),
-      this.prisma.user.count({ where: { role: Role.VENDOR, status: UserStatus.ACTIVE } }),
-      this.prisma.user.count({ where: { role: Role.VENDOR, status: UserStatus.PENDING } }),
-      this.prisma.product.count({ where: {} }),
+      this.prisma.user.count({ where: { role: Role.VENDOR, status: AccountStatus.ACTIVE } }),
+      this.prisma.user.count({ where: { role: Role.VENDOR, status: AccountStatus.PENDING } }),
+      this.prisma.product.count({ where: { deletedAt: null } }),
+      this.prisma.product.count({ where: { status: 'PENDING', deletedAt: null } }),
       this.prisma.category.count({ where: { deletedAt: null } }),
-      this.prisma.category.count({ where: { status: 'PENDING', deletedAt: null } }),
       this.prisma.brand.count({ where: { deletedAt: null } }),
-      this.prisma.brand.count({ where: { status: 'PENDING', deletedAt: null } }),
-      this.prisma.product.count({ where: { status: 'PENDING' } }),
-      this.prisma.order.count({ where: { status: 'COMPLETED' } }),
-      this.prisma.order.aggregate({
-        where: { status: 'COMPLETED' },
-        _sum: {
-          totalAmount: true,
-        },
-      }),
     ]);
 
     return {
@@ -61,13 +48,12 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       pendingVendorApprovals,
       totalProducts,
       totalCategories,
-      pendingCategories,
+      pendingCategories: 0,
       totalBrands,
-      pendingBrands,
+      pendingBrands: 0,
       pendingProducts,
-      totalCompletedOrders,
-      totalCompletedOrdersRevenue: revenueAggregate._sum.totalAmount || 0,
+      totalCompletedOrders: 0,
+      totalCompletedOrdersRevenue: 0,
     };
   }
 }
-

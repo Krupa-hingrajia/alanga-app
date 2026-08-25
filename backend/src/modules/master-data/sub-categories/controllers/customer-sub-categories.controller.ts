@@ -1,11 +1,8 @@
-import { Controller, Get, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SubCategoriesService } from '../services/sub-categories.service';
 
 @ApiTags('Customer SubCategories')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
 @Controller('customer/sub-categories')
 export class CustomerSubCategoriesController {
   constructor(private readonly subCategoriesService: SubCategoriesService) {}

@@ -1,6 +1,4 @@
-import { AttributeValue } from '@prisma/client';
-
-export class AttributeValueEntity implements AttributeValue {
+export class AttributeValueEntity {
   id: string;
   attributeId: string;
   value: string;

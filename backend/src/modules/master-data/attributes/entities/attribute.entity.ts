@@ -1,6 +1,4 @@
-import { ProductAttribute } from '@prisma/client';
-
-export class ProductAttributeEntity implements ProductAttribute {
+export class ProductAttributeEntity {
   id: string;
   name: string;
   status: string;

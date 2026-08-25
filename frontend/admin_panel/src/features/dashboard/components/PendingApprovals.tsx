@@ -20,14 +20,6 @@ export default function PendingApprovals({ summary }: PendingApprovalsProps) {
       badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
     },
     {
-      title: 'Categories',
-      count: summary.pendingCategories,
-      description: 'Vendor suggested categories awaiting taxonomy approval',
-      link: '/categories',
-      icon: FolderTree,
-      badgeColor: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400',
-    },
-    {
       title: 'Brands',
       count: summary.pendingBrands,
       description: 'New vendor brands needing registration verification',

@@ -102,10 +102,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return BlocProvider(
       create: (_) => sl<RegisterBloc>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFEEFDD),
+        backgroundColor: const Color(0xFFE6EFEA),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF0F2016)),
+            onPressed: () => context.go('/login'),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+        extendBodyBehindAppBar: true,
         body: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: kToolbarHeight + 10.0, bottom: 24.0),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: isTablet ? 450 : double.infinity,
@@ -141,13 +150,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        // Small Brand Logo Asset
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/images/app_icon.jpg',
+                              height: 64, // Small logo size
+                              width: 64,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         // Title
                         const Text(
                           'Register as Vendor',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1D1B18),
+                            color: Color(0xFF0F2016),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -182,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   onPressed: state is RegisterLoading ? null : _previousStep,
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 14),
-                                    side: const BorderSide(color: AppColors.brandOrange),
+                                    side: const BorderSide(color: Color(0xFF1A3827)),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -190,7 +212,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   child: const Text(
                                     'BACK',
                                     style: TextStyle(
-                                      color: AppColors.brandOrange,
+                                      color: Color(0xFF1A3827),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                     ),
@@ -234,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       },
                                 style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 14),
-                                  backgroundColor: AppColors.brandOrange,
+                                  backgroundColor: const Color(0xFF1A3827),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -278,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero),
                                 child: const Text(
                                   'Login Here',
-                                  style: TextStyle(color: AppColors.brandOrange, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Color(0xFF1A3827), fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -307,12 +329,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isCompleted
-                ? AppColors.brandOrange
+                ? AppColors.primaryGreen
                 : isActive
-                    ? AppColors.brandOrange
-                    : const Color(0xFFF0EBE1),
+                    ? AppColors.primaryGreen
+                    : const Color(0xFFD1DDD6),
             border: isActive
-                ? Border.all(color: AppColors.brandOrange, width: 2)
+                ? Border.all(color: AppColors.primaryGreen, width: 2)
                 : null,
           ),
           child: Center(
@@ -333,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           title,
           style: TextStyle(
             fontSize: 10,
-            color: isActive ? AppColors.brandOrange : AppColors.textSecondaryLight,
+            color: isActive ? AppColors.primaryGreen : AppColors.textSecondaryLight,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
         )
@@ -346,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       width: 40,
       height: 2,
       margin: const EdgeInsets.only(bottom: 12),
-      color: const Color(0xFFF0EBE1),
+      color: const Color(0xFFD1DDD6),
     );
   }
 
@@ -360,7 +382,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Full Name
           TextFormField(
             controller: _fullNameController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Full Name', Icons.person_outline),
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter your full name';
@@ -373,7 +395,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Email
           TextFormField(
             controller: _emailController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Email Address', Icons.email_outlined),
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
@@ -393,7 +415,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: 75,
                 child: TextFormField(
                   controller: _countryCodeController,
-                  style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Code', null),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
@@ -407,7 +429,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Expanded(
                 child: TextFormField(
                   controller: _mobileNumberController,
-                  style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Mobile Number', Icons.phone_outlined),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
@@ -427,7 +449,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildPasswordInputDecoration(
               'Password',
               _obscurePassword,
@@ -452,7 +474,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildPasswordInputDecoration(
               'Confirm Password',
               _obscureConfirmPassword,
@@ -479,7 +501,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Business Name
           TextFormField(
             controller: _businessNameController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Business Name', Icons.store_outlined),
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter business name';
@@ -491,7 +513,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Business Type Dropdown
           DropdownButtonFormField<String>(
             value: _businessType,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            dropdownColor: Colors.white,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Business Type', Icons.business_outlined),
             items: _businessTypes.map((type) {
               return DropdownMenuItem<String>(
@@ -520,7 +543,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // City
           TextFormField(
             controller: _cityController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('City', Icons.location_city_outlined),
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter city';
@@ -532,7 +555,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // State
           TextFormField(
             controller: _stateController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('State', Icons.map_outlined),
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter state';
@@ -544,7 +567,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Pincode
           TextFormField(
             controller: _pincodeController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Pincode', Icons.pin_outlined),
             keyboardType: TextInputType.number,
             validator: (value) {
@@ -558,7 +581,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // GST Number (Optional)
           TextFormField(
             controller: _gstNumberController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('GST Number (Optional)', Icons.description_outlined),
           ),
           const SizedBox(height: 16),
@@ -566,7 +589,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // PAN Number (Optional)
           TextFormField(
             controller: _panNumberController,
-            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('PAN Number (Optional)', Icons.payment_outlined),
           ),
         ],
@@ -580,19 +603,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
       prefixIcon: icon != null ? Icon(icon, color: AppColors.textSecondaryLight, size: 20) : null,
       filled: true,
-      fillColor: const Color(0xFFFFF9F2),
+      fillColor: const Color(0xFFF1F5F2),
       contentPadding: const EdgeInsets.all(16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.brandOrange, width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
       ),
     );
   }
@@ -615,19 +638,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onPressed: toggleObscure,
       ),
       filled: true,
-      fillColor: const Color(0xFFFFF9F2),
+      fillColor: const Color(0xFFF1F5F2),
       contentPadding: const EdgeInsets.all(16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.brandOrange, width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
       ),
     );
   }

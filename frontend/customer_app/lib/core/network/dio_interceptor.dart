@@ -14,9 +14,10 @@ class DioInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (options.path != ApiEndpoints.register &&
-        options.path != ApiEndpoints.login) {
+        options.path != ApiEndpoints.login &&
+        options.path != ApiEndpoints.refresh) {
       final token = await _storageService.getAccessToken();
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
     }
@@ -29,10 +30,9 @@ class DioInterceptor extends Interceptor {
         err.requestOptions.path != ApiEndpoints.login &&
         err.requestOptions.path != ApiEndpoints.register &&
         err.requestOptions.path != ApiEndpoints.refresh) {
-      
       try {
         final refreshToken = await _storageService.getRefreshToken();
-        if (refreshToken != null) {
+        if (refreshToken != null && refreshToken.isNotEmpty) {
           final response = await _refreshDio.post(
             ApiEndpoints.refresh,
             data: {'refreshToken': refreshToken},

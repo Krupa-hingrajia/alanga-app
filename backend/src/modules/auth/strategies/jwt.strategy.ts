@@ -10,10 +10,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
+    const accessSecret =
+      configService.get<string>('jwt.accessSecret') ||
+      configService.get<string>('JWT_ACCESS_SECRET') ||
+      configService.get<string>('JWT_SECRET') ||
+      'super-secret-access-token-key-change-in-production';
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('jwt.accessSecret') || 'fallback-access-secret',
+      secretOrKey: accessSecret,
     });
   }
 

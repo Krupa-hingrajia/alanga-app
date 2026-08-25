@@ -16,6 +16,7 @@ import { UnitsModule } from './modules/master-data/units/units.module';
 import { AttributesModule } from './modules/master-data/attributes/attributes.module';
 import { AttributeValuesModule } from './modules/master-data/attribute-values/attribute-values.module';
 import { ProductsModule } from './modules/products/products.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ProductsModule } from './modules/products/products.module';
     AttributesModule,
     AttributeValuesModule,
     ProductsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

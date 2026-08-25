@@ -19,12 +19,8 @@ export class UsersService {
     return this.usersRepository.findByEmail(email);
   }
 
-  async findByMobileNumber(mobileNumber: string): Promise<UserEntity | null> {
-    return this.usersRepository.findByMobileNumber(mobileNumber);
-  }
-
-  async updateRefreshToken(id: string, hashedRefreshToken: string | null): Promise<UserEntity> {
-    return this.usersRepository.update(id, { hashedRefreshToken });
+  async findByPhoneNumber(phoneNumber: string): Promise<UserEntity | null> {
+    return this.usersRepository.findByPhoneNumber(phoneNumber);
   }
 
   async findManyVendors(filters?: {

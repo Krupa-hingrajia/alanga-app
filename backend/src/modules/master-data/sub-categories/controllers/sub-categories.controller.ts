@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Delete, Param, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -7,14 +7,66 @@ import { Roles } from '../../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { SubCategoriesService } from '../services/sub-categories.service';
 import { RejectDto } from '../../categories/dto/reject.dto';
+import { AdminSubCategoryFilterDto } from '../dto/admin-sub-category-filter.dto';
+import { CreateSubCategoryDto } from '../dto/create-sub-category.dto';
+import { UpdateSubCategoryDto } from '../dto/update-sub-category.dto';
 
-@ApiTags('Admin SubCategories Approval')
+@ApiTags('Admin SubCategories Approval & Management')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
-@Controller('admin/sub-categories')
+@Controller(['admin/subcategories', 'admin/sub-categories'])
 export class SubCategoriesController {
   constructor(private readonly subCategoriesService: SubCategoriesService) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new subcategory (Admin only)' })
+  @ApiResponse({ status: 201, description: 'SubCategory created successfully.' })
+  @ApiResponse({ status: 400, description: 'Validation failed.' })
+  @ApiResponse({ status: 409, description: 'SubCategory name already exists in this category.' })
+  async create(@Body() createSubCategoryDto: CreateSubCategoryDto, @CurrentUser('id') adminId: string) {
+    const data = await this.subCategoriesService.create(createSubCategoryDto, adminId);
+    return {
+      success: true,
+      message: 'SubCategory created successfully',
+      data,
+      statusCode: HttpStatus.CREATED,
+    };
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update subcategory (Admin only)' })
+  @ApiResponse({ status: 200, description: 'SubCategory updated successfully.' })
+  @ApiResponse({ status: 404, description: 'SubCategory not found.' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateSubCategoryDto: UpdateSubCategoryDto,
+    @CurrentUser('id') adminId: string,
+  ) {
+    const data = await this.subCategoriesService.updateByVendor(id, updateSubCategoryDto, adminId);
+    return {
+      success: true,
+      message: 'SubCategory updated successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all marketplace subcategories with filters, search, and pagination' })
+  @ApiResponse({ status: 200, description: 'SubCategories retrieved successfully.' })
+  async getSubCategories(@Query() filterDto: AdminSubCategoryFilterDto) {
+    const data = await this.subCategoriesService.findForAdmin(filterDto);
+    return {
+      success: true,
+      message: 'Admin subcategories retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
 
   @Get('pending')
   @HttpCode(HttpStatus.OK)
@@ -30,6 +82,7 @@ export class SubCategoriesController {
       statusCode: HttpStatus.OK,
     };
   }
+
 
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
@@ -70,6 +123,7 @@ export class SubCategoriesController {
   @ApiOperation({ summary: 'Soft delete subcategory' })
   @ApiResponse({ status: 200, description: 'SubCategory successfully deleted.' })
   @ApiResponse({ status: 404, description: 'SubCategory not found.' })
+  @ApiResponse({ status: 409, description: 'This sub-category cannot be deleted because it contains products. Please delete all products first.' })
   async remove(@Param('id') id: string, @CurrentUser('id') adminId: string) {
     const data = await this.subCategoriesService.remove(id, adminId);
     return {

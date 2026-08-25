@@ -35,6 +35,18 @@ import '../../features/sub_categories/domain/repositories/sub_category_repositor
 import '../../features/sub_categories/data/repositories/sub_category_repository_impl.dart';
 import '../../features/sub_categories/presentation/bloc/sub_category_bloc.dart';
 
+// Inventory imports
+import '../../features/inventory/data/datasource/inventory_remote_datasource.dart';
+import '../../features/inventory/domain/repositories/inventory_repository.dart';
+import '../../features/inventory/data/repositories/inventory_repository_impl.dart';
+import '../../features/inventory/presentation/bloc/inventory_bloc.dart';
+
+// Shipping imports
+import '../../features/shipping/data/datasource/shipping_remote_datasource.dart';
+import '../../features/shipping/domain/repositories/shipping_repository.dart';
+import '../../features/shipping/data/repositories/shipping_repository_impl.dart';
+import '../../features/shipping/presentation/bloc/shipping_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -45,6 +57,8 @@ Future<void> init() async {
   sl.registerFactory(() => BrandBloc(brandRepository: sl()));
   sl.registerFactory(() => ProductBloc(productRepository: sl()));
   sl.registerFactory(() => SubCategoryBloc(subCategoryRepository: sl()));
+  sl.registerFactory(() => InventoryBloc(inventoryRepository: sl()));
+  sl.registerFactory(() => ShippingBloc(shippingRepository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -66,6 +80,12 @@ Future<void> init() async {
   sl.registerLazySingleton<SubCategoryRepository>(
     () => SubCategoryRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<InventoryRepository>(
+    () => InventoryRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<ShippingRepository>(
+    () => ShippingRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -82,6 +102,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<SubCategoryRemoteDataSource>(
     () => SubCategoryRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<InventoryRemoteDataSource>(
+    () => InventoryRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<ShippingRemoteDataSource>(
+    () => ShippingRemoteDataSourceImpl(apiService: sl()),
   );
 
   // Core

@@ -4,7 +4,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { UsersService } from '../../users/services/users.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -12,6 +11,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
+    const refreshSecret =
+      configService.get<string>('jwt.refreshSecret') ||
+      configService.get<string>('JWT_REFRESH_SECRET') ||
+      'super-secret-refresh-token-key-change-in-production';
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -20,29 +24,23 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('jwt.refreshSecret') || 'fallback-refresh-secret',
+      secretOrKey: refreshSecret,
       passReqToCallback: true,
     });
   }
 
   async validate(req: Request, payload: { sub: string; email: string; role: string }) {
-    let refreshToken = req.get('Authorization')?.replace('Bearer ', '').trim();
-    if (!refreshToken && req.body && req.body.refreshToken) {
-      refreshToken = req.body.refreshToken;
-    }
+    const refreshToken =
+      req.get('Authorization')?.replace('Bearer ', '').trim() ||
+      (req.body && req.body.refreshToken);
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is required');
     }
 
     const user = await this.usersService.findById(payload.sub);
-    if (!user || !user.hashedRefreshToken) {
+    if (!user) {
       throw new UnauthorizedException('Access denied. Invalid or expired session.');
-    }
-
-    const isTokenMatching = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
-    if (!isTokenMatching) {
-      throw new UnauthorizedException('Access denied. Invalid session token.');
     }
 
     return user;

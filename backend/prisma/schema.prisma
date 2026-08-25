@@ -1,222 +1,259 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 enum Role {
-  CUSTOMER
-  VENDOR
   ADMIN
+  VENDOR
+  CUSTOMER
 }
 
-enum UserStatus {
+enum AccountStatus {
   PENDING
   ACTIVE
-  REJECTED
   SUSPENDED
+  REJECTED
+}
+
+enum KYCStatus {
+  NOT_SUBMITTED
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model User {
-  id                 String     @id @default(uuid())
-  fullName           String     @map("full_name")
-  email              String     @unique
-  countryCode        String     @map("country_code")
-  mobileNumber       String     @unique @map("mobile_number")
-  password           String
-  role               Role       @default(CUSTOMER)
-  status             UserStatus @default(ACTIVE)
-  businessName       String?    @map("business_name")
-  businessType       String?    @map("business_type")
-  city               String?
-  state              String?
-  pincode            String?
-  gstNumber          String?    @map("gst_number")
-  panNumber          String?    @map("pan_number")
-  hashedRefreshToken String?    @map("hashed_refresh_token")
-  createdAt          DateTime   @default(now()) @map("created_at")
-  updatedAt          DateTime   @updatedAt @map("updated_at")
-  products           Product[]
-  customerOrders     Order[]    @relation("CustomerOrders")
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  fullName     String        @map("full_name")
+  phoneNumber  String?       @map("phone_number")
+  role         Role          @default(CUSTOMER)
+  status       AccountStatus @default(PENDING)
+  kycStatus    KYCStatus     @default(NOT_SUBMITTED) @map("kyc_status")
+  profileImage String?       @map("profile_image")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  deletedAt    DateTime?     @map("deleted_at")
+
+  // Vendor relations
+  products Product[] @relation("VendorProducts")
+
+  // Customer relations
+  wishlists Wishlist[]
 
   @@map("users")
 }
 
-model Product {
-  id                String      @id @default(uuid())
-  name              String
-  description       String?
-  shortDescription  String?     @map("short_description")
-  categoryId        String      @map("category_id")
-  category          Category    @relation(fields: [categoryId], references: [id])
-  subCategoryId     String      @map("sub_category_id")
-  subCategory       SubCategory @relation(fields: [subCategoryId], references: [id])
-  brandId           String      @map("brand_id")
-  brand             Brand       @relation(fields: [brandId], references: [id])
-  sellingPrice      Float       @map("selling_price")
-  mrp               Float
-  taxPercentage     Float       @default(0) @map("tax_percentage")
-  stock             Int         @default(0)
-  weight            Float?
-  length            Float?
-  width             Float?
-  height            Float?
-  sku               String      @unique
-  status            String      @default("DRAFT")
-  image             String?
-  vendorId          String      @map("vendor_id")
-  vendor            User        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  orderItems        OrderItem[]
-  createdAt         DateTime    @default(now()) @map("created_at")
-  updatedAt         DateTime    @updatedAt @map("updated_at")
-  deletedAt         DateTime?   @map("deleted_at")
-  createdBy         String?     @map("created_by")
-  updatedBy         String?     @map("updated_by")
-  createdByVendorId String?     @map("created_by_vendor_id")
-  approvedByAdminId String?     @map("approved_by_admin_id")
-  approvedAt        DateTime?   @map("approved_at")
-  rejectedReason    String?     @map("rejected_reason")
-
-  @@map("products")
-}
-
-model Order {
-  id          String      @id @default(uuid())
-  orderNumber String      @unique @map("order_number")
-  customerId  String      @map("customer_id")
-  customer    User        @relation("CustomerOrders", fields: [customerId], references: [id])
-  status      String      @default("PENDING") // PENDING, PROCESSING, COMPLETED, CANCELLED
-  totalAmount Float       @map("total_amount")
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String   @map("order_id")
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String   @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  quantity  Int
-  price     Float
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("order_items")
-}
-
 model Category {
-  id                String        @id @default(uuid())
-  name              String        @unique
-  description       String?
-  image             String?
-  sortOrder         Int           @default(0) @map("sort_order")
-  status            String        @default("PENDING")
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
-  deletedAt         DateTime?     @map("deleted_at")
-  createdBy         String?       @map("created_by")
-  updatedBy         String?       @map("updated_by")
-  createdByVendorId String?       @map("created_by_vendor_id")
-  approvedByAdminId String?       @map("approved_by_admin_id")
-  approvedAt        DateTime?     @map("approved_at")
-  rejectedReason    String?       @map("rejected_reason")
-  subCategories     SubCategory[]
-  products          Product[]
+  id            String        @id @default(uuid())
+  name          String
+  slug          String?       @unique
+  description   String?
+  image         String?
+  isActive      Boolean       @default(true) @map("is_active")
+  displayOrder  Int           @default(0) @map("display_order")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  deletedAt     DateTime?     @map("deleted_at")
+  subCategories SubCategory[]
+  products      Product[]
 
   @@map("categories")
 }
 
 model SubCategory {
-  id                String    @id @default(uuid())
-  categoryId        String    @map("category_id")
-  category          Category  @relation(fields: [categoryId], references: [id])
-  name              String
-  description       String?
-  image             String?
-  sortOrder         Int       @default(0) @map("sort_order")
-  status            String    @default("PENDING")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  deletedAt         DateTime? @map("deleted_at")
-  createdBy         String?   @map("created_by")
-  updatedBy         String?   @map("updated_by")
-  createdByVendorId String?   @map("created_by_vendor_id")
-  approvedByAdminId String?   @map("approved_by_admin_id")
-  approvedAt        DateTime? @map("approved_at")
-  rejectedReason    String?   @map("rejected_reason")
-  products          Product[]
+  id           String    @id @default(uuid())
+  categoryId   String    @map("category_id")
+  category     Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String?
+  description  String?
+  image        String?
+  isActive     Boolean   @default(true) @map("is_active")
+  displayOrder Int       @default(0) @map("display_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  products     Product[]
 
+  @@unique([categoryId, slug])
   @@map("sub_categories")
 }
 
 model Brand {
   id                String    @id @default(uuid())
   name              String    @unique
-  logo              String?
+  slug              String?   @unique
   description       String?
-  status            String    @default("PENDING")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  deletedAt         DateTime? @map("deleted_at")
-  createdBy         String?   @map("created_by")
-  updatedBy         String?   @map("updated_by")
+  logo              String?
+  website           String?
+  status            String    @default("ACTIVE")
+  isActive          Boolean   @default(true) @map("is_active")
+  displayOrder      Int       @default(0) @map("display_order")
   createdByVendorId String?   @map("created_by_vendor_id")
   approvedByAdminId String?   @map("approved_by_admin_id")
   approvedAt        DateTime? @map("approved_at")
   rejectedReason    String?   @map("rejected_reason")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
   products          Product[]
 
   @@map("brands")
 }
 
-model Unit {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  shortName String    @map("short_name")
-  status    String    @default("ACTIVE")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
+model Product {
+  id               String           @id @default(uuid())
+  vendorId         String           @map("vendor_id")
+  vendor           User             @relation("VendorProducts", fields: [vendorId], references: [id], onDelete: Cascade)
+  categoryId       String           @map("category_id")
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategoryId    String           @map("sub_category_id")
+  subCategory      SubCategory      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  brandId          String           @map("brand_id")
+  brand            Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  sku              String           @unique
+  name             String
+  description      String?
+  shortDescription String?          @map("short_description")
+  sellingPrice     Float            @map("selling_price")
+  mrp              Float
+  taxPercentage    Float            @default(0) @map("tax_percentage")
+  stock            Int              @default(0)
+  weight           Float?
+  length           Float?
+  width            Float?
+  height           Float?
+  status           String           @default("ACTIVE")
+  image            String?
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  deletedAt        DateTime?        @map("deleted_at")
+  productImages    ProductImage[]
+  productVariants  ProductVariant[]
+  inventories      Inventory[]
+  shipping         ProductShipping?
+  wishlists        Wishlist[]
 
-  @@map("units")
+  @@map("products")
 }
 
-model ProductAttribute {
-  id        String           @id @default(uuid())
-  name      String           @unique
-  status    String           @default("ACTIVE")
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  deletedAt DateTime?        @map("deleted_at")
-  createdBy String?          @map("created_by")
-  updatedBy String?          @map("updated_by")
-  values    AttributeValue[]
+model ProductShipping {
+  id                       String   @id @default(uuid())
+  productId                String   @unique @map("product_id")
+  product                  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  weight                   Float    @default(0)
+  weightUnit               String   @default("kg") @map("weight_unit")
+  length                   Float    @default(0)
+  width                    Float    @default(0)
+  height                   Float    @default(0)
+  dimensionUnit            String   @default("cm") @map("dimension_unit")
+  shippingCharge           Float    @default(0) @map("shipping_charge")
+  isFreeShipping           Boolean  @default(false) @map("is_free_shipping")
+  freeShippingAboveAmount  Float?   @map("free_shipping_above_amount")
+  estimatedDeliveryMinDays Int      @default(3) @map("estimated_delivery_min_days")
+  estimatedDeliveryMaxDays Int      @default(7) @map("estimated_delivery_max_days")
+  codAvailable             Boolean  @default(true) @map("cod_available")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
 
-  @@map("product_attributes")
+  @@map("product_shippings")
 }
 
-model AttributeValue {
-  id          String           @id @default(uuid())
-  attributeId String           @map("attribute_id")
-  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
-  value       String
-  sortOrder   Int              @default(0) @map("sort_order")
-  status      String           @default("ACTIVE")
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
-  deletedAt   DateTime?        @map("deleted_at")
-  createdBy   String?          @map("created_by")
-  updatedBy   String?          @map("updated_by")
+model Inventory {
+  id               String          @id @default(uuid())
+  productId        String          @map("product_id")
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVariantId String          @map("product_variant_id")
+  productVariant   ProductVariant  @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  stockQuantity    Int             @default(0) @map("stock_quantity")
+  reservedQuantity Int             @default(0) @map("reserved_quantity")
+  availableStock   Int             @default(0) @map("available_stock")
+  minStockAlert    Int             @default(5) @map("min_stock_alert")
+  inventoryStatus  String          @default("IN_STOCK") @map("inventory_status")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  logs             InventoryLog[]
 
-  @@map("attribute_values")
+  @@unique([productId, productVariantId])
+  @@map("inventories")
+}
+
+model InventoryLog {
+  id             String    @id @default(uuid())
+  inventoryId    String    @map("inventory_id")
+  inventory      Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  previousStock  Int       @map("previous_stock")
+  newStock       Int       @map("new_stock")
+  quantityChanged Int      @map("quantity_changed")
+  changeType     String    @map("change_type")
+  reason         String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("inventory_logs")
+}
+
+model Wishlist {
+  id               String          @id @default(uuid())
+  customerId       String          @map("customer_id")
+  customer         User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId        String          @map("product_id")
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVariantId String?         @map("product_variant_id")
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@unique([customerId, productId, productVariantId])
+  @@map("wishlists")
+}
+
+model ProductImage {
+  id               String          @id @default(uuid())
+  productId        String          @map("product_id")
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVariantId String?         @map("product_variant_id")
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  imageUrl         String          @map("image_url")
+  isPrimary        Boolean         @default(false) @map("is_primary")
+  displayOrder     Int             @default(0) @map("display_order")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  deletedAt        DateTime?       @map("deleted_at")
+
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id                 String             @id @default(uuid())
+  productId          String             @map("product_id")
+  product            Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku                String             @unique
+  variantName        String             @map("variant_name")
+  color              String?
+  size               String?
+  storage            String?
+  price              Float
+  mrp                Float?
+  stock              Int                @default(0)
+  status             String             @default("ACTIVE")
+  attributes         Json               @default("{}")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  deletedAt          DateTime?          @map("deleted_at")
+  inventories        Inventory[]
+  wishlists          Wishlist[]
+  images             ProductImage[]
+
+  @@map("product_variants")
 }

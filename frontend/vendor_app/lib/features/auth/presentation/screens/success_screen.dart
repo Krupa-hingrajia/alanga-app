@@ -11,7 +11,7 @@ class SuccessScreen extends StatelessWidget {
     final isTablet = size.width > 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFEEFDD), // Very soft warm orange/amber tint background
+      backgroundColor: const Color(0xFFE6EFEA), // Very soft light mint green tint background
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -39,7 +39,7 @@ class SuccessScreen extends StatelessWidget {
                   const Icon(
                     Icons.verified_user_outlined,
                     size: 80,
-                    color: AppColors.brandOrange,
+                    color: const Color(0xFF1A3827),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -47,7 +47,7 @@ class SuccessScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1D1B18),
+                      color: Color(0xFF0F2016),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -66,7 +66,7 @@ class SuccessScreen extends StatelessWidget {
                     onPressed: () => context.go('/login'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: AppColors.brandOrange,
+                      backgroundColor: const Color(0xFF1A3827),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

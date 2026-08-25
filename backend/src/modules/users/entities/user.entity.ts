@@ -1,31 +1,23 @@
-import { Role, UserStatus } from '@prisma/client';
+import { Role, AccountStatus, KYCStatus } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserEntity {
   id: string;
   fullName: string;
   email: string;
-  countryCode: string;
-  mobileNumber: string;
+  phoneNumber?: string | null;
 
   @Exclude()
   password?: string;
 
   role: Role;
-  status: UserStatus;
-  businessName?: string | null;
-  businessType?: string | null;
-  city?: string | null;
-  state?: string | null;
-  pincode?: string | null;
-  gstNumber?: string | null;
-  panNumber?: string | null;
-
-  @Exclude()
-  hashedRefreshToken?: string | null;
+  status: AccountStatus;
+  kycStatus: KYCStatus;
+  profileImage?: string | null;
 
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date | null;
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);

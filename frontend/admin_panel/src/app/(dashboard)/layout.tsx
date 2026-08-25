@@ -228,14 +228,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Button>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 focus:outline-none transition-colors">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                    {user?.fullName?.charAt(0) || 'A'}
-                  </div>
-                </button>
+              <DropdownMenuTrigger className="flex items-center gap-2 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 focus:outline-none transition-colors">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                  {user?.fullName?.charAt(0) || 'A'}
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 mt-1 border-zinc-200 dark:border-zinc-850">
+
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold leading-none text-zinc-900 dark:text-zinc-50">

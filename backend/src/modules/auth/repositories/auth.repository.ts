@@ -13,21 +13,15 @@ export class AuthRepository implements IAuthRepository {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
-      countryCode: user.countryCode,
-      mobileNumber: user.mobileNumber,
+      phoneNumber: user.phoneNumber,
       password: user.password,
       role: user.role,
       status: user.status,
-      businessName: user.businessName,
-      businessType: user.businessType,
-      city: user.city,
-      state: user.state,
-      pincode: user.pincode,
-      gstNumber: user.gstNumber,
-      panNumber: user.panNumber,
-      hashedRefreshToken: user.hashedRefreshToken,
+      kycStatus: user.kycStatus,
+      profileImage: user.profileImage,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      deletedAt: user.deletedAt,
     });
   }
 
@@ -42,17 +36,14 @@ export class AuthRepository implements IAuthRepository {
     return this.mapToEntity(user);
   }
 
-  async findUserByMobile(mobileNumber: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findUnique({ where: { mobileNumber } });
+  async findUserByMobile(phoneNumber: string): Promise<UserEntity | null> {
+    const user = await this.prisma.user.findFirst({ where: { phoneNumber } });
     if (!user) return null;
     return this.mapToEntity(user);
   }
 
   async updateRefreshToken(id: string, token: string | null): Promise<UserEntity> {
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: { hashedRefreshToken: token },
-    });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     return this.mapToEntity(user);
   }
 }

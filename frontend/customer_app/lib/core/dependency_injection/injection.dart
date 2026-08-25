@@ -28,6 +28,12 @@ import '../../features/products/domain/repositories/product_repository.dart';
 import '../../features/products/data/repositories/product_repository_impl.dart';
 import '../../features/products/presentation/bloc/product_bloc.dart';
 
+// Wishlist imports
+import '../../features/wishlist/data/datasources/wishlist_remote_datasource.dart';
+import '../../features/wishlist/domain/repositories/wishlist_repository.dart';
+import '../../features/wishlist/data/repositories/wishlist_repository_impl.dart';
+import '../../features/wishlist/presentation/bloc/wishlist_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -37,6 +43,7 @@ Future<void> init() async {
   sl.registerFactory(() => HomeBloc(categoryRepository: sl(), productRepository: sl()));
   sl.registerFactory(() => CategoryBloc(categoryRepository: sl()));
   sl.registerFactory(() => ProductBloc(productRepository: sl()));
+  sl.registerLazySingleton(() => WishlistBloc(repository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -52,6 +59,9 @@ Future<void> init() async {
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<WishlistRepository>(
+    () => WishlistRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -62,6 +72,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ProductRemoteDataSource>(
     () => ProductRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<WishlistRemoteDataSource>(
+    () => WishlistRemoteDataSourceImpl(apiService: sl()),
   );
 
   // Core

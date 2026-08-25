@@ -22,14 +22,18 @@ async function bootstrap() {
   }
 
   // Create Nest application using Express Adapter
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(server),
-  );
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
+    // Suppress verbose logs in production
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn']
+        : ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
   const configService = app.get(ConfigService);
   const apiPrefix = configService.get<string>('apiPrefix') || 'api/v1';
   const corsOrigin = configService.get<string>('corsOrigin') || '*';
+  const isProduction = configService.get<string>('nodeEnv') === 'production';
 
   // Set API Versioning prefix
   app.setGlobalPrefix(apiPrefix);
@@ -59,43 +63,45 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger Documentation Setup
-  const config = new DocumentBuilder()
-    .setTitle('E-Commerce Marketplace API')
-    .setDescription('Production-ready backend API documentation for the E-Commerce Marketplace')
-    .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter Access Token',
-        in: 'header',
-      },
-      'access-token',
-    )
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter Refresh Token',
-        in: 'header',
-      },
-      'refresh-token',
-    )
-    .build();
+  // Swagger Documentation — only enabled in non-production environments
+  if (!isProduction) {
+    const config = new DocumentBuilder()
+      .setTitle('E-Commerce Marketplace API')
+      .setDescription('Production-ready backend API documentation for the E-Commerce Marketplace')
+      .setVersion('1.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter Access Token',
+          in: 'header',
+        },
+        'access-token',
+      )
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter Refresh Token',
+          in: 'header',
+        },
+        'refresh-token',
+      )
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
-    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-    customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
-    ],
-  });
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(`${apiPrefix}/docs`, app, document, {
+      customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+      customJs: [
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
+      ],
+    });
+  }
 
   await app.init();
   isAppInitialized = true;

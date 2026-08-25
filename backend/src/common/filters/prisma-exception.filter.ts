@@ -7,7 +7,8 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    
+    const isProduction = process.env.NODE_ENV === 'production';
+
     let statusCode = HttpStatus.BAD_REQUEST;
     let message = 'Database operation failed';
     const errors: string[] = [];
@@ -32,7 +33,10 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         break;
       }
       default:
-        message = `Database error: ${exception.message}`;
+        // In production, do NOT expose raw Prisma error messages (may leak schema info)
+        message = isProduction
+          ? 'An unexpected database error occurred'
+          : `Database error: ${exception.message}`;
         break;
     }
 

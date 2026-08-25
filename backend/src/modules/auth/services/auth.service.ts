@@ -6,7 +6,7 @@ import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { UserEntity } from '../../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { Role, UserStatus } from '@prisma/client';
+import { Role, AccountStatus } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -22,32 +22,27 @@ export class AuthService {
       throw new ConflictException('Email address is already registered');
     }
 
-    const existingPhone = await this.authRepository.findUserByMobile(registerDto.mobileNumber);
-    if (existingPhone) {
-      throw new ConflictException('Mobile number is already registered');
+    const phone = registerDto.mobileNumber || (registerDto as any).countryCode;
+    if (phone) {
+      const existingPhone = await this.authRepository.findUserByMobile(phone);
+      if (existingPhone) {
+        throw new ConflictException('Mobile number is already registered');
+      }
     }
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(registerDto.password, saltRounds);
 
     const role = registerDto.role;
-    const status = role === Role.VENDOR ? UserStatus.PENDING : UserStatus.ACTIVE;
+    const status = role === Role.VENDOR ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
     return this.authRepository.createUser({
       fullName: registerDto.fullName,
       email: registerDto.email,
-      countryCode: registerDto.countryCode,
-      mobileNumber: registerDto.mobileNumber,
+      phoneNumber: registerDto.mobileNumber,
       password: hashedPassword,
       role: registerDto.role,
       status: status,
-      businessName: registerDto.businessName,
-      businessType: registerDto.businessType,
-      city: registerDto.city,
-      state: registerDto.state,
-      pincode: registerDto.pincode,
-      gstNumber: registerDto.gstNumber,
-      panNumber: registerDto.panNumber,
     });
   }
 
@@ -61,31 +56,28 @@ export class AuthService {
       user = await this.authRepository.findUserByMobile(identifier);
     }
 
-    if (!user || !user.password) {
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password || '');
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Check status if vendor
-    if (user.role === Role.VENDOR && user.status !== UserStatus.ACTIVE) {
-      if (user.status === UserStatus.PENDING) {
-        throw new ForbiddenException('Your account is under verification.');
-      } else if (user.status === UserStatus.REJECTED) {
-        throw new ForbiddenException(
-          'Your registration was rejected. Please update your information and submit again.',
-        );
-      } else if (user.status === UserStatus.SUSPENDED) {
-        throw new ForbiddenException('Your account has been suspended. Please contact support.');
-      }
+    if (user.status === AccountStatus.SUSPENDED) {
+      throw new ForbiddenException('Your account has been suspended');
+    }
+
+    if (user.status === AccountStatus.REJECTED) {
+      throw new ForbiddenException('Your account registration was rejected');
+    }
+
+    if (user.status === AccountStatus.PENDING && user.role === Role.VENDOR) {
+      throw new ForbiddenException('Your vendor account is pending approval by administrator');
     }
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-
     return {
       user,
       ...tokens,
@@ -93,26 +85,35 @@ export class AuthService {
   }
 
   async refresh(userId: string, email: string, role: string) {
-    const tokens = await this.generateTokens(userId, email, role);
-    await this.updateRefreshToken(userId, tokens.refreshToken);
-    return tokens;
+    return this.generateTokens(userId, email, role);
   }
 
-  async logout(userId: string) {
-    await this.authRepository.updateRefreshToken(userId, null);
+  async logout(userId: string): Promise<void> {
+    // Session invalidated on client side
   }
 
-  private async generateTokens(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
+  async generateTokens(userId: string, email: string, role: string) {
+    const jwtPayload = { sub: userId, email, role };
+
+    const accessSecret =
+      this.configService.get<string>('jwt.accessSecret') ||
+      this.configService.get<string>('JWT_ACCESS_SECRET') ||
+      this.configService.get<string>('JWT_SECRET') ||
+      'super-secret-access-token-key-change-in-production';
+
+    const refreshSecret =
+      this.configService.get<string>('jwt.refreshSecret') ||
+      this.configService.get<string>('JWT_REFRESH_SECRET') ||
+      'super-secret-refresh-token-key-change-in-production';
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.accessSecret') || 'fallback-access-secret',
-        expiresIn: (this.configService.get<string>('jwt.accessExpiration') || '15m') as any,
+      this.jwtService.signAsync(jwtPayload, {
+        secret: accessSecret,
+        expiresIn: '7d',
       }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.refreshSecret') || 'fallback-refresh-secret',
-        expiresIn: (this.configService.get<string>('jwt.refreshExpiration') || '7d') as any,
+      this.jwtService.signAsync(jwtPayload, {
+        secret: refreshSecret,
+        expiresIn: '30d',
       }),
     ]);
 
@@ -120,11 +121,5 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  private async updateRefreshToken(userId: string, refreshToken: string) {
-    const saltRounds = 10;
-    const hashedToken = await bcrypt.hash(refreshToken, saltRounds);
-    await this.authRepository.updateRefreshToken(userId, hashedToken);
   }
 }

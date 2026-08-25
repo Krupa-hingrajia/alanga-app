@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocProvider(
       create: (_) => sl<LoginBloc>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFEEFDD), // Warm orange-white tinted background
+        backgroundColor: const Color(0xFFE6EFEA), // Solid clean light mint green background
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Welcome back, ${state.user.fullName}!'),
-                        backgroundColor: AppColors.brandOrange,
+                        backgroundColor: AppColors.primaryGreen,
                       ),
                     );
                     context.go('/home');
@@ -83,10 +83,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Icon(
-                            Icons.storefront_outlined,
-                            size: 70,
-                            color: AppColors.brandOrange,
+                          // Brand Logo Asset
+                          Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.asset(
+                                  'assets/images/app_icon.jpg',
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 16),
                           const Text(
@@ -94,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1D1B18),
+                              color: Color(0xFF0F2016),
                               letterSpacing: 2,
                             ),
                             textAlign: TextAlign.center,
@@ -114,25 +121,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Identifier Field
                           TextFormField(
                             controller: _identifierController,
-                            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+                            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                             decoration: InputDecoration(
                               labelText: 'Email or Mobile Number',
                               labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
                               prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight, size: 20),
                               filled: true,
-                              fillColor: const Color(0xFFFFF9F2), // Warm orange-white input fill
+                              fillColor: const Color(0xFFF1F5F2), // Very soft green-white fill
                               contentPadding: const EdgeInsets.all(16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+                                borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+                                borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.brandOrange, width: 1.5),
+                                borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
                               ),
                             ),
                             validator: (value) {
@@ -148,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
-                            style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
+                            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
@@ -166,19 +173,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                               ),
                               filled: true,
-                              fillColor: const Color(0xFFFFF9F2),
+                              fillColor: const Color(0xFFF1F5F2),
                               contentPadding: const EdgeInsets.all(16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+                                borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFF9DCC4)),
+                                borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.brandOrange, width: 1.5),
+                                borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
                               ),
                             ),
                             validator: (value) {
@@ -200,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     width: 24,
                                     child: Checkbox(
                                       value: _rememberMe,
-                                      activeColor: AppColors.brandOrange,
+                                      activeColor: const Color(0xFF1A3827),
                                       side: const BorderSide(color: AppColors.textSecondaryLight),
                                       onChanged: (val) {
                                         setState(() {
@@ -242,7 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: AppColors.brandOrange,
+                              backgroundColor: const Color(0xFF1A3827),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -277,7 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero),
                                 child: const Text(
                                   'Register as Vendor',
-                                  style: TextStyle(color: AppColors.brandOrange, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],

@@ -30,6 +30,14 @@ export class ProductEntity implements Product {
   approvedAt: Date | null;
   rejectedReason: string | null;
 
+  images?: any[];
+  variants?: any[];
+  shipping?: any;
+  brand?: any;
+  category?: any;
+  subCategory?: any;
+  isWishlisted?: boolean;
+
   constructor(partial: Partial<ProductEntity>) {
     Object.assign(this, partial);
   }

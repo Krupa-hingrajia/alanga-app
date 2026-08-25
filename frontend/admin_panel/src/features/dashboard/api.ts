@@ -7,8 +7,15 @@ export interface DashboardSummary {
   pendingVendorApprovals: number;
   totalProducts: number;
   totalCategories: number;
-  pendingCategories: number;
+  activeCategories?: number;
+  inactiveCategories?: number;
+  pendingCategories?: number;
+  totalSubCategories?: number;
+  activeSubCategories?: number;
+  inactiveSubCategories?: number;
   totalBrands: number;
+  activeBrands?: number;
+  inactiveBrands?: number;
   pendingBrands: number;
   pendingProducts: number;
   totalCompletedOrders: number;

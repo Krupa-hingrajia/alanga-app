@@ -1,9 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/user_entity.dart';
 
-part 'user_model.g.dart';
-
-@JsonSerializable()
 class UserModel {
   final String id;
   final String fullName;
@@ -11,7 +7,6 @@ class UserModel {
   final String countryCode;
   final String mobileNumber;
   final String role;
-  @JsonKey(defaultValue: 'PENDING')
   final String status;
   final String? businessName;
   final String? businessType;
@@ -38,9 +33,44 @@ class UserModel {
     this.panNumber,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    final phone = json['phoneNumber'] as String? ?? json['mobileNumber'] as String? ?? '';
+    final code = json['countryCode'] as String? ?? '+91';
 
-  Map<String, dynamic> toJson() => _$UserModelToJson(this);
+    return UserModel(
+      id: json['id'] as String? ?? '',
+      fullName: json['fullName'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      countryCode: code,
+      mobileNumber: phone,
+      role: json['role'] as String? ?? 'CUSTOMER',
+      status: json['status'] as String? ?? 'PENDING',
+      businessName: json['businessName'] as String?,
+      businessType: json['businessType'] as String?,
+      city: json['city'] as String?,
+      state: json['state'] as String?,
+      pincode: json['pincode'] as String?,
+      gstNumber: json['gstNumber'] as String?,
+      panNumber: json['panNumber'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fullName': fullName,
+        'email': email,
+        'countryCode': countryCode,
+        'mobileNumber': mobileNumber,
+        'role': role,
+        'status': status,
+        'businessName': businessName,
+        'businessType': businessType,
+        'city': city,
+        'state': state,
+        'pincode': pincode,
+        'gstNumber': gstNumber,
+        'panNumber': panNumber,
+      };
 
   UserEntity toEntity() {
     UserRole userRole;

@@ -13,21 +13,15 @@ export class UsersRepository implements IUsersRepository {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
-      countryCode: user.countryCode,
-      mobileNumber: user.mobileNumber,
+      phoneNumber: user.phoneNumber,
       password: user.password,
       role: user.role,
       status: user.status,
-      businessName: user.businessName,
-      businessType: user.businessType,
-      city: user.city,
-      state: user.state,
-      pincode: user.pincode,
-      gstNumber: user.gstNumber,
-      panNumber: user.panNumber,
-      hashedRefreshToken: user.hashedRefreshToken,
+      kycStatus: user.kycStatus,
+      profileImage: user.profileImage,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      deletedAt: user.deletedAt,
     });
   }
 
@@ -48,8 +42,8 @@ export class UsersRepository implements IUsersRepository {
     return this.mapToEntity(user);
   }
 
-  async findByMobileNumber(mobileNumber: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findUnique({ where: { mobileNumber } });
+  async findByPhoneNumber(phoneNumber: string): Promise<UserEntity | null> {
+    const user = await this.prisma.user.findFirst({ where: { phoneNumber } });
     if (!user) return null;
     return this.mapToEntity(user);
   }
@@ -77,7 +71,6 @@ export class UsersRepository implements IUsersRepository {
         whereClause.OR = [
           { fullName: { contains: filters.search, mode: 'insensitive' } },
           { email: { contains: filters.search, mode: 'insensitive' } },
-          { businessName: { contains: filters.search, mode: 'insensitive' } },
         ];
       }
     }

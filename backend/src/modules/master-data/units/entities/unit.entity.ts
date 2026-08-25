@@ -1,9 +1,7 @@
-import { Unit } from '@prisma/client';
-
-export class UnitEntity implements Unit {
+export class UnitEntity {
   id: string;
   name: string;
-  shortName: string;
+  symbol: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;

@@ -1,4 +1,4 @@
-import { PrismaClient, Role, UserStatus } from '@prisma/client';
+import { PrismaClient, Role, AccountStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -15,11 +15,10 @@ async function main() {
       data: {
         fullName: 'Admin User',
         email: adminEmail,
-        countryCode: '+91',
-        mobileNumber: '9999999999',
+        phoneNumber: '+919999999999',
         password: hashedPassword,
         role: Role.ADMIN,
-        status: UserStatus.ACTIVE,
+        status: AccountStatus.ACTIVE,
       },
     });
     console.log('Default admin user created successfully.');

@@ -21,7 +21,7 @@ class AppRouter {
     redirect: (context, state) async {
       final storage = sl<SecureStorageService>();
       final token = await storage.getAccessToken();
-      
+
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
 
@@ -50,6 +50,10 @@ class AppRouter {
         builder: (context, state) => const MainNavigationScreen(),
       ),
       GoRoute(
+        path: '/wishlist',
+        builder: (context, state) => const MainNavigationScreen(initialIndex: 2),
+      ),
+      GoRoute(
         path: '/products',
         builder: (context, state) => ProductListScreen(
           initialQuery: state.extra as String?,
@@ -57,6 +61,12 @@ class AppRouter {
       ),
       GoRoute(
         path: '/products/details',
+        builder: (context, state) => ProductDetailScreen(
+          product: state.extra as ProductModel,
+        ),
+      ),
+      GoRoute(
+        path: '/products/detail',
         builder: (context, state) => ProductDetailScreen(
           product: state.extra as ProductModel,
         ),

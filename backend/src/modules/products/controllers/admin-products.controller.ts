@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Param, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -7,14 +7,29 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ProductsService } from '../services/products.service';
 import { RejectDto } from '../../master-data/categories/dto/reject.dto';
+import { AdminProductFilterDto } from '../dto/admin-product-filter.dto';
 
-@ApiTags('Admin Products Approval')
+@ApiTags('Admin Products Approval & Management')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 @Controller('admin/products')
 export class AdminProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get all marketplace products with filters, search, sorting, and pagination' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully.' })
+  async getProducts(@Query() filterDto: AdminProductFilterDto) {
+    const data = await this.productsService.findForAdmin(filterDto);
+    return {
+      success: true,
+      message: 'Admin products retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
 
   @Get('pending')
   @HttpCode(HttpStatus.OK)
@@ -29,6 +44,7 @@ export class AdminProductsController {
       statusCode: HttpStatus.OK,
     };
   }
+
 
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)

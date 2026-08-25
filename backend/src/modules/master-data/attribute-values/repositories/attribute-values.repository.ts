@@ -1,90 +1,68 @@
 import { Injectable } from '@nestjs/common';
 import { IAttributeValuesRepository } from '../interfaces/attribute-values-repository.interface';
-import { PrismaService } from '../../../../database/prisma.service';
 import { AttributeValueEntity } from '../entities/attribute-value.entity';
 import { CreateAttributeValueDto } from '../dto/create-attribute-value.dto';
 import { UpdateAttributeValueDto } from '../dto/update-attribute-value.dto';
 
+/**
+ * NOTE: 'AttributeValue' model does not exist in the Prisma schema yet.
+ * This is a stub repository using in-memory storage until the schema is updated.
+ */
 @Injectable()
 export class AttributeValuesRepository implements IAttributeValuesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  private values: AttributeValueEntity[] = [];
+  private idCounter = 1;
 
-  private mapToEntity(val: any): AttributeValueEntity {
-    return new AttributeValueEntity({
-      id: val.id,
-      attributeId: val.attributeId,
-      value: val.value,
-      sortOrder: val.sortOrder,
-      status: val.status,
-      createdAt: val.createdAt,
-      updatedAt: val.updatedAt,
-      deletedAt: val.deletedAt,
-      createdBy: val.createdBy,
-      updatedBy: val.updatedBy,
-    });
+  private makeId(): string {
+    return `av-${this.idCounter++}-${Date.now()}`;
   }
 
   async create(data: CreateAttributeValueDto, userId: string): Promise<AttributeValueEntity> {
-    const val = await this.prisma.attributeValue.create({
-      data: {
-        attributeId: data.attributeId,
-        value: data.value,
-        sortOrder: data.sortOrder ?? 0,
-        status: data.status ?? 'ACTIVE',
-        createdBy: userId,
-      },
+    const now = new Date();
+    const val = new AttributeValueEntity({
+      id: this.makeId(),
+      attributeId: data.attributeId,
+      value: data.value,
+      sortOrder: 0,
+      status: 'ACTIVE',
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+      createdBy: userId,
+      updatedBy: userId,
     });
-    return this.mapToEntity(val);
+    this.values.push(val);
+    return val;
   }
 
   async findMany(attributeId?: string): Promise<AttributeValueEntity[]> {
-    const values = await this.prisma.attributeValue.findMany({
-      where: {
-        deletedAt: null,
-        ...(attributeId ? { attributeId } : {}),
-      },
-      orderBy: { sortOrder: 'asc' },
-    });
-    return values.map((v) => this.mapToEntity(v));
+    return this.values.filter((v) => !v.deletedAt && (!attributeId || v.attributeId === attributeId));
   }
 
   async findById(id: string): Promise<AttributeValueEntity | null> {
-    const val = await this.prisma.attributeValue.findFirst({
-      where: { id, deletedAt: null },
-    });
-    return val ? this.mapToEntity(val) : null;
+    return this.values.find((v) => v.id === id && !v.deletedAt) || null;
   }
 
   async findByValueAndAttribute(value: string, attributeId: string): Promise<AttributeValueEntity | null> {
-    const val = await this.prisma.attributeValue.findFirst({
-      where: { value, attributeId, deletedAt: null },
-    });
-    return val ? this.mapToEntity(val) : null;
+    return this.values.find((v) => v.value === value && v.attributeId === attributeId && !v.deletedAt) || null;
   }
 
   async update(id: string, data: UpdateAttributeValueDto, userId: string): Promise<AttributeValueEntity> {
-    const val = await this.prisma.attributeValue.update({
-      where: { id },
-      data: {
-        attributeId: data.attributeId,
-        value: data.value,
-        sortOrder: data.sortOrder,
-        status: data.status,
-        updatedBy: userId,
-      },
-    });
-    return this.mapToEntity(val);
+    const val = this.values.find((v) => v.id === id);
+    if (!val) throw new Error(`AttributeValue not found: ${id}`);
+    if (data.attributeId !== undefined) val.attributeId = data.attributeId;
+    if (data.value !== undefined) val.value = data.value;
+    val.updatedBy = userId;
+    val.updatedAt = new Date();
+    return val;
   }
 
   async softDelete(id: string, userId: string): Promise<AttributeValueEntity> {
-    const val = await this.prisma.attributeValue.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        status: 'INACTIVE',
-        updatedBy: userId,
-      },
-    });
-    return this.mapToEntity(val);
+    const val = this.values.find((v) => v.id === id);
+    if (!val) throw new Error(`AttributeValue not found: ${id}`);
+    val.deletedAt = new Date();
+    val.updatedBy = userId;
+    val.updatedAt = new Date();
+    return val;
   }
 }

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Data Deletion Request - Alanga Vendor</title>
+    <meta name="description" content="Submit account and data deletion request for Alanga Vendor App - Google Play Compliant">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #11261B;
+            --primary-accent: #1e3e2d;
+            --accent-green: #10b981;
+            --accent-light: #e6f4ea;
+            --danger: #ef4444;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 3rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+            color: #ffffff;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 4px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 680px;
+            margin: -2rem auto 0 auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Info boxes */
+        .info-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #f97316;
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .info-box strong {
+            color: #9a3412;
+        }
+
+        .data-summary {
+            background-color: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .data-summary h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .data-summary ul {
+            margin-left: 1.2rem;
+        }
+
+        .data-summary li {
+            margin-bottom: 0.3rem;
+            color: var(--text-main);
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+
+        label span {
+            color: var(--danger);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn-submit {
+            width: 100%;
+            background-color: var(--danger);
+            color: #ffffff;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-submit:disabled {
+            background-color: #fca5a5;
+            cursor: not-allowed;
+        }
+
+        /* Status Messages */
+        .status-message {
+            display: none;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background-color: var(--accent-light);
+            color: var(--primary);
+            border: 1px solid var(--accent-green);
+        }
+
+        .status-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="badge">🛡️ Google Play Data Safety</div>
+            <h1>Delete Alanga Vendor Account</h1>
+            <p class="subtitle">Submit a request to permanently delete your seller account and personal data</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+
+            <div class="info-box">
+                <strong>⚠️ Warning:</strong> Account deletion is permanent. Once completed, your store access, active product listings, variant images, and profile credentials will be permanently erased.
+            </div>
+
+            <div class="data-summary">
+                <h3>What data will be deleted?</h3>
+                <ul>
+                    <li><strong>Account & Profile:</strong> Vendor Name, Email Address, Phone Number, Password.</li>
+                    <li><strong>Store & Catalog Data:</strong> Store Name, Banners, Product Listings, Variant Photos.</li>
+                    <li><strong>Local Data:</strong> Device authentication tokens and local caches.</li>
+                </ul>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;">
+                    <em>Note: Transactional audit logs and payout invoices may be retained for the minimum period legally required for tax compliance.</em>
+                </p>
+            </div>
+
+            <!-- Web3Forms Form -->
+            <form action="https://api.web3forms.com/submit" method="POST" id="deletionForm" onsubmit="submitForm(event)">
+                
+                <!-- Web3Forms Access Key & Configuration -->
+                <input type="hidden" name="access_key" value="4ec34637-ea65-457b-aaaa-3e9b486a3134">
+                <input type="hidden" name="subject" value="🚨 NEW ACCOUNT DELETION REQUEST - Alanga Vendor App">
+                <input type="hidden" name="from_name" value="Alanga Vendor Account Deletion System">
+                <input type="hidden" name="replyto" id="replyToEmail">
+
+                <div class="form-group">
+                    <label for="vendor_email">Registered Vendor Email Address <span>*</span></label>
+                    <input type="email" id="vendor_email" name="vendor_email" required placeholder="e.g. seller@example.com" onchange="updateReplyTo(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="vendor_phone">Registered Mobile Phone Number <span>*</span></label>
+                    <input type="tel" id="vendor_phone" name="vendor_phone" required placeholder="e.g. +91 9876543210">
+                </div>
+
+                <div class="form-group">
+                    <label for="store_name">Store / Business Name <span>*</span></label>
+                    <input type="text" id="store_name" name="store_name" required placeholder="e.g. Acme Fashion Store">
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Reason for Account Deletion (Optional)</label>
+                    <textarea id="reason" name="deletion_reason" rows="3" placeholder="Please let us know why you wish to delete your vendor account..."></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="confirm_check" required>
+                    <label for="confirm_check">I understand that deleting my account is irreversible and all my product listings will be removed from Alanga.</label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span>Submit Deletion Request</span>
+                </button>
+
+                <!-- Feedback status messages -->
+                <div id="statusSuccess" class="status-message status-success">
+                    ✅ <strong>Request Submitted Successfully!</strong><br>
+                    An email notification has been sent to our administration team. We will process your account deletion and contact you at your registered email within 48 business hours.
+                </div>
+
+                <div id="statusError" class="status-message status-error">
+                    ❌ <strong>Submission Failed!</strong><br>
+                    There was an error sending your request. Please check your internet connection or email us directly at <a href="mailto:alanga.founder@gmail.com" style="color: #991b1b; font-weight:700;">alanga.founder@gmail.com</a>.
+                </div>
+            </form>
+
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Alanga Vendor App. All rights reserved. | <a href="privacy_policy.html">Privacy Policy</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function updateReplyTo(val) {
+            document.getElementById('replyToEmail').value = val;
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+            const form = document.getElementById('deletionForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusSuccess = document.getElementById('statusSuccess');
+            const statusError = document.getElementById('statusError');
+
+            statusSuccess.style.display = 'none';
+            statusError.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Processing Request...</span>';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusSuccess.style.display = 'block';
+                    form.reset();
+                    submitBtn.innerHTML = '<span>Request Submitted ✓</span>';
+                } else {
+                    statusError.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Submit Deletion Request</span>';
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                statusError.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit Deletion Request</span>';
+            }
+        }
+    </script>
+</body>
+</html>

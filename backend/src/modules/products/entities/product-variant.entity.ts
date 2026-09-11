@@ -16,6 +16,7 @@ export class ProductVariantEntity implements ProductVariant {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  isDefault: boolean;
   images?: any[];
 
   constructor(partial: Partial<ProductVariantEntity>) {

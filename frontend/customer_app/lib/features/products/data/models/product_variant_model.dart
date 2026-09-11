@@ -13,6 +13,7 @@ class ProductVariantModel {
   final String status;
   final Map<String, String> attributes;
   final List<ProductImageModel> images;
+  final bool isDefault;
 
   ProductVariantModel({
     required this.id,
@@ -27,6 +28,7 @@ class ProductVariantModel {
     this.status = 'ACTIVE',
     this.attributes = const {},
     this.images = const [],
+    this.isDefault = false,
   });
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class ProductVariantModel {
       status: json['status'] as String? ?? 'ACTIVE',
       attributes: dynamicAttrs,
       images: parsedImages,
+      isDefault: json['isDefault'] as bool? ?? false,
     );
   }
 
@@ -112,6 +115,7 @@ class ProductVariantModel {
     String? status,
     Map<String, String>? attributes,
     List<ProductImageModel>? images,
+    bool? isDefault,
   }) {
     return ProductVariantModel(
       id: id ?? this.id,
@@ -126,6 +130,7 @@ class ProductVariantModel {
       status: status ?? this.status,
       attributes: attributes ?? this.attributes,
       images: images ?? this.images,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 
@@ -142,6 +147,7 @@ class ProductVariantModel {
       'stock': stock,
       'status': status,
       'images': images.map((img) => img.toJson()).toList(),
+      'isDefault': isDefault,
     };
   }
 }

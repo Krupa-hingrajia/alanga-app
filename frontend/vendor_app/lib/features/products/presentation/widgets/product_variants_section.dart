@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/product_variant_model.dart';
 import '../../data/models/product_image_model.dart';
 import '../../data/models/attribute_model.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../bloc/product_bloc.dart';
+import '../bloc/product_event.dart';
 import 'product_variant_card.dart';
 import 'add_edit_variant_bottom_sheet.dart';
 import 'variant_image_gallery_widget.dart';
+import 'product_images_section.dart';
 
 class ProductVariantsSection extends StatelessWidget {
   final String? productId;
@@ -63,7 +67,7 @@ class ProductVariantsSection extends StatelessWidget {
   void _openManageVariantImagesSheet(BuildContext context, ProductVariantModel variant) {
     final filteredImages = variant.id.isNotEmpty
         ? variant.images.where((img) => img.productVariantId == variant.id).toList()
-        : variant.images.where((img) => img.productVariantId == null || img.productVariantId == variant.id).toList();
+        : <ProductImageModel>[];
 
     showModalBottomSheet(
       context: context,
@@ -95,6 +99,50 @@ class ProductVariantsSection extends StatelessWidget {
             images: remoteList,
             pendingLocalPaths: localPaths,
           );
+
+          if (variant.id.isNotEmpty) {
+            // Find deleted remote images and dispatch delete event
+            final deletedRemoteImages = filteredImages.where((oldImg) =>
+                !updatedImages.any((newImg) => newImg.isUploaded && newImg.id == oldImg.id)).toList();
+
+            for (final oldImg in deletedRemoteImages) {
+              if (oldImg.id.isNotEmpty) {
+                context.read<ProductBloc>().add(
+                      DeleteProductImageEvent(
+                        productId: variant.productId,
+                        imageId: oldImg.id,
+                        productVariantId: variant.id,
+                      ),
+                    );
+              }
+            }
+
+            // Find if primary image has changed
+            final oldPrimary = filteredImages.firstWhere((img) => img.isPrimary,
+                orElse: () => const ProductImageModel(id: '', productId: '', imageUrl: '', isPrimary: false, displayOrder: 0));
+            final newPrimary = updatedImages.firstWhere((img) => img.isPrimary,
+                orElse: () => LocalOrRemoteImage(isPrimary: false, displayOrder: 0, isUploaded: false));
+
+            if (newPrimary.isUploaded && newPrimary.id != null && newPrimary.id != oldPrimary.id) {
+              context.read<ProductBloc>().add(
+                    SetPrimaryProductImageEvent(
+                      productId: variant.productId,
+                      imageId: newPrimary.id!,
+                    ),
+                  );
+            }
+
+            // Dispatch upload event if there are new local paths
+            if (localPaths.isNotEmpty) {
+              context.read<ProductBloc>().add(
+                    UploadProductImagesEvent(
+                      productId: variant.productId,
+                      filePaths: localPaths,
+                      productVariantId: variant.id,
+                    ),
+                  );
+            }
+          }
 
           onUpdateVariant(updated);
           if (onManageVariantImages != null) {
@@ -256,6 +304,10 @@ class ProductVariantsSection extends StatelessWidget {
                   onEdit: () => _openEditVariantSheet(context, v),
                   onDelete: () => _confirmDelete(context, v),
                   onManageImages: () => _openManageVariantImagesSheet(context, v),
+                  onSetDefault: () {
+                    final updated = v.copyWith(isDefault: true);
+                    onUpdateVariant(updated);
+                  },
                 );
               },
             ),

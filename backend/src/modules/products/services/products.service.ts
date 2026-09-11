@@ -38,10 +38,49 @@ export class ProductsService {
     return this.productsRepository.create(data, vendorId);
   }
 
+  private resolveDefaultVariantAndImages(product: any) {
+    const variants = product.variants || [];
+    // 1. Variant marked as default
+    // 2. First Active Variant
+    // 3. Fallback to first variant
+    const defaultVariant = variants.find((v: any) => v.isDefault && v.status === 'ACTIVE')
+      || variants.find((v: any) => v.isDefault)
+      || variants.find((v: any) => v.status === 'ACTIVE')
+      || variants[0]
+      || null;
+
+    let variantImages = [];
+    if (defaultVariant && defaultVariant.images && defaultVariant.images.length > 0) {
+      variantImages = defaultVariant.images;
+    } else {
+      // Fallback to product common images (productImages where productVariantId is null)
+      variantImages = (product.images || []).filter((img: any) => !img.productVariantId);
+    }
+
+    const primaryImageUrl = variantImages.find((img: any) => img.isPrimary)?.imageUrl
+      || variantImages[0]?.imageUrl
+      || product.image
+      || '';
+
+    return {
+      ...product,
+      sellingPrice: defaultVariant ? defaultVariant.price : product.sellingPrice,
+      mrp: defaultVariant ? (defaultVariant.mrp ?? defaultVariant.price) : product.mrp,
+      stock: defaultVariant ? defaultVariant.stock : product.stock,
+      sku: defaultVariant ? defaultVariant.sku : product.sku,
+      attributes: defaultVariant ? defaultVariant.attributes : {},
+      image: primaryImageUrl,
+      images: variantImages,
+      defaultVariant,
+    };
+  }
+
   async findAllActive(customerId?: string) {
     const products = await this.productsRepository.findMany({ status: 'ACTIVE' });
+    const resolvedProducts = products.map((p) => this.resolveDefaultVariantAndImages(p));
+
     if (!customerId) {
-      return products.map((p) => ({ ...p, isWishlisted: false }));
+      return resolvedProducts.map((p) => ({ ...p, isWishlisted: false }));
     }
 
     const wishlists = await this.prisma.wishlist.findMany({
@@ -50,24 +89,71 @@ export class ProductsService {
     });
     const wishlistedSet = new Set(wishlists.map((w) => w.productId));
 
-    return products.map((p) => ({
+    return resolvedProducts.map((p) => ({
       ...p,
       isWishlisted: wishlistedSet.has(p.id),
     }));
   }
 
   async findOneForCustomer(id: string, customerId?: string) {
-    const product = await this.findOne(id);
+    const rawProduct = await this.findOne(id);
+    const product = this.resolveDefaultVariantAndImages(rawProduct);
+    
     let isWishlisted = false;
     if (customerId) {
       const existing = await this.prisma.wishlist.findFirst({
-        where: { customerId, productId: id },
+        where: { 
+          customerId, 
+          productId: id,
+          productVariantId: product.defaultVariant ? product.defaultVariant.id : undefined,
+        },
       });
       isWishlisted = !!existing;
     }
     return {
       ...product,
       isWishlisted,
+    };
+  }
+
+  async findVariantForCustomer(productId: string, variantId: string) {
+    const variant = await this.prisma.productVariant.findFirst({
+      where: { id: variantId, productId: productId, deletedAt: null },
+      include: {
+        images: { where: { deletedAt: null }, orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }] },
+      },
+    });
+
+    if (!variant) {
+      throw new NotFoundException(`Variant with ID "${variantId}" not found for product "${productId}".`);
+    }
+
+    // Resolve images
+    let resolvedImages = variant.images || [];
+    if (resolvedImages.length === 0) {
+      resolvedImages = await this.prisma.productImage.findMany({
+        where: { productId: productId, productVariantId: null, deletedAt: null },
+        orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+      });
+    }
+
+    return {
+      id: variant.id,
+      productId: variant.productId,
+      sku: variant.sku,
+      variantName: variant.variantName,
+      color: variant.color,
+      size: variant.size,
+      storage: variant.storage,
+      price: variant.price,
+      mrp: variant.mrp ?? variant.price,
+      stock: variant.stock,
+      status: variant.status,
+      attributes: variant.attributes,
+      images: resolvedImages,
+      isDefault: variant.isDefault,
+      createdAt: variant.createdAt,
+      updatedAt: variant.updatedAt,
     };
   }
 

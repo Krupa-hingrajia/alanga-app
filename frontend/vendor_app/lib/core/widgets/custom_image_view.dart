@@ -28,7 +28,11 @@ class CustomImageView extends StatelessWidget {
         .replaceAll('http://localhost:3000', base)
         .replaceAll('http://127.0.0.1:3000', base)
         .replaceAll('http://10.0.2.2:3000', base)
-        .replaceAll('http://192.168.1.101:3000', base);
+        .replaceAll('http://192.168.1.101:3000', base)
+        .replaceAll('http://10.21.155.225:3000', base)
+        .replaceAll('http://192.168.118.162:3000', base)
+        .replaceAll('http://169.254.132.164:3000', base)
+        .replaceAll('http://192.168.29.154:3000', base);
 
     if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
       return resolved;

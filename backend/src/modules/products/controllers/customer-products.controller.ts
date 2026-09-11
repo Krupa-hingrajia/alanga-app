@@ -39,4 +39,23 @@ export class CustomerProductsController {
       statusCode: HttpStatus.OK,
     };
   }
+
+  @Get(':productId/variants/:variantId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get variant details for customer' })
+  @ApiParam({ name: 'productId', description: 'Product ID (UUID)' })
+  @ApiParam({ name: 'variantId', description: 'Variant ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Variant details retrieved successfully.' })
+  async findVariant(
+    @Param('productId') productId: string,
+    @Param('variantId') variantId: string,
+  ) {
+    const data = await this.productsService.findVariantForCustomer(productId, variantId);
+    return {
+      success: true,
+      message: 'Variant details retrieved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
 }

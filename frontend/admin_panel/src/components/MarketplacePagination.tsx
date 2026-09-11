@@ -64,7 +64,7 @@ export function MarketplacePagination({
               onClick={() => onPageChange(pNum)}
               className={`h-8 w-8 p-0 rounded-xl text-xs font-semibold ${
                 page === pNum
-                  ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-sm'
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'
                   : 'border-zinc-200 dark:border-zinc-800'
               }`}
             >

@@ -1,5 +1,19 @@
+'use client';
+
 import React from 'react';
-import { Users, FolderTree, FolderGit2, Tag, ShoppingBag, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Users,
+  UserCheck,
+  FolderTree,
+  FolderGit2,
+  Tag,
+  Clock,
+  ShoppingBag,
+  CheckCircle,
+  ShoppingCart,
+  ArrowUpRight,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardSummary } from '../api';
 
@@ -8,152 +22,159 @@ interface SummaryCardsProps {
 }
 
 export default function SummaryCards({ summary }: SummaryCardsProps) {
-  const activeCatCount = summary.activeCategories ?? summary.totalCategories;
-  const inactiveCatCount = summary.inactiveCategories ?? 0;
-  const totalSubCatCount = summary.totalSubCategories ?? 0;
-  const activeSubCatCount = summary.activeSubCategories ?? totalSubCatCount;
-  const inactiveSubCatCount = summary.inactiveSubCategories ?? 0;
-
-  const activeBrandCount = summary.activeBrands ?? summary.totalBrands;
-  const inactiveBrandCount = summary.inactiveBrands ?? 0;
   const pendingBrandCount = summary.pendingBrands ?? 0;
+  const pendingProductCount = summary.pendingProducts ?? 0;
+  const totalSubCatCount = summary.totalSubCategories ?? 0;
+  const totalOrdersCount = summary.totalOrders ?? summary.totalCompletedOrders ?? 0;
 
-  const cards = [
+  const coreCards = [
     {
       title: 'Total Vendors',
       value: summary.totalVendors,
-      description: `${summary.activeVendors} Active Vendors`,
+      description: `${summary.activeVendors ?? 0} active, ${summary.pendingVendorApprovals ?? 0} pending`,
       icon: Users,
-      color: 'from-blue-500 to-indigo-500',
+      href: '/vendors',
+      color: 'from-emerald-700 to-emerald-500',
+      iconBg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
     },
     {
-      title: 'Pending Vendors',
-      value: summary.pendingVendorApprovals,
-      description: 'Awaiting Verification',
-      icon: Clock,
-      color: 'from-amber-500 to-orange-500',
-      badge: summary.pendingVendorApprovals > 0 ? 'action-required' : null,
+      title: 'Total Customers',
+      value: summary.totalCustomers ?? 0,
+      description: 'Registered marketplace buyers',
+      icon: UserCheck,
+      href: '/customers',
+      color: 'from-teal-600 to-emerald-500',
+      iconBg: 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400',
     },
     {
       title: 'Total Categories',
       value: summary.totalCategories,
-      description: `${activeCatCount} Active / ${inactiveCatCount} Inactive`,
+      description: 'Master product categories',
       icon: FolderTree,
-      color: 'from-emerald-500 to-teal-500',
-    },
-    {
-      title: 'Active Categories',
-      value: activeCatCount,
-      description: 'Visible to Vendors',
-      icon: CheckCircle2,
-      color: 'from-green-500 to-emerald-600',
-    },
-    {
-      title: 'Inactive Categories',
-      value: inactiveCatCount,
-      description: 'Disabled Taxonomy',
-      icon: XCircle,
-      color: 'from-zinc-400 to-zinc-600',
+      href: '/categories',
+      color: 'from-amber-500 to-orange-500',
+      iconBg: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
     },
     {
       title: 'Total Sub Categories',
       value: totalSubCatCount,
-      description: `${activeSubCatCount} Active / ${inactiveSubCatCount} Inactive`,
+      description: 'Nested taxonomy classifications',
       icon: FolderGit2,
-      color: 'from-purple-500 to-indigo-500',
-    },
-    {
-      title: 'Active Sub Categories',
-      value: activeSubCatCount,
-      description: 'Selectable Sub Categories',
-      icon: CheckCircle2,
-      color: 'from-teal-500 to-cyan-600',
-    },
-    {
-      title: 'Inactive Sub Categories',
-      value: inactiveSubCatCount,
-      description: 'Disabled Sub Categories',
-      icon: XCircle,
-      color: 'from-zinc-400 to-zinc-600',
+      href: '/subcategories',
+      color: 'from-emerald-600 to-emerald-800',
+      iconBg: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
     },
     {
       title: 'Total Brands',
       value: summary.totalBrands,
-      description: `${activeBrandCount} Active / ${inactiveBrandCount} Inactive`,
+      description: 'Catalog marketplace brands',
       icon: Tag,
-      color: 'from-purple-500 to-violet-500',
-    },
-    {
-      title: 'Active Brands',
-      value: activeBrandCount,
-      description: 'Available to Vendors',
-      icon: CheckCircle2,
-      color: 'from-purple-600 to-indigo-600',
-    },
-    {
-      title: 'Inactive Brands',
-      value: inactiveBrandCount,
-      description: 'Hidden Marketplace Brands',
-      icon: XCircle,
-      color: 'from-zinc-400 to-zinc-600',
+      href: '/brands',
+      color: 'from-orange-500 to-amber-500',
+      iconBg: 'bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400',
     },
     {
       title: 'Pending Brand Requests',
       value: pendingBrandCount,
-      description: 'Vendor Submissions',
+      description: 'Vendor submissions awaiting review',
       icon: Clock,
-      color: 'from-amber-500 to-orange-500',
+      href: '/requests/brands',
+      color: 'from-amber-500 to-red-500',
+      iconBg: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
       badge: pendingBrandCount > 0 ? 'action-required' : null,
+      highlight: pendingBrandCount > 0,
     },
     {
       title: 'Total Products',
       value: summary.totalProducts,
-      description: 'Items in Catalogue',
+      description: 'Active items in marketplace catalog',
       icon: ShoppingBag,
-      color: 'from-sky-500 to-blue-500',
+      href: '/products',
+      color: 'from-emerald-500 to-green-600',
+      iconBg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
+    },
+    {
+      title: 'Pending Product Approvals',
+      value: pendingProductCount,
+      description: 'Quality verification queue',
+      icon: CheckCircle,
+      href: '/requests/products',
+      color: 'from-red-500 to-rose-600',
+      iconBg: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+      badge: pendingProductCount > 0 ? 'action-required' : null,
+      highlight: pendingProductCount > 0,
+    },
+    {
+      title: 'Total Orders',
+      value: totalOrdersCount,
+      description: `${summary.totalCompletedOrders ?? 0} fulfilled / completed`,
+      icon: ShoppingCart,
+      href: '/orders',
+      color: 'from-emerald-700 via-teal-600 to-emerald-500',
+      iconBg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
     },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card, idx) => {
-        const Icon = card.icon;
-        const hasAction = card.badge === 'action-required';
-        return (
-          <Card
-            key={idx}
-            className={`relative overflow-hidden border border-zinc-200/60 dark:border-zinc-800/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 ${
-              hasAction ? 'ring-1 ring-rose-500/20 dark:ring-rose-500/30' : ''
-            }`}
-          >
-            {/* Ambient Background Glow */}
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.03] dark:opacity-[0.06] rounded-bl-full`} />
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          Core Marketplace Metrics
+        </h2>
+        <span className="text-xs text-zinc-400">Real-time live APIs</span>
+      </div>
 
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-                {card.title}
-              </CardTitle>
-              <div className={`p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300`}>
-                <Icon className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                {card.value}
-              </div>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-                {card.description}
-              </p>
-              {hasAction && (
-                <span className="absolute top-2 right-12 flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                </span>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {coreCards.map((card, idx) => {
+          const Icon = card.icon;
+          const hasAction = card.badge === 'action-required';
+
+          return (
+            <Link key={idx} href={card.href} className="group block">
+              <Card
+                className={`relative overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-white dark:bg-zinc-950 ${
+                  card.highlight
+                    ? 'border-amber-300/80 dark:border-amber-700/60 ring-1 ring-amber-400/20'
+                    : 'border-zinc-200/80 dark:border-zinc-800'
+                }`}
+              >
+                {/* Ambient glow accent */}
+                <div
+                  className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.04] dark:opacity-[0.08] rounded-bl-full pointer-events-none`}
+                />
+
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+                    {card.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-xl ${card.iconBg} transition-transform group-hover:scale-110 duration-200`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                </CardHeader>
+
+                <CardContent className="pt-0">
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                      {card.value.toLocaleString()}
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-zinc-400 opacity-0 group-hover:opacity-100 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-all duration-200" />
+                  </div>
+
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5 flex items-center gap-1.5">
+                    {hasAction && (
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                      </span>
+                    )}
+                    <span>{card.description}</span>
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

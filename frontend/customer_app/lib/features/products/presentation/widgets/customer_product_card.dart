@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/utils/category_cache.dart';
 import '../../../products/data/models/product_model.dart';
 import '../../../wishlist/presentation/widgets/wishlist_button.dart';
+import '../../../cart/presentation/bloc/cart_cubit.dart';
 
 class CustomerProductCard extends StatelessWidget {
   final ProductModel product;
@@ -235,16 +237,64 @@ class CustomerProductCard extends StatelessWidget {
                     InkWell(
                       onTap: isOutOfStock
                           ? null
-                          : () {
-                              onAddToCart?.call();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${product.name} added to cart!'),
-                                  backgroundColor: AppColors.primaryGreen,
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
+                          : () async {
+                              if (onAddToCart != null) {
+                                onAddToCart!();
+                                return;
+                              }
+
+                              try {
+                                final defaultVariantId = product.defaultVariant?.id ??
+                                    (product.variants.isNotEmpty ? product.variants.first.id : null);
+
+                                await context.read<CartCubit>().addToCart(
+                                      productId: product.id,
+                                      variantId: defaultVariantId,
+                                      quantity: 1,
+                                    );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              '${product.name} added to cart',
+                                              style: const TextStyle(fontWeight: FontWeight.bold),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      backgroundColor: AppColors.primaryGreen,
+                                      duration: const Duration(seconds: 3),
+                                      action: SnackBarAction(
+                                        label: 'VIEW CART',
+                                        textColor: Colors.amber,
+                                        onPressed: () {
+                                          context.push('/cart');
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  final errorMsg = e.toString().replaceAll('Exception: ', '');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(errorMsg),
+                                      backgroundColor: AppColors.brandRed,
+                                      duration: const Duration(seconds: 4),
+                                    ),
+                                  );
+                                }
+                              }
                             },
                       borderRadius: BorderRadius.circular(8),
                       child: Container(

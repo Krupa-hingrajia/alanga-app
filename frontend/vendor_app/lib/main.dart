@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Alanga Vendor',
       theme: AppTheme.lightTheme,
+
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,

@@ -17,14 +17,32 @@ export class WishlistService {
     const product = entity.product || {};
     const variant = entity.productVariant || null;
 
+    const getVariantImages = (prod: any, vr: any) => {
+      if (vr && vr.images && vr.images.length > 0) {
+        return vr.images;
+      }
+      return (prod.productImages || []).filter((img: any) => !img.productVariantId);
+    };
+
+    const getPrimaryImageUrl = (images: any[], fallbackUrl?: string) => {
+      if (images.length > 0) {
+        const primary = images.find(img => img.isPrimary) || images[0];
+        return primary.imageUrl;
+      }
+      return fallbackUrl || '';
+    };
+
+    const variantImages = getVariantImages(product, variant);
+    const primaryImageUrl = getPrimaryImageUrl(variantImages, product.image);
+
     const sellingPrice = variant ? variant.price : (product.sellingPrice ?? 0);
-    const mrp = product.mrp ?? sellingPrice;
+    const mrp = variant ? (variant.mrp ?? variant.price) : (product.mrp ?? sellingPrice);
 
     const discountPercentage = (mrp > sellingPrice && mrp > 0)
       ? Math.round(((mrp - sellingPrice) / mrp) * 100)
       : 0;
 
-    const stock = variant ? (variant.currentStock ?? variant.stock ?? 0) : (product.stock ?? 0);
+    const stock = variant ? (variant.stock ?? 0) : (product.stock ?? 0);
     let stockStatus = 'IN_STOCK';
     if (stock <= 0) {
       stockStatus = 'OUT_OF_STOCK';
@@ -56,18 +74,18 @@ export class WishlistService {
         name: product.name,
         description: product.description,
         shortDescription: product.shortDescription,
-        sku: product.sku,
+        sku: variant ? variant.sku : product.sku,
         categoryId: product.categoryId,
         subCategoryId: product.subCategoryId,
         brandId: product.brandId,
-        sellingPrice: product.sellingPrice,
-        mrp: product.mrp,
+        sellingPrice: sellingPrice,
+        mrp: mrp,
         taxPercentage: product.taxPercentage,
-        stock: product.stock,
+        stock: stock,
         status: product.status,
-        image: product.image,
-        primaryImageUrl: product.productImages?.[0]?.imageUrl || product.image || '',
-        images: product.productImages || [],
+        image: primaryImageUrl,
+        primaryImageUrl: primaryImageUrl,
+        images: variantImages,
         variants: product.productVariants || [],
         shipping: shipping,
         brand: product.brand ? { id: product.brand.id, name: product.brand.name, logo: product.brand.logo } : null,
@@ -82,7 +100,7 @@ export class WishlistService {
             size: variant.size,
             storage: variant.storage,
             price: variant.price,
-            stock: variant.stock ?? variant.currentStock ?? 0,
+            stock: variant.stock ?? 0,
             status: variant.status,
           }
         : null,
@@ -99,7 +117,6 @@ export class WishlistService {
   }
 
   async toggleWishlist(customerId: string, dto: CreateWishlistDto) {
-    // 1. Validate Product exists
     const product = await this.prisma.product.findFirst({
       where: { id: dto.productId, deletedAt: null },
     });
@@ -107,55 +124,64 @@ export class WishlistService {
       throw new NotFoundException(`Product with ID "${dto.productId}" not found.`);
     }
 
-    // 2. If ProductVariantId provided, validate it belongs to the Product
-    if (dto.productVariantId) {
+    let variantId = dto.productVariantId;
+    if (!variantId) {
+      const defaultVariant = await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null, isDefault: true }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null, status: 'ACTIVE' }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null }
+      });
+
+      if (!defaultVariant) {
+        throw new BadRequestException('Product must have at least one variant.');
+      }
+      variantId = defaultVariant.id;
+    } else {
       const variant = await this.prisma.productVariant.findFirst({
-        where: { id: dto.productVariantId, productId: dto.productId, deletedAt: null },
+        where: { id: variantId, productId: dto.productId, deletedAt: null },
       });
       if (!variant) {
         throw new BadRequestException(
-          `Product Variant with ID "${dto.productVariantId}" not found or does not belong to Product "${dto.productId}".`,
+          `Product Variant with ID "${variantId}" not found or does not belong to Product "${dto.productId}".`,
         );
       }
     }
 
-    // 3. Enforce Business Rule: One Wishlist item per Product per Customer
     const existingProductWishlist = await this.wishlistRepository.findByCustomerAndProduct(customerId, dto.productId);
 
     if (existingProductWishlist) {
-      const requestedVariantId = dto.productVariantId || null;
-      const existingVariantId = existingProductWishlist.productVariantId || null;
-
-      if (existingVariantId === requestedVariantId) {
+      if (existingProductWishlist.productVariantId === variantId) {
         // Customer tapped same variant -> Untoggle / Remove from Wishlist
         await this.wishlistRepository.delete(existingProductWishlist.id);
         return {
-          message: 'Product removed from Wishlist.',
+          message: 'Product variant removed from Wishlist.',
           isWishlisted: false,
           wishlistId: null,
           productId: dto.productId,
-          productVariantId: requestedVariantId,
+          productVariantId: variantId,
         };
       } else {
         // Customer selected a DIFFERENT variant -> Update existing Wishlist item in place!
-        const updated = await this.wishlistRepository.updateVariant(existingProductWishlist.id, requestedVariantId);
+        const updated = await this.wishlistRepository.updateVariant(existingProductWishlist.id, variantId);
         return {
           message: 'Wishlist variant updated.',
           isWishlisted: true,
           wishlistId: updated.id,
           productId: dto.productId,
-          productVariantId: requestedVariantId,
+          productVariantId: variantId,
         };
       }
     } else {
       // Product not in Wishlist -> Add new entry
-      const created = await this.wishlistRepository.create(customerId, dto.productId, dto.productVariantId);
+      const created = await this.wishlistRepository.create(customerId, dto.productId, variantId);
       return {
-        message: 'Product added to Wishlist.',
+        message: 'Product variant added to Wishlist.',
         isWishlisted: true,
         wishlistId: created.id,
         productId: dto.productId,
-        productVariantId: dto.productVariantId || null,
+        productVariantId: variantId,
       };
     }
   }
@@ -168,27 +194,41 @@ export class WishlistService {
       throw new NotFoundException(`Product with ID "${dto.productId}" not found.`);
     }
 
-    if (dto.productVariantId) {
+    let variantId = dto.productVariantId;
+    if (!variantId) {
+      const defaultVariant = await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null, isDefault: true }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null, status: 'ACTIVE' }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId: dto.productId, deletedAt: null }
+      });
+
+      if (!defaultVariant) {
+        throw new BadRequestException('Product must have at least one variant.');
+      }
+      variantId = defaultVariant.id;
+    } else {
       const variant = await this.prisma.productVariant.findFirst({
-        where: { id: dto.productVariantId, productId: dto.productId, deletedAt: null },
+        where: { id: variantId, productId: dto.productId, deletedAt: null },
       });
       if (!variant) {
         throw new BadRequestException(
-          `Product Variant with ID "${dto.productVariantId}" not found or does not belong to Product "${dto.productId}".`,
+          `Product Variant with ID "${variantId}" not found or does not belong to Product "${dto.productId}".`,
         );
       }
     }
 
     const existing = await this.wishlistRepository.findByCustomerAndProduct(customerId, dto.productId);
     if (existing) {
-      if ((existing.productVariantId || null) !== (dto.productVariantId || null)) {
-        const updated = await this.wishlistRepository.updateVariant(existing.id, dto.productVariantId || null);
+      if (existing.productVariantId !== variantId) {
+        const updated = await this.wishlistRepository.updateVariant(existing.id, variantId);
         return this.mapToResponseDto(updated);
       }
       return this.mapToResponseDto(existing);
     }
 
-    const created = await this.wishlistRepository.create(customerId, dto.productId, dto.productVariantId);
+    const created = await this.wishlistRepository.create(customerId, dto.productId, variantId);
     return this.mapToResponseDto(created);
   }
 
@@ -215,7 +255,23 @@ export class WishlistService {
   }
 
   async checkWishlist(customerId: string, productId: string, productVariantId?: string): Promise<WishlistCheckResponseDto> {
-    const item = await this.wishlistRepository.findByCustomerAndProduct(customerId, productId);
+    let variantId = productVariantId;
+    if (!variantId) {
+      const defaultVariant = await this.prisma.productVariant.findFirst({
+        where: { productId, deletedAt: null, isDefault: true }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId, deletedAt: null, status: 'ACTIVE' }
+      }) || await this.prisma.productVariant.findFirst({
+        where: { productId, deletedAt: null }
+      });
+      variantId = defaultVariant?.id;
+    }
+
+    if (!variantId) {
+      return new WishlistCheckResponseDto(false, null);
+    }
+
+    const item = await this.wishlistRepository.findExisting(customerId, productId, variantId);
     if (item) {
       return new WishlistCheckResponseDto(true, item.id);
     }

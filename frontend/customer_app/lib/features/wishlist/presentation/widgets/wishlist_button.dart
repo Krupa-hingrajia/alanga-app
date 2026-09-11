@@ -44,10 +44,16 @@ class WishlistButton extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        if (state is WishlistInitial) {
+          wishlistBloc.add(const FetchWishlistEvent());
+        }
+
         bool isWishlisted = initialIsWishlisted;
 
         if (state is WishlistLoaded) {
-          isWishlisted = state.wishlistedProductIds.contains(productId);
+          isWishlisted = state.items.any((item) =>
+              item.productId == productId &&
+              (productVariantId == null || item.productVariantId == productVariantId));
         }
 
         return InkWell(

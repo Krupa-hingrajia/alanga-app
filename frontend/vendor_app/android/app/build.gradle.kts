@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.alanga.vendor.vendor_app"
+    namespace = "com.alanga.vendor_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.alanga.vendor.vendor_app"
+        applicationId = "com.alanga.vendor_app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         // Increment versionCode by 1 for each Play Store upload

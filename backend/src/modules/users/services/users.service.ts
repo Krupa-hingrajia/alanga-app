@@ -49,6 +49,32 @@ export class UsersService {
     };
   }
 
+  async findManyCustomers(filters?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const { items, total } = await this.usersRepository.findManyCustomers({
+      status: filters?.status,
+      search: filters?.search,
+      skip,
+      take: limit,
+    });
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   async updateStatus(id: string, status: any): Promise<UserEntity> {
     return this.usersRepository.update(id, { status });
   }

@@ -109,7 +109,7 @@ export function MarketplaceFilter({
             placeholder="Search by name, code, or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-9 h-10 rounded-xl border-zinc-200 dark:border-zinc-800 focus-visible:ring-rose-500"
+            className="pl-10 pr-9 h-10 rounded-xl border-zinc-200 dark:border-zinc-800 focus-visible:ring-emerald-500"
           />
           {searchTerm && (
             <button
@@ -208,7 +208,7 @@ export function MarketplaceFilter({
                 setSearchTerm('');
                 onReset();
               }}
-              className="h-10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 rounded-xl px-3 gap-1.5"
+              className="h-10 text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-800 dark:text-emerald-400 rounded-xl px-3 gap-1.5"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset

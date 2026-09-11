@@ -89,4 +89,40 @@ export class UsersRepository implements IUsersRepository {
       total,
     };
   }
+
+  async findManyCustomers(filters?: {
+    status?: string;
+    search?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ items: UserEntity[]; total: number }> {
+    const whereClause: any = { role: 'CUSTOMER' };
+    if (filters) {
+      if (filters.status) {
+        whereClause.status = filters.status;
+      }
+      if (filters.search) {
+        whereClause.OR = [
+          { fullName: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { phoneNumber: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
+    }
+    const [items, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where: whereClause,
+        orderBy: { createdAt: 'desc' },
+        skip: filters?.skip,
+        take: filters?.take,
+      }),
+      this.prisma.user.count({ where: whereClause }),
+    ]);
+
+    return {
+      items: items.map((u) => this.mapToEntity(u)),
+      total,
+    };
+  }
 }
+

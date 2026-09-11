@@ -7,6 +7,8 @@ import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/wishlist/presentation/bloc/wishlist_bloc.dart';
 import '../../features/wishlist/presentation/bloc/wishlist_state.dart';
+import '../../features/cart/presentation/bloc/cart_cubit.dart';
+import '../../features/cart/presentation/bloc/cart_state.dart';
 import '../constants/app_colors.dart';
 import '../dependency_injection/injection.dart';
 
@@ -51,6 +53,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             wishlistCount = wishlistState.items.length;
           } else {
             wishlistCount = sl<WishlistBloc>().wishlistedProductIds.length;
+          }
+
+          final cartState = context.watch<CartCubit>().state;
+          int cartCount = 0;
+          if (cartState is CartLoaded) {
+            cartCount = cartState.summary.totalItems;
           }
 
           return Container(
@@ -109,17 +117,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       : const Icon(Icons.favorite_rounded),
                   label: 'Wishlist',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Badge(
-                    label: Text('2'),
-                    backgroundColor: AppColors.brandRed,
-                    child: Icon(Icons.shopping_bag_outlined),
-                  ),
-                  activeIcon: Badge(
-                    label: Text('2'),
-                    backgroundColor: AppColors.brandRed,
-                    child: Icon(Icons.shopping_bag_rounded),
-                  ),
+                BottomNavigationBarItem(
+                  icon: cartCount > 0
+                      ? Badge(
+                          label: Text('$cartCount'),
+                          backgroundColor: AppColors.primaryGreen,
+                          child: const Icon(Icons.shopping_bag_outlined),
+                        )
+                      : const Icon(Icons.shopping_bag_outlined),
+                  activeIcon: cartCount > 0
+                      ? Badge(
+                          label: Text('$cartCount'),
+                          backgroundColor: AppColors.primaryGreen,
+                          child: const Icon(Icons.shopping_bag_rounded),
+                        )
+                      : const Icon(Icons.shopping_bag_rounded),
                   label: 'Cart',
                 ),
                 const BottomNavigationBarItem(

@@ -4,10 +4,12 @@ export interface Vendor {
   id: string;
   fullName: string;
   email: string;
-  countryCode: string;
-  mobileNumber: string;
+  countryCode?: string;
+  mobileNumber?: string;
+  phoneNumber?: string | null;
   role: string;
   status: string;
+  kycStatus?: string;
   businessName?: string;
   businessType?: string;
   city?: string;

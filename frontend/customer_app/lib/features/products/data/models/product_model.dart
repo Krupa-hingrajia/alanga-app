@@ -31,6 +31,7 @@ class ProductModel extends Equatable {
   final bool? isWishlisted;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final ProductVariantModel? defaultVariant;
 
   const ProductModel({
     required this.id,
@@ -60,6 +61,7 @@ class ProductModel extends Equatable {
     this.isWishlisted = false,
     required this.createdAt,
     required this.updatedAt,
+    this.defaultVariant,
   });
 
   String get primaryImageUrl {
@@ -94,10 +96,30 @@ class ProductModel extends Equatable {
           .toList();
       final finalImages = variantSpecificImages.isNotEmpty
           ? variantSpecificImages
-          : variantModel.images.where((img) => img.productVariantId == variantModel.id).toList();
+          : variantModel.images;
 
       return variantModel.copyWith(images: finalImages);
     }).toList();
+
+    ProductVariantModel? defVariant;
+    if (json['defaultVariant'] != null && json['defaultVariant'] is Map<String, dynamic>) {
+      defVariant = ProductVariantModel.fromJson(json['defaultVariant'] as Map<String, dynamic>);
+      final variantSpecificImages = parsedImages
+          .where((img) => img.productVariantId == defVariant!.id)
+          .toList();
+      final finalImages = variantSpecificImages.isNotEmpty
+          ? variantSpecificImages
+          : defVariant.images;
+      defVariant = defVariant.copyWith(images: finalImages);
+    } else if (parsedVariants.isNotEmpty) {
+      defVariant = parsedVariants.firstWhere((v) => v.isDefault && v.status == 'ACTIVE',
+        orElse: () => parsedVariants.firstWhere((v) => v.isDefault,
+          orElse: () => parsedVariants.firstWhere((v) => v.status == 'ACTIVE',
+            orElse: () => parsedVariants.first,
+          ),
+        ),
+      );
+    }
 
     ProductShippingModel? parsedShipping;
     if (json['shipping'] != null && json['shipping'] is Map<String, dynamic>) {
@@ -157,6 +179,7 @@ class ProductModel extends Equatable {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : DateTime.now(),
+      defaultVariant: defVariant,
     );
   }
 
@@ -189,6 +212,7 @@ class ProductModel extends Equatable {
       'isWishlisted': isWishlisted,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      if (defaultVariant != null) 'defaultVariant': defaultVariant!.toJson(),
     };
   }
 
@@ -221,5 +245,6 @@ class ProductModel extends Equatable {
         isWishlisted,
         createdAt,
         updatedAt,
+        defaultVariant,
       ];
 }

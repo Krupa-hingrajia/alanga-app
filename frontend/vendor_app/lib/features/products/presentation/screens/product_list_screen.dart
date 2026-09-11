@@ -95,98 +95,92 @@ class _ProductListScreenState extends State<ProductListScreen>
               children: [
                 AbsorbPointer(
                   absorbing: isActionLoading,
-                  child: NestedScrollView(
-                    headerSliverBuilder: (context, _) => [
-                      SliverToBoxAdapter(
-                        child: Column(
-                          children: [
-                            if (isActionLoading)
-                              const LinearProgressIndicator(
-                                color: AppColors.brandOrange,
-                                backgroundColor: Color(0xFFFFF3E0),
-                              ),
-                            _buildHeader(context, state, countMap),
-                          ],
+                  child: Column(
+                    children: [
+                      // ── Fixed header (AppBar + search + stats) ────────────
+                      // This block does NOT scroll. It stays pinned at the top.
+                      if (isActionLoading)
+                        const LinearProgressIndicator(
+                          color: AppColors.brandOrange,
+                          backgroundColor: Color(0xFFFFF3E0),
+                        ),
+                      _buildHeader(context, state, countMap),
+
+                      // ── Fixed TabBar ───────────────────────────────────────
+                      Container(
+                        color: Colors.white,
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          labelColor: AppColors.primaryGreen,
+                          unselectedLabelColor: const Color(0xFF5A7265),
+                          indicatorColor: AppColors.primaryGreen,
+                          indicatorWeight: 3.0,
+                          indicatorSize: TabBarIndicatorSize.label,
+                          dividerColor: const Color(0xFFE8EFE9),
+                          labelStyle: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13.5),
+                          unselectedLabelStyle: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 13),
+                          tabs: _tabs
+                              .map((t) => Tab(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(t.icon, size: 16),
+                                        const SizedBox(width: 6),
+                                        Text(t.label),
+                                        if (countMap[t.status] != null &&
+                                            countMap[t.status]! > 0) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 7, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: t.color
+                                                  .withValues(alpha: 0.12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              '${countMap[t.status]}',
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w800,
+                                                color: t.color,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
                         ),
                       ),
-                    ],
-              body: Column(
-                children: [
-                  // Elevated Tab bar with primary green active indicators
-                  Container(
-                    color: Colors.white,
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      labelColor: AppColors.primaryGreen,
-                      unselectedLabelColor: const Color(0xFF5A7265),
-                      indicatorColor: AppColors.primaryGreen,
-                      indicatorWeight: 3.0,
-                      indicatorSize: TabBarIndicatorSize.label,
-                      dividerColor: const Color(0xFFE8EFE9),
-                      labelStyle: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 13.5),
-                      unselectedLabelStyle:
-                          const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                      tabs: _tabs
-                          .map((t) => Tab(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(t.icon, size: 16),
-                                    const SizedBox(width: 6),
-                                    Text(t.label),
-                                    if (countMap[t.status] != null &&
-                                        countMap[t.status]! > 0) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              t.color.withValues(alpha: 0.12),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Text(
-                                          '${countMap[t.status]}',
-                                          style: TextStyle(
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w800,
-                                            color: t.color,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ))
-                          .toList(),
-                    ),
-                  ),
 
-                  // Tab content
-                  Expanded(
-                    child: (state is ProductListLoading && allProducts.isEmpty)
-                        ? _buildSkeletonLoader()
-                        : state is ProductListError
-                            ? _buildError(context, state.message)
-                            : TabBarView(
-                                controller: _tabController,
-                                children: _tabs
-                                    .map((t) => _buildProductTab(
-                                        context, allProducts, t))
-                                    .toList(),
-                              ),
+                      // ── Scrollable content ─────────────────────────────────
+                      Expanded(
+                        child: (state is ProductListLoading &&
+                                allProducts.isEmpty)
+                            ? _buildSkeletonLoader()
+                            : state is ProductListError
+                                ? _buildError(context, state.message)
+                                : TabBarView(
+                                    controller: _tabController,
+                                    children: _tabs
+                                        .map((t) => _buildProductTab(
+                                            context, allProducts, t))
+                                        .toList(),
+                                  ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-    },
+                ),
+              ],
+            );
+          },
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
@@ -210,6 +204,7 @@ class _ProductListScreenState extends State<ProductListScreen>
       ),
     );
   }
+
 
   Widget _buildHeader(
       BuildContext context, ProductState state, Map<String, int> countMap) {

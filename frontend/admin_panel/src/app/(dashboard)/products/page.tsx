@@ -23,15 +23,34 @@ import { MarketplaceTable, TableColumn } from '@/components/MarketplaceTable';
 import { MarketplacePagination } from '@/components/MarketplacePagination';
 import { MarketplaceDetailModal } from '@/components/MarketplaceDetailModal';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { RejectDialog } from '@/components/RejectDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 export default function ProductsPage() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'marketplace' | 'pending'>('marketplace');
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editStatus, setEditStatus] = useState<string>('ACTIVE');
 
   const [filterState, setFilterState] = useState<MarketplaceFilterState>({
     page: 1,
@@ -328,6 +347,13 @@ export default function ProductsPage() {
               setSelectedProduct(item);
               setDetailModalOpen(true);
             }}
+            onEdit={(item) => {
+              setEditingProduct(item);
+              setEditStatus(item.status);
+            }}
+            onDelete={(item) => {
+              setSuspendTarget(item);
+            }}
             emptyMessage="No products found matching your filters."
           />
 
@@ -476,6 +502,79 @@ export default function ProductsPage() {
         onOpenChange={setDetailModalOpen}
         title="Product Details"
         item={selectedProduct}
+      />
+
+      {/* Edit Product Status Dialog */}
+      <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+        <DialogContent className="sm:max-w-md rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">Manage Product Status</DialogTitle>
+          </DialogHeader>
+          {editingProduct && (
+            <div className="space-y-4 pt-2">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                <p className="font-semibold text-sm text-zinc-900 dark:text-zinc-50">{editingProduct.name}</p>
+                <p className="text-xs text-zinc-400 font-mono mt-0.5">SKU: {editingProduct.sku}</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Product Status</Label>
+                <Select value={editStatus} onValueChange={(val) => setEditStatus(val as 'ACTIVE' | 'PENDING' | 'SUSPENDED')}>
+                  <SelectTrigger className="h-9 rounded-xl text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">ACTIVE (Published)</SelectItem>
+                    <SelectItem value="PENDING">PENDING (In Review)</SelectItem>
+                    <SelectItem value="SUSPENDED">SUSPENDED (Hidden)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <DialogFooter className="pt-2">
+                <Button variant="outline" onClick={() => setEditingProduct(null)} className="rounded-xl h-9 text-xs">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (editStatus === 'ACTIVE') {
+                      approveMutation.mutate(editingProduct.id);
+                    } else if (editStatus === 'SUSPENDED') {
+                      suspendMutation.mutate(editingProduct.id);
+                    }
+                    setEditingProduct(null);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs rounded-xl h-9 text-xs font-semibold"
+                >
+                  Update Status
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Suspend Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!suspendTarget}
+        onClose={() => setSuspendTarget(null)}
+        onConfirm={() => {
+          if (suspendTarget) {
+            suspendMutation.mutate(suspendTarget.id);
+            setSuspendTarget(null);
+          }
+        }}
+        title="Suspend Product"
+        description={
+          suspendTarget ? (
+            <span>
+              Are you sure you want to suspend product <strong>&quot;{suspendTarget.name}&quot;</strong>? It will be hidden from marketplace customers.
+            </span>
+          ) : undefined
+        }
+        confirmText="Suspend Product"
+        variant="warning"
+        isLoading={suspendMutation.isPending}
       />
     </div>
   );

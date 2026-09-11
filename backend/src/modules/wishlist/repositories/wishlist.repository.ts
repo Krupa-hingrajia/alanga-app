@@ -42,12 +42,12 @@ export class WishlistRepository implements IWishlistRepository {
     return items.map((i) => this.mapToEntity(i));
   }
 
-  async findExisting(customerId: string, productId: string, productVariantId?: string): Promise<WishlistEntity | null> {
+  async findExisting(customerId: string, productId: string, productVariantId: string): Promise<WishlistEntity | null> {
     const item = await this.prisma.wishlist.findFirst({
       where: {
         customerId,
         productId,
-        productVariantId: productVariantId ?? null,
+        productVariantId,
       },
       include: {
         product: {
@@ -112,12 +112,12 @@ export class WishlistRepository implements IWishlistRepository {
     return item ? this.mapToEntity(item) : null;
   }
 
-  async create(customerId: string, productId: string, productVariantId?: string): Promise<WishlistEntity> {
+  async create(customerId: string, productId: string, productVariantId: string): Promise<WishlistEntity> {
     const created = await this.prisma.wishlist.create({
       data: {
         customerId,
         productId,
-        productVariantId: productVariantId ?? null,
+        productVariantId,
       },
       include: {
         product: {
@@ -137,11 +137,11 @@ export class WishlistRepository implements IWishlistRepository {
     return this.mapToEntity(created);
   }
 
-  async updateVariant(id: string, productVariantId: string | null): Promise<WishlistEntity> {
+  async updateVariant(id: string, productVariantId: string): Promise<WishlistEntity> {
     const updated = await this.prisma.wishlist.update({
       where: { id },
       data: {
-        productVariantId: productVariantId ?? null,
+        productVariantId,
       },
       include: {
         product: {

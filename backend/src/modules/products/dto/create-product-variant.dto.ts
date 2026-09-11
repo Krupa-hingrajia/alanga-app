@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, IsInt, Min, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsInt, Min, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateProductVariantDto {
   @ApiProperty({
@@ -70,4 +70,13 @@ export class CreateProductVariantDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional({
+    description: 'Whether this variant is marked as default',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isDefault?: boolean;
 }

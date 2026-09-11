@@ -16,12 +16,23 @@ export default function LoginPage() {
   }, [accessToken, router]);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500 overflow-hidden">
-      {/* Background Blobs for Design Aesthetics */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-rose-500/10 dark:bg-rose-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-amber-500/10 dark:bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="relative min-h-screen flex items-center justify-center p-4 bg-[#07180f] dark:bg-[#05120b] transition-colors duration-500 overflow-hidden">
+      {/* ALANGA Signature Ambient Waves & Glows */}
+      <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-emerald-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-[#F99F1B]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[10%] left-[5%] w-[40%] h-[40%] bg-[#E6222B]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[20%] right-[15%] w-[35%] h-[35%] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full flex justify-center">
+      {/* Subtle Dot Grid Pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(#22c55e 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+      />
+
+      <div className="relative z-10 w-full flex justify-center py-8">
         <LoginForm />
       </div>
     </div>

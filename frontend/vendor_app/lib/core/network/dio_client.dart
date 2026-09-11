@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'api_endpoints.dart';
 import 'dio_interceptor.dart';
 import '../storage/secure_storage_service.dart';
@@ -31,12 +32,18 @@ class DioClient {
     );
 
     dio.interceptors.add(DioInterceptor(storageService, refreshDio));
-    dio.interceptors.add(LogInterceptor(
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: false,
-      responseBody: true,
-      error: true,
-    ));
+
+    // LogInterceptor — only enabled in debug/profile mode.
+    // In production (release), logs are completely disabled to avoid
+    // exposing sensitive data (tokens, passwords) in device logs.
+    if (!kReleaseMode) {
+      dio.interceptors.add(LogInterceptor(
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: false,
+        responseBody: true,
+        error: true,
+      ));
+    }
   }
 }

@@ -1,7 +1,7 @@
 name: vendor_app
 description: "A new Flutter project for Alanga Vendors."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.2+3
 
 environment:
   sdk: ^3.11.0
@@ -36,3 +36,16 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+# ============================================================
+# Flutter Launcher Icons Configuration
+# Run: flutter pub run flutter_launcher_icons
+# ============================================================
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#11261B"
+  adaptive_icon_foreground: "assets/images/logo.png"
+  remove_alpha_ios: true

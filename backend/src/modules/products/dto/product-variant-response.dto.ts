@@ -36,4 +36,7 @@ export class ProductVariantResponseDto {
 
   @ApiProperty({ example: '2026-08-20T10:30:00.000Z' })
   updatedAt: Date;
+
+  @ApiProperty({ example: false })
+  isDefault: boolean;
 }

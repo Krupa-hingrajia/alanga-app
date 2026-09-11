@@ -9,6 +9,7 @@ class ProductVariantCard extends StatefulWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback? onManageImages;
+  final VoidCallback? onSetDefault;
 
   const ProductVariantCard({
     super.key,
@@ -16,6 +17,7 @@ class ProductVariantCard extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     this.onManageImages,
+    this.onSetDefault,
   });
 
   @override
@@ -113,13 +115,37 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            v.variantName.isNotEmpty ? v.variantName : 'Unnamed Variant',
-                            style: const TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF11261B),
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  v.variantName.isNotEmpty ? v.variantName : 'Unnamed Variant',
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF11261B),
+                                  ),
+                                ),
+                              ),
+                              if (v.isDefault) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryGreen,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'DEFAULT',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 3),
                           Text(
@@ -193,6 +219,83 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Variant Images Preview
+                    if (variantImages.isNotEmpty || v.pendingLocalPaths.isNotEmpty) ...[
+                      const Text(
+                        'Variant Images',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF11261B),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 70,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            ...v.pendingLocalPaths.map((path) => Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFD4E2D9)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(7),
+                                child: Image.file(File(path), fit: BoxFit.cover),
+                              ),
+                            )),
+                            ...variantImages.map((img) => Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFD4E2D9)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(7),
+                                child: CustomImageView(imageUrl: img.imageUrl, fit: BoxFit.cover),
+                              ),
+                            )),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
+                    // SKU, Price, Stock Details Card
+                    const Text(
+                      'Variant Details',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF11261B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE4ECE8)),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildDetailRow('SKU', v.sku.isNotEmpty ? v.sku : 'N/A'),
+                          const Divider(height: 12, color: Color(0xFFF0F4F2)),
+                          _buildDetailRow('Price', '₹${v.price.toStringAsFixed(2)}'),
+                          const Divider(height: 12, color: Color(0xFFF0F4F2)),
+                          _buildDetailRow('Stock', '${v.stock} units'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
                     // Dynamic Attributes Chips
                     if (v.attributes.isNotEmpty) ...[
                       const Text(
@@ -241,6 +344,39 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
                       ),
                       const SizedBox(height: 14),
                     ],
+
+                    // Set Default Option (Switch)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.star_rounded, size: 18, color: AppColors.brandOrange),
+                            SizedBox(width: 6),
+                            Text(
+                              'Default Variant',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF11261B),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Switch(
+                          value: v.isDefault,
+                          onChanged: v.isDefault
+                              ? null // Cannot toggle off if already default
+                              : (val) {
+                                  if (val && widget.onSetDefault != null) {
+                                    widget.onSetDefault!();
+                                  }
+                                },
+                          activeColor: AppColors.primaryGreen,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
                     // Action Buttons (Manage Images, Edit & Delete)
                     Row(
@@ -293,6 +429,30 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF5A7265),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF11261B),
+          ),
+        ),
+      ],
     );
   }
 }

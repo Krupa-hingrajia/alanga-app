@@ -15,9 +15,11 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
     totalProducts: number;
     totalCategories: number;
     pendingCategories: number;
+    totalSubCategories: number;
     totalBrands: number;
     pendingBrands: number;
     pendingProducts: number;
+    totalOrders: number;
     totalCompletedOrders: number;
     totalCompletedOrdersRevenue: number;
   }> {
@@ -29,7 +31,11 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       totalProducts,
       pendingProducts,
       totalCategories,
+      totalSubCategories,
       totalBrands,
+      pendingBrands,
+      totalOrders,
+      completedOrdersAgg,
     ] = await Promise.all([
       this.prisma.user.count({ where: { role: Role.CUSTOMER } }),
       this.prisma.user.count({ where: { role: Role.VENDOR } }),
@@ -38,7 +44,15 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       this.prisma.product.count({ where: { deletedAt: null } }),
       this.prisma.product.count({ where: { status: 'PENDING', deletedAt: null } }),
       this.prisma.category.count({ where: { deletedAt: null } }),
+      this.prisma.subCategory.count({ where: { deletedAt: null } }),
       this.prisma.brand.count({ where: { deletedAt: null } }),
+      this.prisma.brand.count({ where: { status: 'PENDING', deletedAt: null } }),
+      this.prisma.order.count({ where: { deletedAt: null } }),
+      this.prisma.order.aggregate({
+        _count: { id: true },
+        _sum: { totalAmount: true },
+        where: { status: 'DELIVERED', deletedAt: null },
+      }),
     ]);
 
     return {
@@ -49,11 +63,13 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       totalProducts,
       totalCategories,
       pendingCategories: 0,
+      totalSubCategories,
       totalBrands,
-      pendingBrands: 0,
+      pendingBrands,
       pendingProducts,
-      totalCompletedOrders: 0,
-      totalCompletedOrdersRevenue: 0,
+      totalOrders,
+      totalCompletedOrders: completedOrdersAgg._count.id || 0,
+      totalCompletedOrdersRevenue: completedOrdersAgg._sum.totalAmount || 0,
     };
   }
 }

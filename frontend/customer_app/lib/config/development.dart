@@ -15,7 +15,7 @@ class DevelopmentConfig {
       return 'http://$localIp:3000/api/v1';
     }
     // Default development server IP
-    return 'http://192.168.1.101:3000/api/v1';
+    return 'http://192.168.29.154:3000/api/v1';
   }
 
   /// Enable verbose API request/response logging in development.

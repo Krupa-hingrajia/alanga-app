@@ -21,6 +21,7 @@ export class ProductVariantsRepository implements IProductVariantsRepository {
       price: variant.price,
       stock: variant.stock,
       status: variant.status,
+      isDefault: variant.isDefault || false,
       createdAt: variant.createdAt,
       updatedAt: variant.updatedAt,
       deletedAt: variant.deletedAt,
@@ -32,6 +33,13 @@ export class ProductVariantsRepository implements IProductVariantsRepository {
     productId: string,
     data: CreateProductVariantDto,
   ): Promise<ProductVariantEntity> {
+    if (data.isDefault) {
+      await this.prisma.productVariant.updateMany({
+        where: { productId, deletedAt: null },
+        data: { isDefault: false },
+      });
+    }
+
     const created = await this.prisma.productVariant.create({
       data: {
         productId,
@@ -43,6 +51,7 @@ export class ProductVariantsRepository implements IProductVariantsRepository {
         price: data.price,
         stock: data.stock,
         status: data.status || 'ACTIVE',
+        isDefault: data.isDefault || false,
       },
       include: {
         images: {
@@ -109,6 +118,16 @@ export class ProductVariantsRepository implements IProductVariantsRepository {
     id: string,
     data: UpdateProductVariantDto,
   ): Promise<ProductVariantEntity> {
+    if (data.isDefault) {
+      const existing = await this.prisma.productVariant.findUnique({ where: { id } });
+      if (existing) {
+        await this.prisma.productVariant.updateMany({
+          where: { productId: existing.productId, deletedAt: null },
+          data: { isDefault: false },
+        });
+      }
+    }
+
     const updated = await this.prisma.productVariant.update({
       where: {
         id,
@@ -122,6 +141,7 @@ export class ProductVariantsRepository implements IProductVariantsRepository {
         ...(data.price !== undefined && { price: data.price }),
         ...(data.stock !== undefined && { stock: data.stock }),
         ...(data.status !== undefined && { status: data.status }),
+        ...(data.isDefault !== undefined && { isDefault: data.isDefault }),
       },
       include: {
         images: {

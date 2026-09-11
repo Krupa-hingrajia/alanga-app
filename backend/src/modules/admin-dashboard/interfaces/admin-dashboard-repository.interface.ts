@@ -7,9 +7,11 @@ export abstract class IAdminDashboardRepository {
     totalProducts: number;
     totalCategories: number;
     pendingCategories: number;
+    totalSubCategories: number;
     totalBrands: number;
     pendingBrands: number;
     pendingProducts: number;
+    totalOrders: number;
     totalCompletedOrders: number;
     totalCompletedOrdersRevenue: number;
   }>;

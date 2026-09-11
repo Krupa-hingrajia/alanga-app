@@ -16,6 +16,7 @@ class ProductVariantModel {
   final Map<String, String> attributes;
   final List<ProductImageModel> images;
   final List<String> pendingLocalPaths;
+  final bool isDefault;
 
   ProductVariantModel({
     required this.id,
@@ -33,6 +34,7 @@ class ProductVariantModel {
     this.attributes = const {},
     this.images = const [],
     this.pendingLocalPaths = const [],
+    this.isDefault = false,
   });
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
@@ -78,6 +80,7 @@ class ProductVariantModel {
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
       attributes: dynamicAttrs,
       images: parsedImages,
+      isDefault: json['isDefault'] as bool? ?? false,
     );
   }
 
@@ -98,6 +101,7 @@ class ProductVariantModel {
       'stock': stock,
       'status': status,
       'images': images.map((img) => img.toJson()).toList(),
+      'isDefault': isDefault,
     };
   }
 
@@ -115,6 +119,7 @@ class ProductVariantModel {
     Map<String, String>? attributes,
     List<ProductImageModel>? images,
     List<String>? pendingLocalPaths,
+    bool? isDefault,
   }) {
     return ProductVariantModel(
       id: id ?? this.id,
@@ -130,6 +135,7 @@ class ProductVariantModel {
       attributes: attributes ?? this.attributes,
       images: images ?? this.images,
       pendingLocalPaths: pendingLocalPaths ?? this.pendingLocalPaths,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 }

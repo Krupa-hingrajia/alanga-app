@@ -15,6 +15,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { loginSchema, LoginCredentials } from '../types';
 import { loginAdmin } from '../api';
 
+import { AlangaLogo } from '@/components/AlangaLogo';
+
 export default function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -48,18 +50,19 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl transition-all duration-300">
-      <CardHeader className="space-y-1">
-        <div className="flex justify-center mb-4">
-          <div className="p-3 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl shadow-lg shadow-rose-500/20">
-            <Lock className="h-6 w-6 text-white" />
-          </div>
+    <Card className="w-full max-w-md border border-emerald-900/20 dark:border-emerald-800/40 shadow-2xl bg-white/95 dark:bg-[#0c1f15]/95 backdrop-blur-xl transition-all duration-300 overflow-hidden relative">
+      {/* ALANGA Trademark Brand Ribbon */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-[#E6222B] via-[#F99F1B] via-[#EBDD1C] to-[#229944]" />
+      
+      <CardHeader className="space-y-2 pt-6">
+        <div className="flex justify-center mb-2">
+          <AlangaLogo size="md" variant="full" />
         </div>
-        <CardTitle className="text-2xl font-bold text-center tracking-tight text-zinc-900 dark:text-zinc-50">
-          Admin Portal
+        <CardTitle className="text-xl font-bold text-center tracking-tight text-zinc-900 dark:text-zinc-50">
+          Admin Control Center
         </CardTitle>
-        <CardDescription className="text-center text-zinc-500 dark:text-zinc-400">
-          Enter your email to access the administrative dashboard
+        <CardDescription className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+          Authorized personnel only. Please sign in with your admin credentials.
         </CardDescription>
       </CardHeader>
 
@@ -75,13 +78,13 @@ export default function LoginForm() {
                 id="identifier"
                 type="text"
                 placeholder="admin@alanga.com"
-                className="pl-10 h-11 bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-rose-500"
+                className="pl-10 h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:ring-emerald-500/20 focus:border-emerald-600 rounded-xl text-sm"
                 disabled={loginMutation.isPending}
                 {...register('identifier')}
               />
             </div>
             {errors.identifier && (
-              <p className="text-xs text-rose-500 font-medium mt-1">{errors.identifier.message}</p>
+              <p className="text-xs text-red-500 font-medium mt-1">{errors.identifier.message}</p>
             )}
           </div>
 
@@ -95,7 +98,7 @@ export default function LoginForm() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className="pl-10 pr-10 h-11 bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-rose-500"
+                className="pl-10 pr-10 h-11 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus:ring-emerald-500/20 focus:border-emerald-600 rounded-xl text-sm"
                 disabled={loginMutation.isPending}
                 {...register('password')}
               />
@@ -109,15 +112,15 @@ export default function LoginForm() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-xs text-rose-500 font-medium mt-1">{errors.password.message}</p>
+              <p className="text-xs text-red-500 font-medium mt-1">{errors.password.message}</p>
             )}
           </div>
         </CardContent>
 
-        <CardFooter className="pt-2">
+        <CardFooter className="pt-2 pb-6">
           <Button
             type="submit"
-            className="w-full h-11 font-semibold text-white bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 shadow-md shadow-rose-500/10 hover:shadow-lg transition-all duration-300"
+            className="w-full h-11 font-semibold text-white bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 shadow-md shadow-emerald-700/25 hover:shadow-lg rounded-xl transition-all duration-300"
             disabled={loginMutation.isPending}
           >
             {loginMutation.isPending ? (

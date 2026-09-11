@@ -17,6 +17,9 @@ import { AttributesModule } from './modules/master-data/attributes/attributes.mo
 import { AttributeValuesModule } from './modules/master-data/attribute-values/attribute-values.module';
 import { ProductsModule } from './modules/products/products.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { CartModule } from './modules/cart/cart.module';
+import { AddressModule } from './modules/addresses/address.module';
+import { OrderModule } from './modules/orders/order.module';
 
 @Module({
   imports: [
@@ -39,6 +42,9 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
     AttributeValuesModule,
     ProductsModule,
     WishlistModule,
+    CartModule,
+    AddressModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

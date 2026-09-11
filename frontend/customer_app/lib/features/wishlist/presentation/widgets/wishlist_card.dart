@@ -49,16 +49,11 @@ class _WishlistCardState extends State<WishlistCard> {
   String _getVariantImageUrl(ProductModel product, ProductVariantModel? variant) {
     if (variant != null) {
       if (variant.images.isNotEmpty) {
-        final variantSpecificImgs = variant.images
-            .where((img) => img.productVariantId == variant.id)
-            .toList();
-        if (variantSpecificImgs.isNotEmpty) {
-          final primary = variantSpecificImgs.firstWhere(
-            (img) => img.isPrimary,
-            orElse: () => variantSpecificImgs.first,
-          );
-          if (primary.imageUrl.isNotEmpty) return primary.imageUrl;
-        }
+        final primary = variant.images.firstWhere(
+          (img) => img.isPrimary,
+          orElse: () => variant.images.first,
+        );
+        if (primary.imageUrl.isNotEmpty) return primary.imageUrl;
       }
 
       final matchingImgs = product.images

@@ -4,7 +4,7 @@ export class WishlistEntity implements Wishlist {
   id: string;
   customerId: string;
   productId: string;
-  productVariantId: string | null;
+  productVariantId: string;
   createdAt: Date;
   updatedAt: Date;
 

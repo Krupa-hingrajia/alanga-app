@@ -34,6 +34,25 @@ import '../../features/wishlist/domain/repositories/wishlist_repository.dart';
 import '../../features/wishlist/data/repositories/wishlist_repository_impl.dart';
 import '../../features/wishlist/presentation/bloc/wishlist_bloc.dart';
 
+// Cart imports
+import '../../features/cart/data/datasources/cart_remote_datasource.dart';
+import '../../features/cart/domain/repositories/cart_repository.dart';
+import '../../features/cart/data/repositories/cart_repository_impl.dart';
+import '../../features/cart/presentation/bloc/cart_cubit.dart';
+
+// Address imports
+import '../../features/addresses/data/datasources/address_remote_datasource.dart';
+import '../../features/addresses/domain/repositories/address_repository.dart';
+import '../../features/addresses/data/repositories/address_repository_impl.dart';
+import '../../features/addresses/presentation/bloc/address_cubit.dart';
+
+// Checkout imports
+import '../../features/checkout/data/datasources/checkout_remote_datasource.dart';
+import '../../features/checkout/domain/repositories/checkout_repository.dart';
+import '../../features/checkout/data/repositories/checkout_repository_impl.dart';
+import '../../features/checkout/presentation/bloc/checkout_cubit.dart';
+import '../../features/checkout/presentation/bloc/order_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -44,6 +63,10 @@ Future<void> init() async {
   sl.registerFactory(() => CategoryBloc(categoryRepository: sl()));
   sl.registerFactory(() => ProductBloc(productRepository: sl()));
   sl.registerLazySingleton(() => WishlistBloc(repository: sl()));
+  sl.registerLazySingleton(() => CartCubit(repository: sl()));
+  sl.registerLazySingleton(() => AddressCubit(repository: sl()));
+  sl.registerLazySingleton(() => CheckoutCubit(repository: sl()));
+  sl.registerLazySingleton(() => OrderCubit(repository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -62,6 +85,15 @@ Future<void> init() async {
   sl.registerLazySingleton<WishlistRepository>(
     () => WishlistRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(remoteDatasource: sl()),
+  );
+  sl.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(remoteDatasource: sl()),
+  );
+  sl.registerLazySingleton<CheckoutRepository>(
+    () => CheckoutRepositoryImpl(remoteDatasource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -75,6 +107,15 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<WishlistRemoteDataSource>(
     () => WishlistRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<CartRemoteDatasource>(
+    () => CartRemoteDatasourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<AddressRemoteDatasource>(
+    () => AddressRemoteDatasourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<CheckoutRemoteDatasource>(
+    () => CheckoutRemoteDatasourceImpl(apiService: sl()),
   );
 
   // Core

@@ -388,6 +388,17 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                 backgroundColor: AppColors.brandRed,
                               ),
                             );
+                          } else if (state is ProductVariantsLoadedState) {
+                            setState(() {
+                              _productVariants = state.variants;
+                            });
+                          } else if (state is ProductVariantActionSuccess) {
+                            setState(() {
+                              _productVariants = state.variants;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
+                            );
                           } else if (state is ProductActionSuccess) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
@@ -613,15 +624,43 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                     availableAttributes: _availableAttributes,
                                     onAddVariant: (newVariant) {
                                       setState(() {
+                                        if (newVariant.isDefault) {
+                                          for (int i = 0; i < _productVariants.length; i++) {
+                                            _productVariants[i] = _productVariants[i].copyWith(isDefault: false);
+                                          }
+                                        }
                                         _productVariants.add(newVariant);
                                       });
+                                      if (isEdit) {
+                                        context.read<ProductBloc>().add(
+                                              CreateProductVariantEvent(
+                                                productId: widget.product!.id,
+                                                data: newVariant.toJson(),
+                                                pendingImagePaths: newVariant.pendingLocalPaths,
+                                              ),
+                                            );
+                                      }
                                     },
                                     onUpdateVariant: (updatedVariant) {
                                       final index = _productVariants.indexWhere((v) => v.id == updatedVariant.id || v.sku == updatedVariant.sku);
                                       if (index != -1) {
                                         setState(() {
+                                          if (updatedVariant.isDefault) {
+                                            for (int i = 0; i < _productVariants.length; i++) {
+                                              _productVariants[i] = _productVariants[i].copyWith(isDefault: false);
+                                            }
+                                          }
                                           _productVariants[index] = updatedVariant;
                                         });
+                                        if (isEdit && updatedVariant.id.isNotEmpty) {
+                                          context.read<ProductBloc>().add(
+                                                UpdateProductVariantEvent(
+                                                  productId: widget.product!.id,
+                                                  variantId: updatedVariant.id,
+                                                  data: updatedVariant.toJson(),
+                                                ),
+                                              );
+                                        }
                                       }
                                     },
                                     onDeleteVariant: (variantToDelete) {

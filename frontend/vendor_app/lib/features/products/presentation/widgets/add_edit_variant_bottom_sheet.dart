@@ -31,6 +31,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
 
   // List of dynamic attribute key-value pairs
   final List<MapEntry<String, String>> _attributePairs = [];
+  bool _isDefault = false;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
     _skuCtrl = TextEditingController(text: v?.sku ?? '');
     _priceCtrl = TextEditingController(text: v != null ? v.price.toStringAsFixed(0) : '');
     _stockCtrl = TextEditingController(text: v != null ? v.stock.toString() : '0');
+    _isDefault = v?.isDefault ?? false;
 
     if (v != null && v.attributes.isNotEmpty) {
       v.attributes.forEach((key, value) {
@@ -154,6 +156,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
       size: attributesMap['Size'],
       storage: attributesMap['Storage'],
       attributes: attributesMap,
+      isDefault: _isDefault,
     );
 
     widget.onSave(updatedVariant);
@@ -432,7 +435,32 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // Default Variant Switch
+                SwitchListTile(
+                  title: const Text(
+                    'Default Variant',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF11261B),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Set this variant as the default variant for this product.',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF5A7265)),
+                  ),
+                  value: _isDefault,
+                  onChanged: (val) {
+                    setState(() {
+                      _isDefault = val;
+                    });
+                  },
+                  activeColor: AppColors.primaryGreen,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
 
                 // Save Variant Button
                 ElevatedButton(

@@ -15,6 +15,13 @@ import '../features/products/presentation/screens/product_detail_screen.dart';
 import '../core/dependency_injection/injection.dart';
 import '../core/storage/secure_storage_service.dart';
 
+// Checkout & Orders imports
+import '../features/checkout/data/models/order_model.dart';
+import '../features/checkout/presentation/screens/checkout_screen.dart';
+import '../features/checkout/presentation/screens/order_success_screen.dart';
+import '../features/checkout/presentation/screens/order_list_screen.dart';
+import '../features/checkout/presentation/screens/order_detail_screen.dart';
+
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/login',
@@ -52,6 +59,30 @@ class AppRouter {
       GoRoute(
         path: '/wishlist',
         builder: (context, state) => const MainNavigationScreen(initialIndex: 2),
+      ),
+      GoRoute(
+        path: '/cart',
+        builder: (context, state) => const MainNavigationScreen(initialIndex: 3),
+      ),
+      GoRoute(
+        path: '/checkout',
+        builder: (context, state) => const CheckoutScreen(),
+      ),
+      GoRoute(
+        path: '/order-success',
+        builder: (context, state) => OrderSuccessScreen(
+          order: state.extra as OrderModel,
+        ),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const OrderListScreen(),
+      ),
+      GoRoute(
+        path: '/orders/:id',
+        builder: (context, state) => OrderDetailScreen(
+          orderId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/products',

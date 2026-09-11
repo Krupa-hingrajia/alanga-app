@@ -18,6 +18,7 @@ export interface DashboardSummary {
   inactiveBrands?: number;
   pendingBrands: number;
   pendingProducts: number;
+  totalOrders?: number;
   totalCompletedOrders: number;
   totalCompletedOrdersRevenue: number;
 }

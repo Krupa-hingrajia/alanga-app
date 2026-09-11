@@ -16,13 +16,8 @@ class EnvironmentConfig {
       return 'http://$localIp:3000/api/v1';
     }
 
-    // Android emulator accesses host machine via 10.0.2.2
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api/v1';
-    }
-
-    // Default development server IP for physical devices
-    return 'http://192.168.1.101:3000/api/v1';
+    // Default development server IP for physical devices & local testing
+    return 'http://192.168.29.154:3000/api/v1';
   }
 
   /// Current environment based on Flutter build mode.

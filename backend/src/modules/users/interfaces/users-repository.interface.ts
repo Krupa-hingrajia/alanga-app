@@ -13,4 +13,10 @@ export abstract class IUsersRepository {
     skip?: number;
     take?: number;
   }): Promise<{ items: UserEntity[]; total: number }>;
+  abstract findManyCustomers(filters?: {
+    status?: string;
+    search?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<{ items: UserEntity[]; total: number }>;
 }

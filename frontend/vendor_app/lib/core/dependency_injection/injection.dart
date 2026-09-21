@@ -47,6 +47,12 @@ import '../../features/shipping/domain/repositories/shipping_repository.dart';
 import '../../features/shipping/data/repositories/shipping_repository_impl.dart';
 import '../../features/shipping/presentation/bloc/shipping_bloc.dart';
 
+// Orders imports
+import '../../features/orders/data/datasource/vendor_order_remote_datasource.dart';
+import '../../features/orders/domain/repositories/vendor_order_repository.dart';
+import '../../features/orders/data/repositories/vendor_order_repository_impl.dart';
+import '../../features/orders/presentation/bloc/vendor_order_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -59,6 +65,7 @@ Future<void> init() async {
   sl.registerFactory(() => SubCategoryBloc(subCategoryRepository: sl()));
   sl.registerFactory(() => InventoryBloc(inventoryRepository: sl()));
   sl.registerFactory(() => ShippingBloc(shippingRepository: sl()));
+  sl.registerFactory(() => VendorOrderBloc(repository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -86,6 +93,9 @@ Future<void> init() async {
   sl.registerLazySingleton<ShippingRepository>(
     () => ShippingRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<VendorOrderRepository>(
+    () => VendorOrderRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -108,6 +118,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ShippingRemoteDataSource>(
     () => ShippingRemoteDataSourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<VendorOrderRemoteDataSource>(
+    () => VendorOrderRemoteDataSourceImpl(apiService: sl()),
   );
 
   // Core

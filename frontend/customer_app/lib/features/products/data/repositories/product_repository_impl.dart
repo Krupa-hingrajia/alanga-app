@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../datasource/product_remote_datasource.dart';
 import '../models/product_model.dart';
+import '../models/brand_model.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource _remoteDataSource;
@@ -14,6 +15,24 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<List<ProductModel>> getProducts() async {
     try {
       return await _remoteDataSource.getProducts();
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<ProductModel> getProductById(String id) async {
+    try {
+      return await _remoteDataSource.getProductById(id);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<List<BrandModel>> getBrands() async {
+    try {
+      return await _remoteDataSource.getBrands();
     } on DioException catch (e) {
       throw ServerFailure(_getErrorMessage(e));
     }

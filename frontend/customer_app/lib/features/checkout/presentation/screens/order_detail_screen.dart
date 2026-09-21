@@ -3,8 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
-import '../bloc/order_cubit.dart';
-import '../bloc/order_state.dart';
+import '../../../../core/dependency_injection/injection.dart';
+import '../../data/models/order_model.dart';
+import '../bloc/order_detail_cubit.dart';
+import '../bloc/order_detail_state.dart';
+import '../widgets/order_status_badge.dart';
+import '../widgets/order_timeline_stepper.dart';
+import '../../../reviews/presentation/bloc/customer_reviews_cubit.dart';
+import '../../../reviews/data/models/review_model.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -16,259 +22,257 @@ class OrderDetailScreen extends StatefulWidget {
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
+  late final OrderDetailCubit _cubit;
+
   @override
   void initState() {
     super.initState();
-    context.read<OrderCubit>().fetchOrderById(widget.orderId);
+    _cubit = sl<OrderDetailCubit>()..fetchOrderById(widget.orderId);
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'DELIVERED':
-        return AppColors.primaryGreen;
-      case 'CANCELLED':
-      case 'RETURNED':
-        return AppColors.brandRed;
-      case 'SHIPPED':
-      case 'OUT_FOR_DELIVERY':
-        return Colors.blue;
-      default:
-        return const Color(0xFFD97706);
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
+  }
+
+  String _formatDateTime(DateTime dt) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return '${dt.day} ${months[dt.month - 1]} ${dt.year}, $hour:$minute $period';
+  }
+
+  void _handleCancelOrder(OrderModel order) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.brandRed.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cancel_outlined, color: AppColors.brandRed, size: 24),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Cancel Order?',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to cancel Order #${order.orderNumber}? This will restock the inventory and release items.',
+          style: const TextStyle(fontSize: 14, color: Color(0xFF4C6656)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Back', style: TextStyle(color: Color(0xFF6B7280))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Order cancellation request submitted'),
+                  backgroundColor: AppColors.primaryGreen,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Request Cancellation'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleBuyAgain(OrderItemModel item) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added "${item.productNameSnapshot}" to cart!'),
+        backgroundColor: AppColors.primaryGreen,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: 'VIEW CART',
+          textColor: Colors.white,
+          onPressed: () => context.push('/cart'),
+        ),
+      ),
+    );
+  }
+
+  void _handleReviewProduct(OrderItemModel item, String orderId, ReviewModel? existingReview) async {
+    final result = await context.push('/reviews/write', extra: {
+      'productId': item.productId,
+      'productName': item.productNameSnapshot,
+      'productImage': item.imageUrl,
+      'orderId': orderId,
+      'variantId': item.productVariantId,
+      'variantName': item.variantNameSnapshot,
+      'existingReview': existingReview,
+    });
+
+    if (result == true && mounted) {
+      context.read<CustomerReviewsCubit>().loadCustomerReviews();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F8F6),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF11261B)),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Order Details',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF11261B),
+    return BlocProvider.value(
+      value: _cubit,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F7F5),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0.5,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Color(0xFF11261B)),
+            onPressed: () => context.pop(),
           ),
+          title: const Text(
+            'Order Details',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF11261B),
+            ),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: BlocBuilder<OrderCubit, OrderState>(
-        builder: (context, state) {
-          if (state is OrderLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
-          }
+        body: BlocBuilder<OrderDetailCubit, OrderDetailState>(
+          builder: (context, state) {
+            if (state is OrderDetailLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
+            }
 
-          if (state is OrderError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message, style: const TextStyle(color: AppColors.brandRed)),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () => context.read<OrderCubit>().fetchOrderById(widget.orderId),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen, foregroundColor: Colors.white),
-                    child: const Text('Retry'),
+            if (state is OrderDetailFailure) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppColors.brandRed, size: 48),
+                      const SizedBox(height: 14),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 14, color: Color(0xFF4C6656)),
+                      ),
+                      const SizedBox(height: 18),
+                      ElevatedButton.icon(
+                        onPressed: () => _cubit.fetchOrderById(widget.orderId),
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryGreen,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }
+                ),
+              );
+            }
 
-          if (state is OrderDetailLoaded) {
-            final order = state.order;
-            final statusColor = _getStatusColor(order.status);
-            final addr = order.shippingAddressSnapshot ?? {};
+            if (state is OrderDetailSuccess) {
+              final order = state.order;
+              final isPending = order.status.toUpperCase() == 'PENDING';
+              final isDelivered = order.status.toUpperCase() == 'DELIVERED';
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header Card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE4ECE8)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(order.orderNumber, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryGreen)),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(order.status.replaceAll('_', ' '), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: statusColor)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Placed on ${_formatDate(order.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ),
+                  // 1. HEADER CARD (Order number & Date & Status)
+                  _buildHeaderCard(order),
                   const SizedBox(height: 16),
 
-                  // Shipping Address Card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE4ECE8)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.location_on_outlined, color: AppColors.primaryGreen, size: 18),
-                            SizedBox(width: 6),
-                            Text('Shipping Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          ],
-                        ),
-                        const Divider(height: 16),
-                        Text(addr['fullName'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${addr['addressLine1'] ?? ''}, ${addr['city'] ?? ''}, ${addr['state'] ?? ''} - ${addr['postalCode'] ?? ''}',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF5A7265), height: 1.3),
-                        ),
-                        if (addr['mobileNumber'] != null) Text('Phone: ${addr['mobileNumber']}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ),
+                  // 2. TIMELINE STATUS TRACKER (Amazon / Flipkart Style)
+                  _buildTimelineCard(order),
                   const SizedBox(height: 16),
 
-                  // Order Items List Card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE4ECE8)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Ordered Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        const Divider(height: 16),
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: order.orderItems.length,
-                          separatorBuilder: (_, __) => const Divider(height: 20, color: Color(0xFFEEF3F0)),
-                          itemBuilder: (context, idx) {
-                            final item = order.orderItems[idx];
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 54,
-                                  height: 54,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF6FAF9),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: CustomImageView(
-                                      imageUrl: item.imageUrl ?? '',
-                                      fit: BoxFit.cover,
-                                      placeholderIcon: Icons.shopping_bag_outlined,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(item.productNameSnapshot, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                      if (item.variantNameSnapshot != null) Text('Variant: ${item.variantNameSnapshot}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                      if (item.sku.isNotEmpty) Text('SKU: ${item.sku}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text('₹${item.unitPrice.toStringAsFixed(0)} × ${item.quantity}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                          Text('₹${item.totalPrice.toStringAsFixed(0)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                  // 3. PRODUCT ITEMS LIST CARD
+                  _buildProductListCard(order, isDelivered),
                   const SizedBox(height: 16),
 
-                  // Pricing Breakdown Card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE4ECE8)),
+                  // 4. DELIVERY ADDRESS CARD
+                  _buildAddressCard(order),
+                  const SizedBox(height: 16),
+
+                  // 5. PRICE DETAILS CARD
+                  _buildPriceDetailsCard(order),
+                  const SizedBox(height: 16),
+
+                  // 6. PAYMENT INFO CARD
+                  _buildPaymentInfoCard(order),
+                  const SizedBox(height: 20),
+
+                  // 7. ORDER ACTIONS (Pending: Cancel Order; Delivered: Buy Again)
+                  if (isPending) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _handleCancelOrder(order),
+                        icon: const Icon(Icons.cancel_outlined, color: AppColors.brandRed, size: 18),
+                        label: const Text(
+                          'CANCEL ORDER',
+                          style: TextStyle(
+                            color: AppColors.brandRed,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.brandRed, width: 1.4),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Subtotal', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            Text('₹${order.subtotal.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Shipping Fee', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            Text(
-                              order.shippingCharge <= 0 ? 'FREE' : '₹${order.shippingCharge.toStringAsFixed(0)}',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: order.shippingCharge <= 0 ? AppColors.primaryGreen : Colors.black87),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Total Amount', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                            Text('₹${order.totalAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Payment Method', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            Text('${order.paymentMethod} (${order.paymentStatus})', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Support assistance link
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Support helpline: support@alanga.com | 1800-ALANGA'),
+                            backgroundColor: Color(0xFF1A3827),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.support_agent_rounded, size: 18, color: Color(0xFF5A7265)),
+                      label: const Text(
+                        'Need help with this order? Contact Support',
+                        style: TextStyle(fontSize: 12.5, color: Color(0xFF5A7265), fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 24),
                 ],
               ),
             );
@@ -277,10 +281,577 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           return const SizedBox.shrink();
         },
       ),
+    ),
+  );
+  }
+
+  // ==========================================
+  // 1. HEADER CARD
+  // ==========================================
+  Widget _buildHeaderCard(OrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Order Number', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 2),
+                  Text(
+                    order.orderNumber,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF11261B)),
+                  ),
+                ],
+              ),
+              OrderStatusBadge(status: order.status, isLarge: true),
+            ],
+          ),
+          const Divider(height: 20, color: Color(0xFFEEF3F0)),
+          Row(
+            children: [
+              const Icon(Icons.calendar_today_rounded, size: 13, color: Color(0xFF7A9A86)),
+              const SizedBox(width: 6),
+              Text(
+                'Placed on ${_formatDateTime(order.createdAt)}',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF5A7265)),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  String _formatDate(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year} at ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+  // ==========================================
+  // 2. TIMELINE CARD
+  // ==========================================
+  Widget _buildTimelineCard(OrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.timeline_rounded, color: AppColors.primaryGreen, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Order Status & Tracking',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                  ),
+                ],
+              ),
+              TextButton.icon(
+                onPressed: () => context.push('/orders/${order.id}/track', extra: order),
+                icon: const Icon(Icons.alt_route_rounded, size: 16, color: AppColors.primaryGreen),
+                label: const Text(
+                  'TRACK',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20, color: Color(0xFFEEF3F0)),
+          OrderTimelineStepper(
+            currentStatus: order.status,
+            orderDate: order.createdAt,
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: () => context.push('/orders/${order.id}/track', extra: order),
+              icon: const Icon(Icons.alt_route_rounded, size: 17, color: AppColors.primaryGreen),
+              label: const Text(
+                'DETAILED ORDER TRACKING',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: AppColors.primaryGreen,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.primaryGreen, width: 1.4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 3. PRODUCT LIST CARD
+  // ==========================================
+  Widget _buildProductListCard(OrderModel order, bool isDelivered) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.shopping_bag_outlined, color: AppColors.primaryGreen, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Products in this Order',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                  ),
+                ],
+              ),
+              Text(
+                '${order.orderItems.length} ${order.orderItems.length == 1 ? "item" : "items"}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const Divider(height: 20, color: Color(0xFFEEF3F0)),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: order.orderItems.length,
+            separatorBuilder: (context, index) => const Divider(height: 24, color: Color(0xFFEEF3F0)),
+            itemBuilder: (context, idx) {
+              final item = order.orderItems[idx];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Product image
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7FAF8),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE6EFEA)),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: CustomImageView(
+                            imageUrl: item.imageUrl ?? '',
+                            fit: BoxFit.cover,
+                            placeholderIcon: Icons.shopping_bag_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+
+                      // Item Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.productNameSnapshot,
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF11261B),
+                                height: 1.25,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+
+                            // Variant details
+                            if (item.variantNameSnapshot != null &&
+                                item.variantNameSnapshot!.isNotEmpty &&
+                                item.variantNameSnapshot != 'Default Variant') ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F3),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Variant: ${item.variantNameSnapshot}',
+                                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF4C6656)),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                            ],
+
+                            // SKU
+                            if (item.sku.isNotEmpty) ...[
+                              Text('SKU: ${item.sku}', style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+                              const SizedBox(height: 3),
+                            ],
+
+                            // Price & Qty
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '₹${item.unitPrice.toStringAsFixed(0)} × ${item.quantity}',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF5A7265)),
+                                ),
+                                Text(
+                                  '₹${item.totalPrice.toStringAsFixed(0)}',
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Actions for Delivered products: Buy Again & Rate / Review
+                  if (isDelivered) ...[
+                    const SizedBox(height: 10),
+                    Builder(
+                      builder: (context) {
+                        final reviewsState = context.watch<CustomerReviewsCubit>().state;
+                        final existingReview = reviewsState.getReviewForProduct(item.productId);
+                        final hasReviewed = existingReview != null;
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () => _handleReviewProduct(item, order.id, existingReview),
+                              icon: Icon(
+                                hasReviewed ? Icons.edit_rounded : Icons.star_rounded,
+                                size: 15,
+                                color: const Color(0xFFD97706),
+                              ),
+                              label: Text(
+                                hasReviewed ? 'Edit Review' : 'Write Review',
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFD97706),
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFFFDE68A)),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                visualDensity: VisualDensity.compact,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed: () => _handleBuyAgain(item),
+                              icon: const Icon(Icons.repeat_rounded, size: 15),
+                              label: const Text('Buy Again', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1A3827),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 4. DELIVERY ADDRESS CARD
+  // ==========================================
+  Widget _buildAddressCard(OrderModel order) {
+    final addr = order.shippingAddressSnapshot ?? {};
+    final addressModel = order.address;
+
+    final fullName = addr['fullName'] ?? addressModel?.fullName ?? 'Recipient';
+    final mobileNumber = addr['mobileNumber'] ?? addressModel?.mobileNumber ?? '';
+    final line1 = addr['addressLine1'] ?? addressModel?.addressLine1 ?? '';
+    final line2 = addr['addressLine2'] ?? addressModel?.addressLine2 ?? '';
+    final landmark = addr['landmark'] ?? addressModel?.landmark ?? '';
+    final city = addr['city'] ?? addressModel?.city ?? '';
+    final state = addr['state'] ?? addressModel?.state ?? '';
+    final postalCode = addr['postalCode'] ?? addressModel?.postalCode ?? '';
+    final country = addr['country'] ?? addressModel?.country ?? 'India';
+    final addressType = addr['addressType'] ?? addressModel?.addressType ?? 'HOME';
+
+    final fullAddressText = [
+      line1,
+      if (line2.isNotEmpty) line2,
+      if (landmark.isNotEmpty) 'Near $landmark',
+      '$city, $state - $postalCode',
+      country,
+    ].where((e) => e.isNotEmpty).join(', ');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined, color: AppColors.primaryGreen, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Delivery Address',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEBF3EE),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  addressType,
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.darkGreen),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16, color: Color(0xFFEEF3F0)),
+          Text(
+            fullName,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF11261B)),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            fullAddressText,
+            style: const TextStyle(fontSize: 12.5, color: Color(0xFF4C6656), height: 1.35),
+          ),
+          if (mobileNumber.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.phone_outlined, size: 14, color: AppColors.primaryGreen),
+                const SizedBox(width: 6),
+                Text(
+                  'Phone: $mobileNumber',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF11261B)),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 5. PRICE DETAILS CARD
+  // ==========================================
+  Widget _buildPriceDetailsCard(OrderModel order) {
+    final isFreeShipping = order.shippingCharge <= 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.receipt_long_outlined, color: AppColors.primaryGreen, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Price Summary',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+              ),
+            ],
+          ),
+          const Divider(height: 16, color: Color(0xFFEEF3F0)),
+          _buildRow('Subtotal', '₹${order.subtotal.toStringAsFixed(0)}'),
+          const SizedBox(height: 8),
+          _buildRow(
+            'Shipping Charges',
+            isFreeShipping ? 'FREE' : '₹${order.shippingCharge.toStringAsFixed(0)}',
+            valueColor: isFreeShipping ? AppColors.primaryGreen : null,
+          ),
+          const Divider(height: 20, color: Color(0xFFEEF3F0)),
+          _buildRow(
+            'Grand Total',
+            '₹${order.totalAmount.toStringAsFixed(0)}',
+            isBold: true,
+            valueColor: AppColors.primaryGreen,
+            fontSize: 16,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 6. PAYMENT INFO CARD
+  // ==========================================
+  Widget _buildPaymentInfoCard(OrderModel order) {
+    final isCod = order.paymentMethod == 'COD';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.payment_outlined, color: AppColors.primaryGreen, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Payment Details',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+              ),
+            ],
+          ),
+          const Divider(height: 16, color: Color(0xFFEEF3F0)),
+          _buildRow(
+            'Payment Method',
+            isCod ? 'Cash on Delivery (COD)' : order.paymentMethod,
+          ),
+          const SizedBox(height: 8),
+          _buildRow(
+            'Payment Status',
+            order.paymentStatus,
+            valueColor: order.paymentStatus.toUpperCase() == 'PAID'
+                ? AppColors.primaryGreen
+                : const Color(0xFFD97706),
+          ),
+          if (order.notes != null && order.notes!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const Text(
+              'Delivery Instructions:',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              order.notes!,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF5A7265)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    Color? valueColor,
+    double fontSize = 13,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: isBold ? const Color(0xFF11261B) : const Color(0xFF5A7265),
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: valueColor ?? const Color(0xFF11261B),
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }

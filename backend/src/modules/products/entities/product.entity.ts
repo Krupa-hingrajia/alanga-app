@@ -20,6 +20,8 @@ export class ProductEntity implements Product {
   status: string;
   image: string | null;
   vendorId: string;
+  averageRating: number;
+  totalReviews: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

@@ -6,9 +6,12 @@ import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
 import '../widgets/product_card.dart';
 import '../../data/models/product_model.dart';
+import '../../data/models/brand_model.dart';
+import '../../domain/repositories/product_repository.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String? initialQuery;
@@ -25,8 +28,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   String _sortBy = 'Newest'; // 'Newest', 'Price: Low to High', 'Price: High to Low'
   
-  List<dynamic> _categories = [];
-  List<dynamic> _brands = [];
+  List<CategoryModel> _categories = [];
+  List<BrandModel> _brands = [];
   bool _loadingFilters = true;
 
   // Selected filters
@@ -51,13 +54,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Future<void> _loadFilters() async {
     try {
-      final responses = await Future.wait([
-        sl<ApiService>().get('/customer/categories'),
-        sl<ApiService>().get('/customer/brands'),
+      final categoryRepo = sl<CategoryRepository>();
+      final productRepo = sl<ProductRepository>();
+
+      final results = await Future.wait([
+        categoryRepo.getCategories(),
+        productRepo.getBrands(),
       ]);
+
       setState(() {
-        _categories = responses[0].data['data'] as List<dynamic>;
-        _brands = responses[1].data['data'] as List<dynamic>;
+        _categories = results[0] as List<CategoryModel>;
+        _brands = results[1] as List<BrandModel>;
         _loadingFilters = false;
       });
     } catch (_) {
@@ -152,10 +159,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               spacing: 8,
                               runSpacing: 8,
                               children: _categories.map((c) {
-                                final catId = c['id'] as String;
+                                final catId = c.id;
                                 final isSelected = _selectedCategoryIds.contains(catId);
                                 return FilterChip(
-                                  label: Text(c['name'] as String),
+                                  label: Text(c.name),
                                   selected: isSelected,
                                   selectedColor: AppColors.brandOrange.withOpacity(0.15),
                                   checkmarkColor: AppColors.brandOrange,
@@ -183,10 +190,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               spacing: 8,
                               runSpacing: 8,
                               children: _brands.map((b) {
-                                final brandId = b['id'] as String;
+                                final brandId = b.id;
                                 final isSelected = _selectedBrandIds.contains(brandId);
                                 return FilterChip(
-                                  label: Text(b['name'] as String),
+                                  label: Text(b.name),
                                   selected: isSelected,
                                   selectedColor: AppColors.brandOrange.withOpacity(0.15),
                                   checkmarkColor: AppColors.brandOrange,

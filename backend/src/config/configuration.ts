@@ -2,20 +2,19 @@ export default () => {
   const nodeEnv = process.env.NODE_ENV || 'development';
   const isProduction = nodeEnv === 'production';
 
-  // In production, JWT secrets must be explicitly set — no insecure fallbacks.
   const jwtAccessSecret = process.env.JWT_ACCESS_SECRET;
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+  const databaseUrl = process.env.DATABASE_URL;
 
-  if (isProduction) {
-    if (!jwtAccessSecret) {
-      throw new Error('JWT_ACCESS_SECRET environment variable is required in production.');
-    }
-    if (!jwtRefreshSecret) {
-      throw new Error('JWT_REFRESH_SECRET environment variable is required in production.');
-    }
-    if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL environment variable is required in production.');
-    }
+  // Enforce required environment variables during startup
+  if (!jwtAccessSecret) {
+    throw new Error('FATAL: JWT_ACCESS_SECRET environment variable is missing.');
+  }
+  if (!jwtRefreshSecret) {
+    throw new Error('FATAL: JWT_REFRESH_SECRET environment variable is missing.');
+  }
+  if (!databaseUrl) {
+    throw new Error('FATAL: DATABASE_URL environment variable is missing.');
   }
 
   return {
@@ -25,13 +24,13 @@ export default () => {
     apiPrefix: process.env.API_PREFIX || 'api/v1',
     corsOrigin: process.env.CORS_ORIGIN || (isProduction ? '' : '*'),
     database: {
-      url: process.env.DATABASE_URL,
-      directUrl: process.env.DIRECT_URL || process.env.DATABASE_URL,
+      url: databaseUrl,
+      directUrl: process.env.DIRECT_URL || databaseUrl,
     },
     jwt: {
-      accessSecret: jwtAccessSecret || 'dev-access-secret-change-in-production',
+      accessSecret: jwtAccessSecret,
       accessExpiration: process.env.JWT_ACCESS_EXPIRATION || '15m',
-      refreshSecret: jwtRefreshSecret || 'dev-refresh-secret-change-in-production',
+      refreshSecret: jwtRefreshSecret,
       refreshExpiration: process.env.JWT_REFRESH_EXPIRATION || '7d',
     },
   };

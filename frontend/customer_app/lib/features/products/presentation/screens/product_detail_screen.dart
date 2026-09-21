@@ -5,13 +5,18 @@ import '../../data/models/product_variant_model.dart';
 import '../../data/models/product_image_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/utils/category_cache.dart';
 import '../../../wishlist/presentation/widgets/wishlist_button.dart';
 import '../../../cart/presentation/bloc/cart_cubit.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/product_details_cubit.dart';
+import '../../../reviews/presentation/widgets/product_reviews_section.dart';
+
+import '../../domain/repositories/product_repository.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../data/models/brand_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -50,24 +55,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _resolveMetadata() async {
     if (_categoryName.isNotEmpty && _brandName.isNotEmpty) return;
     try {
-      final responses = await Future.wait([
-        sl<ApiService>().get('/customer/categories'),
-        sl<ApiService>().get('/customer/brands'),
+      final categoryRepo = sl<CategoryRepository>();
+      final productRepo = sl<ProductRepository>();
+
+      final results = await Future.wait([
+        categoryRepo.getCategories(),
+        productRepo.getBrands(),
       ]);
 
-      final categories = responses[0].data['data'] as List<dynamic>;
-      final brands = responses[1].data['data'] as List<dynamic>;
+      final categories = results[0] as List<CategoryModel>;
+      final brands = results[1] as List<BrandModel>;
 
-      final matchedCat = categories.firstWhere((c) => c['id'] == widget.product.categoryId, orElse: () => null);
-      final matchedBrand = brands.firstWhere((b) => b['id'] == widget.product.brandId, orElse: () => null);
+      final matchedCat = categories.where((c) => c.id == widget.product.categoryId).firstOrNull;
+      final matchedBrand = brands.where((b) => b.id == widget.product.brandId).firstOrNull;
 
       if (mounted) {
         setState(() {
           if (_categoryName.isEmpty) {
-            _categoryName = matchedCat != null ? matchedCat['name'] as String : 'General';
+            _categoryName = matchedCat != null ? matchedCat.name : 'General';
           }
           if (_brandName.isEmpty) {
-            _brandName = matchedBrand != null ? matchedBrand['name'] as String : 'Generic';
+            _brandName = matchedBrand != null ? matchedBrand.name : 'Generic';
           }
         });
       }
@@ -619,24 +627,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(color: const Color(0xFFFFE0B2)),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.star_rounded, color: Color(0xFFFF9800), size: 14),
-                                    SizedBox(width: 3),
+                                    const Icon(Icons.star_rounded, color: Color(0xFFFF9800), size: 14),
+                                    const SizedBox(width: 3),
                                     Text(
-                                      '4.5',
-                                      style: TextStyle(
+                                      product.averageRating > 0
+                                          ? product.averageRating.toStringAsFixed(1)
+                                          : 'New',
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFFE65100),
                                       ),
                                     ),
-                                    SizedBox(width: 3),
-                                    Text(
-                                      '(128)',
-                                      style: TextStyle(fontSize: 10, color: Colors.grey),
-                                    ),
+                                    if (product.totalReviews > 0) ...[
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        '(${product.totalReviews})',
+                                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -1224,6 +1236,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 7. Customer Reviews Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ProductReviewsSection(
+                      productId: product.id,
+                      productName: product.name,
+                      productImage: product.image ?? (product.images.isNotEmpty ? product.images.first.imageUrl : null),
+                      onReviewSubmitted: () => _cubit.fetchProductDetails(),
                     ),
                   ),
                   const SizedBox(height: 24),

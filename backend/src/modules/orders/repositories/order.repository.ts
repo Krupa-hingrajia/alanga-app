@@ -53,11 +53,15 @@ export class OrderRepository implements IOrderRepository {
         orderItems: {
           include: {
             product: {
-              select: {
-                id: true,
-                name: true,
-                vendorId: true,
-                image: true,
+              include: {
+                vendor: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phoneNumber: true,
+                  },
+                },
                 productImages: { where: { deletedAt: null } },
               },
             },
@@ -107,7 +111,12 @@ export class OrderRepository implements IOrderRepository {
       where: {
         deletedAt: null,
         orderItems: {
-          some: { vendorId },
+          some: {
+            OR: [
+              { vendorId },
+              { product: { vendorId } },
+            ],
+          },
         },
       },
       include: {
@@ -121,13 +130,23 @@ export class OrderRepository implements IOrderRepository {
           },
         },
         orderItems: {
-          where: { vendorId },
+          where: {
+            OR: [
+              { vendorId },
+              { product: { vendorId } },
+            ],
+          },
           include: {
             product: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
+              include: {
+                vendor: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phoneNumber: true,
+                  },
+                },
                 productImages: { where: { deletedAt: null } },
               },
             },
@@ -136,6 +155,58 @@ export class OrderRepository implements IOrderRepository {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findVendorOrderById(vendorId: string, orderId: string): Promise<any | null> {
+    return this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        deletedAt: null,
+        orderItems: {
+          some: {
+            OR: [
+              { vendorId },
+              { product: { vendorId } },
+            ],
+          },
+        },
+      },
+      include: {
+        address: true,
+        customer: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+          },
+        },
+        orderItems: {
+          where: {
+            OR: [
+              { vendorId },
+              { product: { vendorId } },
+            ],
+          },
+          include: {
+            product: {
+              include: {
+                vendor: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phoneNumber: true,
+                  },
+                },
+                productImages: { where: { deletedAt: null } },
+              },
+            },
+            productVariant: true,
+          },
+        },
+      },
     });
   }
 
@@ -149,7 +220,12 @@ export class OrderRepository implements IOrderRepository {
     if (status) where.status = status;
     if (vendorId) {
       where.orderItems = {
-        some: { vendorId },
+        some: {
+          OR: [
+            { vendorId },
+            { product: { vendorId } },
+          ],
+        },
       };
     }
     if (startDate || endDate) {
@@ -176,14 +252,19 @@ export class OrderRepository implements IOrderRepository {
           orderItems: {
             include: {
               product: {
-                select: {
-                  id: true,
-                  name: true,
-                  vendorId: true,
-                  image: true,
+                include: {
+                  vendor: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      email: true,
+                      phoneNumber: true,
+                    },
+                  },
                   productImages: { where: { deletedAt: null } },
                 },
               },
+              productVariant: true,
             },
           },
         },

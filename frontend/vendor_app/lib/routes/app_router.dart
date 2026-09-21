@@ -16,6 +16,11 @@ import '../features/inventory/presentation/screens/product_inventory_screen.dart
 // Shipping imports
 import '../features/shipping/presentation/screens/product_shipping_screen.dart';
 
+// Orders imports
+import '../features/orders/data/models/vendor_order_model.dart';
+import '../features/orders/presentation/screens/vendor_order_list_screen.dart';
+import '../features/orders/presentation/screens/vendor_order_detail_screen.dart';
+
 import '../core/dependency_injection/injection.dart';
 import '../core/storage/secure_storage_service.dart';
 
@@ -120,6 +125,19 @@ class AppRouter {
             final productId = state.uri.queryParameters['productId'] ?? '';
             return ProductShippingScreen(productId: productId);
           }
+        },
+      ),
+
+      // Orders routes
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const VendorOrderListScreen(),
+      ),
+      GoRoute(
+        path: '/orders/details',
+        builder: (context, state) {
+          final order = state.extra as VendorOrderModel;
+          return VendorOrderDetailScreen(order: order);
         },
       ),
     ],

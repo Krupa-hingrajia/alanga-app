@@ -21,6 +21,15 @@ import '../features/checkout/presentation/screens/checkout_screen.dart';
 import '../features/checkout/presentation/screens/order_success_screen.dart';
 import '../features/checkout/presentation/screens/order_list_screen.dart';
 import '../features/checkout/presentation/screens/order_detail_screen.dart';
+import '../features/checkout/presentation/screens/order_tracking_screen.dart';
+
+// Addresses imports
+import '../features/addresses/presentation/screens/address_list_screen.dart';
+
+// Reviews imports
+import '../features/reviews/data/models/review_model.dart';
+import '../features/reviews/presentation/screens/write_review_screen.dart';
+import '../features/reviews/presentation/screens/my_reviews_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -65,6 +74,10 @@ class AppRouter {
         builder: (context, state) => const MainNavigationScreen(initialIndex: 3),
       ),
       GoRoute(
+        path: '/addresses',
+        builder: (context, state) => const AddressListScreen(),
+      ),
+      GoRoute(
         path: '/checkout',
         builder: (context, state) => const CheckoutScreen(),
       ),
@@ -82,6 +95,13 @@ class AppRouter {
         path: '/orders/:id',
         builder: (context, state) => OrderDetailScreen(
           orderId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/orders/:id/track',
+        builder: (context, state) => OrderTrackingScreen(
+          orderId: state.pathParameters['id']!,
+          order: state.extra as OrderModel?,
         ),
       ),
       GoRoute(
@@ -107,6 +127,25 @@ class AppRouter {
         builder: (context, state) => CategoryProductsScreen(
           category: state.extra as CategoryModel,
         ),
+      ),
+      GoRoute(
+        path: '/reviews/write',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return WriteReviewScreen(
+            productId: extra['productId'] as String,
+            productName: extra['productName'] as String,
+            productImage: extra['productImage'] as String?,
+            orderId: extra['orderId'] as String,
+            variantId: extra['variantId'] as String?,
+            variantName: extra['variantName'] as String?,
+            existingReview: extra['existingReview'] as ReviewModel?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/reviews/my-reviews',
+        builder: (context, state) => const MyReviewsScreen(),
       ),
     ],
   );

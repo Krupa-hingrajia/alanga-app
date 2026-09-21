@@ -52,6 +52,14 @@ import '../../features/checkout/domain/repositories/checkout_repository.dart';
 import '../../features/checkout/data/repositories/checkout_repository_impl.dart';
 import '../../features/checkout/presentation/bloc/checkout_cubit.dart';
 import '../../features/checkout/presentation/bloc/order_cubit.dart';
+import '../../features/checkout/presentation/bloc/order_detail_cubit.dart';
+
+// Reviews imports
+import '../../features/reviews/data/datasources/review_remote_datasource.dart';
+import '../../features/reviews/domain/repositories/review_repository.dart';
+import '../../features/reviews/data/repositories/review_repository_impl.dart';
+import '../../features/reviews/presentation/bloc/customer_reviews_cubit.dart';
+import '../../features/reviews/presentation/bloc/review_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -67,6 +75,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddressCubit(repository: sl()));
   sl.registerLazySingleton(() => CheckoutCubit(repository: sl()));
   sl.registerLazySingleton(() => OrderCubit(repository: sl()));
+  sl.registerFactory(() => OrderDetailCubit(repository: sl()));
+  sl.registerLazySingleton(() => CustomerReviewsCubit(repository: sl()));
+  sl.registerFactory(() => ReviewCubit(repository: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -94,6 +105,9 @@ Future<void> init() async {
   sl.registerLazySingleton<CheckoutRepository>(
     () => CheckoutRepositoryImpl(remoteDatasource: sl()),
   );
+  sl.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -116,6 +130,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<CheckoutRemoteDatasource>(
     () => CheckoutRemoteDatasourceImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(apiService: sl()),
   );
 
   // Core

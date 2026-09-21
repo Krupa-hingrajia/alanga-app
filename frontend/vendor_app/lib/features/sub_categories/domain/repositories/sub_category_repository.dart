@@ -1,7 +1,7 @@
 import '../../data/models/sub_category_model.dart';
 
 abstract class SubCategoryRepository {
-  Future<List<SubCategoryModel>> getSubCategories();
+  Future<List<SubCategoryModel>> getSubCategories({String? categoryId});
   Future<SubCategoryModel> createSubCategory({
     required String categoryId,
     required String name,

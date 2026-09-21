@@ -8,8 +8,8 @@ import '../widgets/sub_category_card.dart';
 import '../../data/models/sub_category_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
 
 class SubCategoryListScreen extends StatefulWidget {
   const SubCategoryListScreen({super.key});
@@ -41,11 +41,11 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final response = await sl<ApiService>().get('/vendor/categories');
-      final list = response.data['data'] as List<dynamic>;
+      final categoryRepo = sl<CategoryRepository>();
+      final list = await categoryRepo.getCategories();
       final Map<String, String> tempMap = {};
       for (final item in list) {
-        tempMap[item['id'] as String] = item['name'] as String;
+        tempMap[item.id] = item.name;
       }
       setState(() {
         _categoryNameMap = tempMap;

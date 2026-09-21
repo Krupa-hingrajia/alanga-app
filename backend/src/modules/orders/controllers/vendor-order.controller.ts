@@ -1,5 +1,6 @@
-import { Controller, Get, Put, Body, Param, UseGuards, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, UseGuards, HttpStatus, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -10,15 +11,18 @@ import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
 @ApiTags('Vendor Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('VENDOR')
+@Roles(Role.VENDOR)
 @Controller('vendor/orders')
 export class VendorOrderController {
+  private readonly logger = new Logger(VendorOrderController.name);
+
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get orders containing vendor products' })
   @ApiResponse({ status: 200, description: 'Vendor orders retrieved successfully.' })
   async getVendorOrders(@CurrentUser('id') vendorId: string) {
+    this.logger.log(`[VendorOrderController] GET /vendor/orders called by vendor: ${vendorId}`);
     const data = await this.orderService.getVendorOrders(vendorId);
     return {
       success: true,

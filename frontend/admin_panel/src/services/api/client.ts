@@ -48,8 +48,13 @@ client.interceptors.response.use(
 
     // Check if error is 401 and request has not been retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Avoid infinite loop if refresh token request itself fails
-      if (originalRequest.url?.includes('/admin/auth/refresh')) {
+      // Avoid infinite loop if refresh token request or auth request itself fails
+      if (
+        originalRequest.url?.includes('/admin/auth/refresh') ||
+        originalRequest.url?.includes('/auth/refresh') ||
+        originalRequest.url?.includes('/auth/login') ||
+        originalRequest.url?.includes('/admin/auth/login')
+      ) {
         useAuthStore.getState().logout();
         return Promise.reject(error);
       }

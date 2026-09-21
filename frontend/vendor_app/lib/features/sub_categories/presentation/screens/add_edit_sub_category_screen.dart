@@ -5,9 +5,10 @@ import '../bloc/sub_category_bloc.dart';
 import '../bloc/sub_category_event.dart';
 import '../bloc/sub_category_state.dart';
 import '../../data/models/sub_category_model.dart';
+import '../../../categories/data/models/category_model.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/image_picker_widget.dart';
 
 class AddEditSubCategoryScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _AddEditSubCategoryScreenState extends State<AddEditSubCategoryScreen> {
 
   bool get isEdit => widget.subCategory != null;
 
-  List<dynamic> _approvedCategories = [];
+  List<CategoryModel> _approvedCategories = [];
   bool _loadingCategories = true;
   String? _selectedCategoryId;
 
@@ -52,12 +53,12 @@ class _AddEditSubCategoryScreenState extends State<AddEditSubCategoryScreen> {
 
   Future<void> _loadApprovedCategories() async {
     try {
-      final response = await sl<ApiService>().get('/vendor/categories');
-      final list = response.data['data'] as List<dynamic>;
+      final categoryRepo = sl<CategoryRepository>();
+      final list = await categoryRepo.getCategories();
 
       // Filter: Only ACTIVE / APPROVED categories belonging to the vendor
       final filteredList = list.where((item) {
-        final status = (item['status'] as String).toUpperCase();
+        final status = item.status.toUpperCase();
         return status == 'ACTIVE' || status == 'APPROVED';
       }).toList();
 
@@ -249,7 +250,7 @@ class _AddEditSubCategoryScreenState extends State<AddEditSubCategoryScreen> {
 
                           // Parent Category Selection Dropdown
                           DropdownButtonFormField<String>(
-                            value: _approvedCategories.any((cat) => cat['id'] == _selectedCategoryId)
+                            value: _approvedCategories.any((cat) => cat.id == _selectedCategoryId)
                                 ? _selectedCategoryId
                                 : null,
                             decoration: _inputDecoration('Parent Category *', Icons.list),
@@ -257,9 +258,9 @@ class _AddEditSubCategoryScreenState extends State<AddEditSubCategoryScreen> {
                             icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondaryLight),
                             items: _approvedCategories.map<DropdownMenuItem<String>>((item) {
                               return DropdownMenuItem<String>(
-                                value: item['id'] as String,
+                                value: item.id,
                                 child: Text(
-                                  item['name'] as String,
+                                  item.name,
                                   style: const TextStyle(color: Color(0xFF1D1B18), fontSize: 14),
                                 ),
                               );

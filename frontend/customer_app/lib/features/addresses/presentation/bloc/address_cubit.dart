@@ -9,14 +9,15 @@ class AddressCubit extends Cubit<AddressState> {
   AddressCubit({required this.repository}) : super(AddressInitial());
 
   Future<void> fetchAddresses({String? autoSelectId}) async {
+    final prevSelectedId = autoSelectId ?? (state is AddressLoaded ? (state as AddressLoaded).selectedAddress?.id : null);
     emit(AddressLoading());
     try {
       final addresses = await repository.getAddresses();
       AddressModel? selected;
 
-      if (autoSelectId != null) {
+      if (prevSelectedId != null) {
         selected = addresses.firstWhere(
-          (a) => a.id == autoSelectId,
+          (a) => a.id == prevSelectedId,
           orElse: () => addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first),
         );
       } else if (addresses.isNotEmpty) {

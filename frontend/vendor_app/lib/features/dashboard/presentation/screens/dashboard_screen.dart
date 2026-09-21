@@ -25,6 +25,9 @@ import '../../../products/domain/repositories/product_repository.dart';
 import '../../../products/presentation/screens/product_list_screen.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
 
+// Orders imports
+import '../../../orders/presentation/screens/vendor_order_list_screen.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -331,11 +334,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F8F6),
-        appBar: _currentIndex == 0
+        appBar: (_currentIndex == 0 || _currentIndex == 1 || _currentIndex == 2)
             ? null
-            : _currentIndex == 2
+            : _currentIndex == 3
                 ? _buildNotificationsAppBar()
-                : _currentIndex == 3
+                : _currentIndex == 4
                     ? _buildProfileAppBar()
                     : null,
         body: AnimatedSwitcher(
@@ -382,6 +385,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icon(Icons.dashboard_outlined),
                 activeIcon: Icon(Icons.dashboard),
                 label: 'Dashboard',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long_outlined),
+                activeIcon: Icon(Icons.receipt_long),
+                label: 'Orders',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.shopping_bag_outlined),
@@ -483,7 +491,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           onPressed: () {
             setState(() {
-              _currentIndex = 2;
+              _currentIndex = 3;
             });
           },
         ),
@@ -491,7 +499,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GestureDetector(
           onTap: () {
             setState(() {
-              _currentIndex = 3;
+              _currentIndex = 4;
             });
           },
           child: Container(
@@ -587,7 +595,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             onPressed: () {
               setState(() {
-                _currentIndex = 2;
+                _currentIndex = 3;
               });
             },
           ),
@@ -595,7 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           GestureDetector(
             onTap: () {
               setState(() {
-                _currentIndex = 3;
+                _currentIndex = 4;
               });
             },
             child: Container(
@@ -760,10 +768,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         );
       case 1:
-        return const ProductListScreen();
+        return VendorOrderListScreen(
+          onBackToDashboard: () {
+            setState(() {
+              _currentIndex = 0;
+            });
+          },
+        );
       case 2:
-        return _buildNotificationsTab();
+        return const ProductListScreen();
       case 3:
+        return _buildNotificationsTab();
+      case 4:
         return _buildProfileTab();
       default:
         return _buildDashboardContent();
@@ -1104,6 +1120,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       //   emoji: '➕',
       // ),
       _ReelItem(
+        title: 'Orders',
+        icon: Icons.receipt_long_rounded,
+        color: const Color(0xFF10B981),
+        route: '/orders',
+        emoji: '📦',
+      ),
+      _ReelItem(
         title: 'Products',
         icon: Icons.shopping_bag_rounded,
         color: const Color(0xFF4A7BC4),
@@ -1229,22 +1252,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.storefront_outlined, color: AppColors.primaryGreen, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Marketplace Master Data',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF11261B),
+              const Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.storefront_outlined, color: AppColors.primaryGreen, size: 20),
+                    SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Marketplace Master Data',
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF11261B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.primaryGreen.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -1374,20 +1403,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.label_outline_rounded, color: AppColors.brandOrange, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Marketplace Brands (${_brands.length})',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF11261B),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.label_outline_rounded, color: AppColors.brandOrange, size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Marketplace Brands (${_brands.length})',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF11261B),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     InkWell(
                       onTap: () => _showBrandsBottomSheet(context),
                       child: const Text(
@@ -1530,19 +1565,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.grid_view_rounded, color: Colors.purple),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Marketplace Categories (${_categories.length})',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF11261B),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.grid_view_rounded, color: Colors.purple),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Marketplace Categories (${_categories.length})',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF11261B),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -1700,19 +1740,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.folder_copy_outlined, color: Colors.teal),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Sub Categories (${_subCategories.length})',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF11261B),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.folder_copy_outlined, color: Colors.teal),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Sub Categories (${_subCategories.length})',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF11261B),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -1854,19 +1899,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.label_outline_rounded, color: AppColors.brandOrange),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Marketplace Brands (${_brands.length})',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF11261B),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.label_outline_rounded, color: AppColors.brandOrange),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Marketplace Brands (${_brands.length})',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF11261B),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),

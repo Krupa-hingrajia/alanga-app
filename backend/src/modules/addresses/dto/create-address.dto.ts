@@ -10,22 +10,22 @@ export enum AddressType {
 export class CreateAddressDto {
   @ApiProperty({ description: 'Full name of recipient', example: 'Pooja Hingrajia' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Full Name is required' })
   fullName: string;
 
-  @ApiProperty({ description: 'Mobile number', example: '9876543210' })
+  @ApiProperty({ description: 'Primary 10-digit mobile number', example: '9876543210' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Mobile Number is required' })
   mobileNumber: string;
 
-  @ApiPropertyOptional({ description: 'Alternate mobile number', example: '9123456789' })
+  @ApiPropertyOptional({ description: 'Alternate contact number', example: '9123456789' })
   @IsString()
   @IsOptional()
   alternateMobile?: string;
 
-  @ApiProperty({ description: 'House / Flat / Building No. / Street', example: 'Flat 402, Green Heights' })
+  @ApiProperty({ description: 'House / Flat / Building / Street address', example: 'Flat 402, Green Heights' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Address Line 1 is required' })
   addressLine1: string;
 
   @ApiPropertyOptional({ description: 'Area / Colony / Sector', example: 'SG Highway' })
@@ -33,37 +33,41 @@ export class CreateAddressDto {
   @IsOptional()
   addressLine2?: string;
 
-  @ApiPropertyOptional({ description: 'Nearby Landmark', example: 'Near YMCA Club' })
+  @ApiPropertyOptional({ description: 'Nearby landmark', example: 'Near YMCA Club' })
   @IsString()
   @IsOptional()
   landmark?: string;
 
   @ApiProperty({ description: 'City / Town', example: 'Ahmedabad' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'City is required' })
   city: string;
 
-  @ApiProperty({ description: 'State', example: 'Gujarat' })
+  @ApiProperty({ description: 'State / Province', example: 'Gujarat' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'State is required' })
   state: string;
 
   @ApiProperty({ description: 'Country', example: 'India', default: 'India' })
   @IsString()
-  @IsOptional()
-  country?: string = 'India';
+  @IsNotEmpty({ message: 'Country is required' })
+  country: string = 'India';
 
   @ApiProperty({ description: 'Postal Code / Pincode', example: '380015' })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Postal Code is required' })
   postalCode: string;
 
-  @ApiProperty({ description: 'Address Type (HOME / OFFICE / OTHER)', example: 'HOME', enum: AddressType, default: 'HOME' })
-  @IsEnum(AddressType)
+  @ApiPropertyOptional({
+    description: 'Categorization of address (HOME | OFFICE | OTHER)',
+    enum: AddressType,
+    default: AddressType.HOME,
+  })
+  @IsEnum(AddressType, { message: 'Address Type must be HOME, OFFICE, or OTHER' })
   @IsOptional()
   addressType?: AddressType = AddressType.HOME;
 
-  @ApiPropertyOptional({ description: 'Set as default address', example: false, default: false })
+  @ApiPropertyOptional({ description: 'Mark as default shipping address', example: false, default: false })
   @IsBoolean()
   @IsOptional()
   isDefault?: boolean = false;

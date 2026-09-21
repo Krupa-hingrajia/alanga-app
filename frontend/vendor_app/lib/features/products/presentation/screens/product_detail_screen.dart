@@ -9,8 +9,9 @@ import '../../data/models/product_image_model.dart';
 import '../../data/models/product_variant_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
+import '../../../sub_categories/domain/repositories/sub_category_repository.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -39,31 +40,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _fetchClassificationNames() async {
     try {
       if (_categoryName == null && widget.product.categoryId.isNotEmpty) {
-        final res = await sl<ApiService>().get('/vendor/categories');
-        final list = res.data['data'] as List<dynamic>;
-        final match = list.firstWhere(
-          (c) => c['id'] == widget.product.categoryId,
-          orElse: () => null,
-        );
+        final categoryRepo = sl<CategoryRepository>();
+        final list = await categoryRepo.getCategories();
+        final match = list.where((c) => c.id == widget.product.categoryId).firstOrNull;
         if (match != null && mounted) {
           setState(() {
-            _categoryName = match['name'] as String?;
+            _categoryName = match.name;
           });
         }
       }
       if (_subCategoryName == null && widget.product.subCategoryId.isNotEmpty) {
-        final res = await sl<ApiService>().get(
-          '/vendor/sub-categories',
-          queryParameters: {'categoryId': widget.product.categoryId},
-        );
-        final list = res.data['data'] as List<dynamic>;
-        final match = list.firstWhere(
-          (sc) => sc['id'] == widget.product.subCategoryId,
-          orElse: () => null,
-        );
+        final subCategoryRepo = sl<SubCategoryRepository>();
+        final list = await subCategoryRepo.getSubCategories(categoryId: widget.product.categoryId);
+        final match = list.where((sc) => sc.id == widget.product.subCategoryId).firstOrNull;
         if (match != null && mounted) {
           setState(() {
-            _subCategoryName = match['name'] as String?;
+            _subCategoryName = match.name;
           });
         }
       }

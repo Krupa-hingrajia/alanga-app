@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/product_model.dart';
+import '../../domain/repositories/product_repository.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 
 class ProductDetailsState extends Equatable {
   final ProductModel product;
@@ -36,8 +36,13 @@ class ProductDetailsState extends Equatable {
 }
 
 class ProductDetailsCubit extends Cubit<ProductDetailsState> {
-  ProductDetailsCubit({required ProductModel product})
-      : super(ProductDetailsState(
+  final ProductRepository _productRepository;
+
+  ProductDetailsCubit({
+    required ProductModel product,
+    ProductRepository? productRepository,
+  })  : _productRepository = productRepository ?? sl<ProductRepository>(),
+        super(ProductDetailsState(
           product: product,
           selectedVariantId: null, // Always start with no variant selected (Amazon Style Common Images)
         ));
@@ -49,27 +54,22 @@ class ProductDetailsCubit extends Cubit<ProductDetailsState> {
   Future<void> fetchProductDetails() async {
     emit(state.copyWith(isLoading: true));
     try {
-      final response = await sl<ApiService>().get('/customer/products/${state.product.id}');
-      if (response.data != null && response.data['data'] != null) {
-        final fetched = ProductModel.fromJson(response.data['data'] as Map<String, dynamic>);
-        
-        String? nextVariantId = state.selectedVariantId;
-        if (nextVariantId != null && !fetched.variants.any((v) => v.id == nextVariantId)) {
-          nextVariantId = null;
-        }
-        
-        emit(state.copyWith(
-          product: fetched,
-          selectedVariantId: nextVariantId,
-          isLoading: false,
-        ));
-      } else {
-        emit(state.copyWith(isLoading: false));
+      final fetched = await _productRepository.getProductById(state.product.id);
+      
+      String? nextVariantId = state.selectedVariantId;
+      if (nextVariantId != null && !fetched.variants.any((v) => v.id == nextVariantId)) {
+        nextVariantId = null;
       }
+      
+      emit(state.copyWith(
+        product: fetched,
+        selectedVariantId: nextVariantId,
+        isLoading: false,
+      ));
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
       ));
     }
   }

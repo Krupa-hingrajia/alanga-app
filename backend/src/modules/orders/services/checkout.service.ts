@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CartRepository } from '../../cart/repositories/cart.repository';
 import { AddressRepository } from '../../addresses/repositories/address.repository';
+import { calculateItemShippingFee } from '../utils/shipping-calculator.util';
 
 @Injectable()
 export class CheckoutService {
@@ -30,16 +31,7 @@ export class CheckoutService {
 
       const unitPrice = Number(variant.price ?? product.sellingPrice ?? 0);
       const itemSubtotal = unitPrice * cartItem.quantity;
-
-      // Shipping calculation
-      let itemShippingFee = 0;
-      if (shipping.isFreeShipping) {
-        itemShippingFee = 0;
-      } else if (shipping.freeShippingAboveAmount && itemSubtotal >= shipping.freeShippingAboveAmount) {
-        itemShippingFee = 0;
-      } else {
-        itemShippingFee = Number(shipping.shippingCharge ?? 0);
-      }
+      const itemShippingFee = calculateItemShippingFee(shipping, itemSubtotal);
 
       if (shipping.estimatedDeliveryMinDays && shipping.estimatedDeliveryMinDays > minDeliveryDays) {
         minDeliveryDays = shipping.estimatedDeliveryMinDays;

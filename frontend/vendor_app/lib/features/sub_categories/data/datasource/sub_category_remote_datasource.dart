@@ -3,7 +3,7 @@ import '../../../../core/network/api_service.dart';
 import '../models/sub_category_model.dart';
 
 abstract class SubCategoryRemoteDataSource {
-  Future<List<SubCategoryModel>> getSubCategories();
+  Future<List<SubCategoryModel>> getSubCategories({String? categoryId});
   Future<SubCategoryModel> createSubCategory({
     required String categoryId,
     required String name,
@@ -26,9 +26,12 @@ class SubCategoryRemoteDataSourceImpl implements SubCategoryRemoteDataSource {
   SubCategoryRemoteDataSourceImpl({required ApiService apiService}) : _apiService = apiService;
 
   @override
-  Future<List<SubCategoryModel>> getSubCategories() async {
+  Future<List<SubCategoryModel>> getSubCategories({String? categoryId}) async {
     try {
-      final response = await _apiService.get('/vendor/sub-categories');
+      final response = await _apiService.get(
+        '/vendor/sub-categories',
+        queryParameters: categoryId != null ? {'categoryId': categoryId} : null,
+      );
       final list = response.data['data'] as List<dynamic>;
       return list.map((json) => SubCategoryModel.fromJson(json as Map<String, dynamic>)).toList();
     } on DioException {

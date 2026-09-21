@@ -13,10 +13,12 @@ import '../widgets/product_images_section.dart';
 import '../widgets/product_variants_section.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
-import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../../core/widgets/searchable_dropdown_field.dart';
 import '../../../brands/presentation/widgets/request_brand_bottom_sheet.dart';
+import '../../../categories/domain/repositories/category_repository.dart';
+import '../../../brands/domain/repositories/brand_repository.dart';
+import '../../../sub_categories/domain/repositories/sub_category_repository.dart';
 
 class AddEditProductScreen extends StatefulWidget {
   final ProductModel? product;
@@ -112,14 +114,17 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   Future<void> _loadDropdownData() async {
     try {
-      final responses = await Future.wait([
-        sl<ApiService>().get('/vendor/categories'),
-        sl<ApiService>().get('/vendor/brands'),
+      final categoryRepo = sl<CategoryRepository>();
+      final brandRepo = sl<BrandRepository>();
+
+      final results = await Future.wait([
+        categoryRepo.getCategories(),
+        brandRepo.getBrands(),
       ]);
 
       setState(() {
-        _categories = responses[0].data['data'] as List<dynamic>;
-        _brands = responses[1].data['data'] as List<dynamic>;
+        _categories = results[0];
+        _brands = results[1];
         _loadingDropdowns = false;
       });
 
@@ -143,12 +148,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       _subCategories = [];
     });
     try {
-      final response = await sl<ApiService>().get(
-        '/vendor/sub-categories',
-        queryParameters: {'categoryId': categoryId},
-      );
+      final subCategoryRepo = sl<SubCategoryRepository>();
+      final list = await subCategoryRepo.getSubCategories(categoryId: categoryId);
       setState(() {
-        _subCategories = response.data['data'] as List<dynamic>;
+        _subCategories = list;
         _loadingSubCategories = false;
       });
     } catch (e) {

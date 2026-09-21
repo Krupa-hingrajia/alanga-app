@@ -59,12 +59,13 @@ const navigationSections: NavSection[] = [
     ],
   },
   {
-    title: 'Marketplace',
+    title: 'Marketplace Management',
     items: [
       { href: '/categories', label: 'Categories', icon: FolderTree },
       { href: '/subcategories', label: 'Sub Categories', icon: FolderGit2 },
       { href: '/brands', label: 'Brands', icon: Tag },
       { href: '/products', label: 'Products', icon: ShoppingBag },
+      { href: '/orders', label: 'Orders', icon: ShoppingCart },
     ],
   },
   {
@@ -72,11 +73,6 @@ const navigationSections: NavSection[] = [
     items: [
       { href: '/vendors', label: 'Vendors', icon: Users, badgeKey: 'pendingVendorApprovals' },
       { href: '/customers', label: 'Customers', icon: UserCheck },
-    ],
-  },
-  {
-    items: [
-      { href: '/orders', label: 'Orders', icon: ShoppingCart },
     ],
   },
   {

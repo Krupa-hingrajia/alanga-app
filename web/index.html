@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALANGA Vendor Support | Customer Care & Help Center</title>
+  <meta name="description" content="Official Vendor Support for ALANGA Vendor App. Get assistance with orders, inventory, payouts, and account management.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2311261B'/><path d='M30 70 L50 25 L70 70 L55 70 L50 50 L45 70 Z' fill='%23229944'/><circle cx='50' cy='38' r='6' fill='%23F99F1B'/></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #11261B;
+      --primary-accent: #1e3e2d;
+      --accent-green: #229944;
+      --accent-light: #E8F7ED;
+      --accent-orange: #F99F1B;
+      --text-main: #1f2937;
+      --text-muted: #526B5C;
+      --bg-body: #F4F7F5;
+      --bg-card: #ffffff;
+      --border-color: #E1EAE4;
+      --shadow-sm: 0 2px 8px rgba(17, 38, 27, 0.04);
+      --shadow-md: 0 8px 24px rgba(17, 38, 27, 0.08);
+      --shadow-lg: 0 16px 40px rgba(17, 38, 27, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .bg-glow {
+      position: fixed;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 750px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(34, 153, 68, 0.12) 0%, rgba(249, 159, 27, 0.05) 50%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+      color: #ffffff;
+      padding: 2.5rem 1.5rem 3.5rem 1.5rem;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow-md);
+      z-index: 10;
+    }
+
+    .header-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .app-badge span {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(34, 153, 68, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 153, 68, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(34, 153, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 153, 68, 0); }
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-subtext {
+      font-size: 1.1rem;
+      color: #D1DDD6;
+      max-width: 600px;
+      margin: 0 auto 1.25rem auto;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .main-container {
+      max-width: 1000px;
+      margin: -2rem auto 3rem auto;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 20;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 1.6rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(34, 153, 68, 0.35);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-email {
+      background: rgba(34, 153, 68, 0.12);
+      color: var(--accent-green);
+    }
+
+    .icon-hours {
+      background: rgba(249, 159, 27, 0.12);
+      color: var(--accent-orange);
+    }
+
+    .icon-sla {
+      background: rgba(17, 38, 27, 0.08);
+      color: var(--primary);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .card-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .card-highlight {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      word-break: break-all;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+
+    .status-open {
+      background: #E8F7ED;
+      color: #167634;
+    }
+
+    .status-closed {
+      background: #FEECEB;
+      color: #C5221F;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(34, 153, 68, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #1C8039;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: #FFFFFF;
+      color: var(--primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-body);
+      border-color: var(--text-muted);
+    }
+
+    .content-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .box-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .box-subtitle {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: #FAFBFB;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent-green);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(34, 153, 68, 0.15);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .faq-btn {
+      width: 100%;
+      text-align: left;
+      padding: 1rem 1.25rem;
+      background: #FAFBFB;
+      border: none;
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .faq-btn:hover {
+      background: #F3F7F4;
+    }
+
+    .faq-icon {
+      transition: transform 0.3s ease;
+      color: var(--accent-green);
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      display: none;
+      padding: 1rem 1.25rem;
+      background: #FFFFFF;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      line-height: 1.6;
+    }
+
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+
+    .policy-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+      color: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .policy-banner h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .policy-banner p {
+      font-size: 0.92rem;
+      color: #D1DDD6;
+      margin-bottom: 1.25rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .banner-links {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-white {
+      background: #FFFFFF;
+      color: var(--primary);
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 0.65rem 1.4rem;
+    }
+
+    .btn-white:hover {
+      background: var(--accent-orange);
+      color: #FFFFFF;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      background: #FFFFFF;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-green);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <header>
+    <div class="header-container">
+      <div class="app-badge">
+        <span></span>
+        Official ALANGA Vendor Care
+      </div>
+      <h1>ALANGA Vendor Support</h1>
+      <p class="header-subtext">Need help with the ALANGA Vendor App? We are here to assist your business grow.</p>
+      
+      <div class="nav-buttons">
+        <a href="https://alangavendorprivacypolicy.vercel.app/" target="_blank" rel="noopener noreferrer" class="nav-btn">
+          🛡️ Privacy Policy
+        </a>
+        <a href="delete_account.html" class="nav-btn">
+          🗑️ Account Deletion
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="cards-grid">
+      <div class="card">
+        <div>
+          <div class="card-top">
+            <div class="card-icon icon-email">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Email Support</div>
+              <div class="card-label">Direct Contact</div>
+            </div>
+          </div>
+          <div class="card-highlight">info@alangashop.com</div>
+          <div class="card-desc">Send us your queries, store KYC, or order assistance requests anytime.</div>
+        </div>
+        <div class="card-actions">
+          <a href="mailto:info@alangashop.com?subject=ALANGA%20Vendor%20Support%20Request" class="btn btn-primary">
+            Send Email
+          </a>
+          <button class="btn btn-outline" onclick="copyEmail('info@alangashop.com')">
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top">
+            <div class="card-icon icon-hours">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Business Hours</div>
+              <div class="card-label">Working Schedule</div>
+            </div>
+          </div>
+          <div class="card-highlight">Monday – Saturday</div>
+          <div class="card-desc" style="font-weight: 600; color: var(--text-main);">10:00 AM – 6:00 PM (IST)</div>
+          <div id="liveStatusBadge" class="status-badge status-open">
+            <span id="liveStatusText">● Checking status...</span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <div style="font-size: 0.78rem; color: var(--text-muted); width: 100%; text-align: center; padding-top: 0.35rem;">
+            Closed on Sundays & National Holidays
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top">
+            <div class="card-icon icon-sla">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Turnaround SLA</div>
+              <div class="card-label">Fast Resolution</div>
+            </div>
+          </div>
+          <div class="card-highlight">24 – 48 Hours</div>
+          <div class="card-desc">We typically respond to and resolve all vendor support requests within 24–48 hours.</div>
+        </div>
+        <div class="card-actions">
+          <a href="#queryBuilder" class="btn btn-outline" style="width: 100%;">
+            Compose Query
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-box" id="queryBuilder">
+      <div class="box-title">Compose Vendor Support Query</div>
+      <div class="box-subtitle">Fill out the quick form below to auto-format your email with all the necessary details.</div>
+
+      <form onsubmit="handleQuerySubmit(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="vName">Store / Vendor Name</label>
+            <input type="text" id="vName" class="form-input" placeholder="e.g. Royal Fashion Boutique" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="vPhone">Registered Mobile Number</label>
+            <input type="tel" id="vPhone" class="form-input" placeholder="e.g. +91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="vDept">Department / Category</label>
+            <select id="vDept" class="form-select">
+              <option value="General Inquiry">General Inquiry</option>
+              <option value="Orders & Shipping">Orders & Fulfillment</option>
+              <option value="Inventory & Listing">Inventory & Catalog Listing</option>
+              <option value="Vendor Payouts">Vendor Payouts & Settlement</option>
+              <option value="Account Verification">Store KYC & Verification</option>
+              <option value="Technical Issue">App Bug / Technical Issue</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="vRef">Order ID / Product ID (Optional)</label>
+            <input type="text" id="vRef" class="form-input" placeholder="e.g. ORD-2026-XXXX">
+          </div>
+          <div class="form-group full">
+            <label class="form-label" for="vMsg">Details of your request</label>
+            <textarea id="vMsg" class="form-textarea" placeholder="Explain your query or issue in detail..." required></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.75rem;">
+          ✉️ Open in Email App
+        </button>
+      </form>
+    </div>
+
+    <div class="content-box">
+      <div class="box-title">Frequently Asked Questions</div>
+      <div class="box-subtitle">Quick answers for common vendor management questions.</div>
+
+      <div class="faq-item active">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span>How long does store KYC approval take?</span>
+          <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          Store documents (GST, PAN, Bank Details) are verified by the ALANGA team within 24–48 business hours after submission. You will receive an in-app confirmation once active.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span>When are vendor payouts processed?</span>
+          <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          Payouts for delivered orders are credited directly to your registered bank account according to our settlement cycle, after platform commission and applicable deductions.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span>How do I update my registered bank details or email?</span>
+          <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          For security, bank or primary email changes require verification. Send an email to <strong>info@alangashop.com</strong> from your registered email with proof (bank passbook / cancelled cheque).
+        </div>
+      </div>
+    </div>
+
+    <div class="policy-banner">
+      <h3>ALANGA Vendor Policies & Guidelines</h3>
+      <p>Review our official terms, privacy policy, and vendor standards anytime.</p>
+      <div class="banner-links">
+        <a href="https://alangavendorprivacypolicy.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn-white">
+          View Privacy Policy
+        </a>
+        <a href="mailto:info@alangashop.com" class="btn" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px;">
+          Email Support
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://alangavendorprivacypolicy.vercel.app/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+      <span>•</span>
+      <a href="delete_account.html">Delete Account</a>
+      <span>•</span>
+      <a href="mailto:info@alangashop.com">info@alangashop.com</a>
+    </div>
+    <div>&copy; <span id="yr"></span> ALANGA Technologies. All rights reserved.</div>
+  </footer>
+
+  <div id="toast" class="toast">Email copied to clipboard!</div>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    function copyEmail(email) {
+      navigator.clipboard.writeText(email).then(() => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+      });
+    }
+
+    function toggleFaq(btn) {
+      const parent = btn.parentElement;
+      const isOpen = parent.classList.contains('active');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+      if(!isOpen) parent.classList.add('active');
+    }
+
+    function updateLiveStatus() {
+      const now = new Date();
+      const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const istTime = new Date(utcTime + (3600000 * 5.5));
+      
+      const day = istTime.getDay();
+      const mins = istTime.getHours() * 60 + istTime.getMinutes();
+      const isOpen = (day >= 1 && day <= 6) && (mins >= 600 && mins < 1080);
+
+      const b = document.getElementById('liveStatusBadge');
+      const t = document.getElementById('liveStatusText');
+
+      if (isOpen) {
+        b.className = 'status-badge status-open';
+        t.textContent = '● Online Now (10:00 AM - 6:00 PM IST)';
+      } else {
+        b.className = 'status-badge status-closed';
+        t.textContent = '○ Currently Closed (Mon–Sat 10 AM IST)';
+      }
+    }
+    updateLiveStatus();
+    setInterval(updateLiveStatus, 60000);
+
+    function handleQuerySubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('vName').value.trim();
+      const phone = document.getElementById('vPhone').value.trim();
+      const dept = document.getElementById('vDept').value;
+      const ref = document.getElementById('vRef').value.trim();
+      const msg = document.getElementById('vMsg').value.trim();
+
+      const subject = encodeURIComponent(`[ALANGA Vendor Support] ${dept} - ${name}`);
+      let body = `Dear ALANGA Support Team,\n\nVendor / Store: ${name}\nPhone: ${phone}\nTopic: ${dept}\n`;
+      if(ref) body += `Reference ID: ${ref}\n`;
+      body += `\nIssue Description:\n${msg}\n\n---\nSent via ALANGA Vendor Support`;
+
+      window.location.href = `mailto:info@alangashop.com?subject=${subject}&body=${encodeURIComponent(body)}`;
+    }
+  </script>
+</body>
+</html>

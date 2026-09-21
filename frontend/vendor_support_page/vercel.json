@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "alanga-vendor-support",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

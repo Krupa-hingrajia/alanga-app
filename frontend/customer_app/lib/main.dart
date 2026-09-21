@@ -10,6 +10,7 @@ import 'features/cart/presentation/bloc/cart_cubit.dart';
 import 'features/addresses/presentation/bloc/address_cubit.dart';
 import 'features/checkout/presentation/bloc/checkout_cubit.dart';
 import 'features/checkout/presentation/bloc/order_cubit.dart';
+import 'features/reviews/presentation/bloc/customer_reviews_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<OrderCubit>.value(
           value: sl<OrderCubit>(),
+        ),
+        BlocProvider<CustomerReviewsCubit>.value(
+          value: sl<CustomerReviewsCubit>()..loadCustomerReviews(),
         ),
       ],
       child: MaterialApp.router(

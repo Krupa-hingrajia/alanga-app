@@ -98,13 +98,15 @@ export class AuthService {
     const accessSecret =
       this.configService.get<string>('jwt.accessSecret') ||
       this.configService.get<string>('JWT_ACCESS_SECRET') ||
-      this.configService.get<string>('JWT_SECRET') ||
-      'super-secret-access-token-key-change-in-production';
+      this.configService.get<string>('JWT_SECRET');
 
     const refreshSecret =
       this.configService.get<string>('jwt.refreshSecret') ||
-      this.configService.get<string>('JWT_REFRESH_SECRET') ||
-      'super-secret-refresh-token-key-change-in-production';
+      this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!accessSecret || !refreshSecret) {
+      throw new Error('JWT secrets are not properly configured.');
+    }
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {

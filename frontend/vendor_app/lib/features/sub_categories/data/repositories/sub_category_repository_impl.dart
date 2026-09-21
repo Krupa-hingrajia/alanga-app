@@ -11,9 +11,9 @@ class SubCategoryRepositoryImpl implements SubCategoryRepository {
       : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<List<SubCategoryModel>> getSubCategories() async {
+  Future<List<SubCategoryModel>> getSubCategories({String? categoryId}) async {
     try {
-      return await _remoteDataSource.getSubCategories();
+      return await _remoteDataSource.getSubCategories(categoryId: categoryId);
     } on DioException catch (e) {
       throw ServerFailure(_getErrorMessage(e));
     }

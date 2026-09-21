@@ -13,8 +13,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   ) {
     const refreshSecret =
       configService.get<string>('jwt.refreshSecret') ||
-      configService.get<string>('JWT_REFRESH_SECRET') ||
-      'super-secret-refresh-token-key-change-in-production';
+      configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!refreshSecret) {
+      throw new Error('JWT refresh secret is not configured.');
+    }
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([

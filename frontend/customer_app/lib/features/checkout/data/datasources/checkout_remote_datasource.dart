@@ -98,6 +98,12 @@ class CheckoutRemoteDatasourceImpl implements CheckoutRemoteDatasource {
   }
 
   String _extractErrorMessage(DioException e) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return 'Network Error: Please check your internet connection and try again.';
+    }
     if (e.response?.data != null && e.response?.data['message'] != null) {
       final raw = e.response?.data['message'];
       if (raw is List) return raw.join(', ');

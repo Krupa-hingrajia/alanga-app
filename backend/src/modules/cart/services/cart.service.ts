@@ -3,6 +3,7 @@ import { ICartRepository } from '../interfaces/cart-repository.interface';
 import { PrismaService } from '../../../database/prisma.service';
 import { AddToCartDto } from '../dto/add-to-cart.dto';
 import { UpdateCartItemDto, CartUpdateAction } from '../dto/update-cart-item.dto';
+import { calculateItemShippingFee } from '../../orders/utils/shipping-calculator.util';
 
 @Injectable()
 export class CartService {
@@ -100,31 +101,15 @@ export class CartService {
       }
     }
 
-    // Compute shipping per product
+    // Compute shipping fee across active items using shared calculation engine
     let shippingCharge = 0;
-    const processedProductIds = new Set<string>();
-
     for (const raw of rawItems) {
       const product = raw.product;
-      if (!product || processedProductIds.has(product.id)) continue;
-      processedProductIds.add(product.id);
-
-      const shipping = product.shipping;
-      if (shipping) {
-        if (shipping.isFreeShipping) {
-          if (shipping.freeShippingAboveAmount && shipping.freeShippingAboveAmount > 0) {
-            const productSubtotal = rawItems
-              .filter((i) => i.productId === product.id)
-              .reduce((acc, i) => acc + (i.productVariant?.price ?? 0) * i.quantity, 0);
-
-            if (productSubtotal < shipping.freeShippingAboveAmount) {
-              shippingCharge += shipping.shippingCharge ?? 0;
-            }
-          }
-        } else {
-          shippingCharge += shipping.shippingCharge ?? 0;
-        }
-      }
+      const variant = raw.productVariant;
+      if (!product || !variant) continue;
+      const unitPrice = Number(variant.price ?? product.sellingPrice ?? 0);
+      const itemSubtotal = unitPrice * raw.quantity;
+      shippingCharge += calculateItemShippingFee(product.shipping, itemSubtotal);
     }
 
     const estimatedTotal = subtotal + shippingCharge;

@@ -26,6 +26,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
   late TextEditingController _landmarkController;
   late TextEditingController _cityController;
   late TextEditingController _stateController;
+  late TextEditingController _countryController;
   late TextEditingController _postalCodeController;
 
   String _addressType = 'HOME';
@@ -45,6 +46,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
     _landmarkController = TextEditingController(text: a?.landmark ?? '');
     _cityController = TextEditingController(text: a?.city ?? '');
     _stateController = TextEditingController(text: a?.state ?? '');
+    _countryController = TextEditingController(text: a?.country ?? 'India');
     _postalCodeController = TextEditingController(text: a?.postalCode ?? '');
     _addressType = a?.addressType ?? 'HOME';
     _isDefault = a?.isDefault ?? false;
@@ -60,6 +62,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
     _landmarkController.dispose();
     _cityController.dispose();
     _stateController.dispose();
+    _countryController.dispose();
     _postalCodeController.dispose();
     super.dispose();
   }
@@ -105,6 +108,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
             _line2Controller.text = place.subLocality ?? '';
             _cityController.text = place.locality ?? place.subAdministrativeArea ?? '';
             _stateController.text = place.administrativeArea ?? '';
+            _countryController.text = place.country ?? 'India';
             _postalCodeController.text = place.postalCode ?? '';
           });
           geocoded = true;
@@ -129,6 +133,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
             _line1Controller.text = addr['road'] ?? addr['suburb'] ?? addr['neighbourhood'] ?? '';
             _cityController.text = addr['city'] ?? addr['town'] ?? addr['village'] ?? addr['state_district'] ?? '';
             _stateController.text = addr['state'] ?? '';
+            _countryController.text = addr['country'] ?? 'India';
             _postalCodeController.text = addr['postcode'] ?? '';
           });
         }
@@ -175,7 +180,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
         'landmark': _landmarkController.text.trim(),
       'city': _cityController.text.trim(),
       'state': _stateController.text.trim(),
-      'country': 'India',
+      'country': _countryController.text.trim().isNotEmpty ? _countryController.text.trim() : 'India',
       'postalCode': _postalCodeController.text.trim(),
       'addressType': _addressType,
       'isDefault': _isDefault,
@@ -327,7 +332,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
               ),
               const SizedBox(height: 12),
 
-              // City, State, Postal Code
+              // City & State
               Row(
                 children: [
                   Expanded(
@@ -337,7 +342,7 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextFormField(
                       controller: _stateController,
@@ -345,13 +350,27 @@ class _AddEditAddressBottomSheetState extends State<AddEditAddressBottomSheet> {
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Country & Postal Code
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _countryController,
+                      decoration: _inputDecoration('Country *', Icons.public_outlined),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextFormField(
                       controller: _postalCodeController,
                       keyboardType: TextInputType.number,
-                      decoration: _inputDecoration('Pincode *', Icons.pin_drop_outlined),
-                      validator: (v) => v == null || v.trim().length < 6 ? 'Invalid' : null,
+                      decoration: _inputDecoration('Postal Code *', Icons.pin_drop_outlined),
+                      validator: (v) => v == null || v.trim().length < 6 ? 'Invalid postal code' : null,
                     ),
                   ),
                 ],

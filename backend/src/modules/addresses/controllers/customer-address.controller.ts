@@ -11,7 +11,14 @@ import {
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -19,6 +26,10 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { AddressService } from '../services/address.service';
 import { CreateAddressDto } from '../dto/create-address.dto';
 import { UpdateAddressDto } from '../dto/update-address.dto';
+import {
+  AddressResponseDto,
+  AddressListResponseDto,
+} from '../dto/address-response.dto';
 
 @ApiTags('Customer Addresses')
 @ApiBearerAuth()
@@ -29,8 +40,15 @@ export class CustomerAddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all saved addresses for customer' })
-  @ApiResponse({ status: 200, description: 'List of customer addresses retrieved successfully.' })
+  @ApiOperation({
+    summary: 'View Address List',
+    description: 'Returns all saved delivery addresses for the authenticated customer. The default address appears first.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of customer addresses retrieved successfully.',
+    type: AddressListResponseDto,
+  })
   async getAddresses(@CurrentUser('id') customerId: string) {
     const data = await this.addressService.getCustomerAddresses(customerId);
     return {
@@ -41,11 +59,38 @@ export class CustomerAddressController {
     };
   }
 
+  @Get('default')
+  @ApiOperation({
+    summary: 'Get Default Address',
+    description: 'Returns the customer’s active default shipping address for checkout convenience.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Default address retrieved successfully.',
+    type: AddressResponseDto,
+  })
+  async getDefaultAddress(@CurrentUser('id') customerId: string) {
+    const data = await this.addressService.getDefaultAddress(customerId);
+    return {
+      success: true,
+      message: data ? 'Default address retrieved successfully' : 'No default address found',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get address by ID' })
+  @ApiOperation({
+    summary: 'View Address Details',
+    description: 'Returns details of a specific address owned by the authenticated customer.',
+  })
   @ApiParam({ name: 'id', description: 'Address UUID' })
-  @ApiResponse({ status: 200, description: 'Address details retrieved successfully.' })
-  @ApiResponse({ status: 404, description: 'Address not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Address details retrieved successfully.',
+    type: AddressResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Address not found or does not belong to customer.' })
   async getAddressById(
     @Param('id') id: string,
     @CurrentUser('id') customerId: string,
@@ -60,8 +105,16 @@ export class CustomerAddressController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Add a new shipping address' })
-  @ApiResponse({ status: 201, description: 'Address created successfully.' })
+  @ApiOperation({
+    summary: 'Add Address',
+    description: 'Creates a new delivery address for the authenticated customer. If this is their first address or marked default, it automatically becomes the default.',
+  })
+  @ApiBody({ type: CreateAddressDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Address created successfully.',
+    type: AddressResponseDto,
+  })
   async createAddress(
     @Body() dto: CreateAddressDto,
     @CurrentUser('id') customerId: string,
@@ -76,9 +129,17 @@ export class CustomerAddressController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Update an existing address' })
+  @ApiOperation({
+    summary: 'Edit Address',
+    description: 'Updates an existing delivery address for the authenticated customer.',
+  })
   @ApiParam({ name: 'id', description: 'Address UUID' })
-  @ApiResponse({ status: 200, description: 'Address updated successfully.' })
+  @ApiBody({ type: UpdateAddressDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Address updated successfully.',
+    type: AddressResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Address not found.' })
   async updateAddress(
     @Param('id') id: string,
@@ -96,7 +157,10 @@ export class CustomerAddressController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Soft delete an address' })
+  @ApiOperation({
+    summary: 'Delete Address',
+    description: 'Soft deletes a delivery address. If the deleted address was the default, another address is automatically promoted to default (if available).',
+  })
   @ApiParam({ name: 'id', description: 'Address UUID' })
   @ApiResponse({ status: 200, description: 'Address deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Address not found.' })
@@ -107,18 +171,52 @@ export class CustomerAddressController {
     const data = await this.addressService.deleteAddress(customerId, id);
     return {
       success: true,
-      message: 'Address deleted successfully',
+      message: data.message,
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Put(':id/default')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Set Default Address',
+    description: 'Marks the specified address as the customer default and automatically unsets default on all other addresses.',
+  })
+  @ApiParam({ name: 'id', description: 'Address UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Default address set successfully.',
+    type: AddressResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Address not found.' })
+  async setDefaultAddressPut(
+    @Param('id') id: string,
+    @CurrentUser('id') customerId: string,
+  ) {
+    const data = await this.addressService.setDefaultAddress(customerId, id);
+    return {
+      success: true,
+      message: 'Default address updated successfully',
       data,
       statusCode: HttpStatus.OK,
     };
   }
 
   @Patch(':id/default')
-  @ApiOperation({ summary: 'Set an address as default' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Set Default Address (PATCH alias)',
+    description: 'Alias for PUT /customer/addresses/:id/default.',
+  })
   @ApiParam({ name: 'id', description: 'Address UUID' })
-  @ApiResponse({ status: 200, description: 'Default address updated successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Default address set successfully.',
+    type: AddressResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Address not found.' })
-  async setDefaultAddress(
+  async setDefaultAddressPatch(
     @Param('id') id: string,
     @CurrentUser('id') customerId: string,
   ) {

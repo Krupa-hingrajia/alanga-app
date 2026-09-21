@@ -49,10 +49,12 @@ model User {
   products Product[] @relation("VendorProducts")
 
   // Customer relations
-  wishlists Wishlist[]
-  cartItems CartItem[]
-  addresses Address[]
-  orders    Order[]
+  wishlists     Wishlist[]
+  cartItems     CartItem[]
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+  reviewReplies ReviewReply[]
 
   @@map("users")
 }
@@ -139,6 +141,8 @@ model Product {
   height           Float?
   status           String           @default("ACTIVE")
   image            String?
+  averageRating    Float            @default(0) @map("average_rating")
+  totalReviews     Int              @default(0) @map("total_reviews")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   deletedAt        DateTime?        @map("deleted_at")
@@ -149,6 +153,7 @@ model Product {
   wishlists        Wishlist[]
   cartItems        CartItem[]
   orderItems       OrderItem[]
+  reviews          Review[]
 
   @@map("products")
 }
@@ -262,6 +267,7 @@ model ProductVariant {
   images             ProductImage[]
   cartItems          CartItem[]
   orderItems         OrderItem[]
+  reviews            Review[]
 
   @@map("product_variants")
 }
@@ -325,6 +331,7 @@ model Order {
   updatedAt               DateTime    @updatedAt @map("updated_at")
   deletedAt               DateTime?   @map("deleted_at")
   orderItems              OrderItem[]
+  reviews                 Review[]
 
   @@map("orders")
 }
@@ -352,3 +359,49 @@ model OrderItem {
 
   @@map("order_items")
 }
+
+model Review {
+  id                 String          @id @default(uuid())
+  productId          String          @map("product_id")
+  product            Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVariantId   String?         @map("product_variant_id")
+  productVariant     ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
+  customerId         String          @map("customer_id")
+  customer           User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderId            String          @map("order_id")
+  order              Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rating             Int             // 1 to 5
+  title              String?
+  review             String?         @db.Text
+  description        String          @default("") @db.Text
+  images             Json            @default("[]")
+  vendorReply        String?         @map("vendor_reply") @db.Text
+  isVerifiedPurchase Boolean         @default(true) @map("is_verified_purchase")
+  helpfulVotes       Int             @default(0) @map("helpful_votes")
+  status             String          @default("ACTIVE") // ACTIVE, HIDDEN, DELETED
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+  deletedAt          DateTime?       @map("deleted_at")
+  replies            ReviewReply[]
+
+  @@unique([customerId, productId])
+  @@index([productId])
+  @@index([customerId])
+  @@index([orderId])
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id        String    @id @default(uuid())
+  reviewId  String    @map("review_id")
+  review    Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  vendorId  String    @map("vendor_id")
+  vendor    User      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  reply     String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("review_replies")
+}
+

@@ -46,3 +46,6 @@ frontend/admin_panel/.next/
 *.log
 *.jks
 *.keystore
+.idea/
+backend/uploads/
+

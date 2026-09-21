@@ -20,6 +20,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CartModule } from './modules/cart/cart.module';
 import { AddressModule } from './modules/addresses/address.module';
 import { OrderModule } from './modules/orders/order.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { OrderModule } from './modules/orders/order.module';
     CartModule,
     AddressModule,
     OrderModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

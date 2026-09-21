@@ -25,6 +25,8 @@ class ProductModel extends Equatable {
   final double? height;
   final String status;
   final String? image;
+  final double averageRating;
+  final int totalReviews;
   final List<ProductImageModel> images;
   final List<ProductVariantModel> variants;
   final ProductShippingModel? shipping;
@@ -55,6 +57,8 @@ class ProductModel extends Equatable {
     this.height,
     required this.status,
     this.image,
+    this.averageRating = 0.0,
+    this.totalReviews = 0,
     this.images = const [],
     this.variants = const [],
     this.shipping,
@@ -169,6 +173,8 @@ class ProductModel extends Equatable {
       height: json['height'] != null ? (json['height'] as num).toDouble() : null,
       status: json['status'] as String? ?? 'ACTIVE',
       image: json['image'] as String?,
+      averageRating: json['averageRating'] != null ? (json['averageRating'] as num).toDouble() : 0.0,
+      totalReviews: json['totalReviews'] != null ? (json['totalReviews'] as num).toInt() : 0,
       images: parsedImages,
       variants: parsedVariants,
       shipping: parsedShipping,
@@ -198,6 +204,8 @@ class ProductModel extends Equatable {
       'brandName': brandName,
       'sellingPrice': sellingPrice,
       'mrp': mrp,
+      'averageRating': averageRating,
+      'totalReviews': totalReviews,
       if (taxPercentage != null) 'taxPercentage': taxPercentage,
       if (stock != null) 'stock': stock,
       if (weight != null) 'weight': weight,
@@ -239,6 +247,8 @@ class ProductModel extends Equatable {
         height,
         status,
         image,
+        averageRating,
+        totalReviews,
         images,
         variants,
         shipping,

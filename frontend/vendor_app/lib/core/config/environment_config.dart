@@ -16,8 +16,8 @@ class EnvironmentConfig {
       return 'http://$localIp:3000/api/v1';
     }
 
-    // Default development server IP for physical devices & local testing
-    return 'http://192.168.29.154:3000/api/v1';
+    // Default to live Vercel backend for all builds
+    return _prodUrl;
   }
 
   /// Current environment based on Flutter build mode.

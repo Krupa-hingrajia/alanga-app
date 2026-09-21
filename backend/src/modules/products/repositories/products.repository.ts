@@ -50,29 +50,10 @@ export class ProductsRepository implements IProductsRepository {
     });
   }
 
-  private async generateNextSku(): Promise<string> {
-    const lastProduct = await this.prisma.product.findFirst({
-      where: {
-        sku: {
-          startsWith: 'ALA-PRD-',
-        },
-      },
-      orderBy: {
-        sku: 'desc',
-      },
-    });
-
-    let nextNumber = 1;
-    if (lastProduct && lastProduct.sku) {
-      const parts = lastProduct.sku.split('-');
-      const numStr = parts[parts.length - 1];
-      const lastNum = parseInt(numStr, 10);
-      if (!isNaN(lastNum)) {
-        nextNumber = lastNum + 1;
-      }
-    }
-
-    return `ALA-PRD-${String(nextNumber).padStart(6, '0')}`;
+  private generateNextSku(): string {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `ALA-PRD-${timestamp}-${randomSuffix}`;
   }
 
   async create(data: CreateProductDto, vendorId: string): Promise<ProductEntity> {

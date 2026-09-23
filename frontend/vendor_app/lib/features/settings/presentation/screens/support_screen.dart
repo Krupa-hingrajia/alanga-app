@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class SupportScreen extends StatefulWidget {
@@ -32,6 +33,8 @@ class _SupportScreenState extends State<SupportScreen> {
       _subjectController.clear();
       _messageController.clear();
 
+      final ticketId = 'TKT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
       showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -44,9 +47,31 @@ class _SupportScreenState extends State<SupportScreen> {
               Text('Inquiry Submitted', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
-          content: const Text(
-            'Thank you for reaching out! Our dedicated vendor partner team will respond to your registered email address within 24 hours.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF4C6656), height: 1.4),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A3827).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Reference: #$ticketId',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Color(0xFF1A3827),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Thank you for reaching out! Our dedicated vendor operations team has received your ticket and will respond to your registered email address within 24 hours.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF4C6656), height: 1.4),
+              ),
+            ],
           ),
           actions: [
             ElevatedButton(
@@ -62,6 +87,17 @@ class _SupportScreenState extends State<SupportScreen> {
         ),
       );
     });
+  }
+
+  void _copyToClipboard(String text, String label) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label copied to clipboard'),
+        backgroundColor: AppColors.primaryGreen,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -142,24 +178,27 @@ class _SupportScreenState extends State<SupportScreen> {
                 child: Column(
                   children: [
                     _buildContactTile(
-                      Icons.email_outlined,
-                      'Email Support',
-                      'support@alanga.com',
-                      'Typically responds in 2 hours',
+                      icon: Icons.email_outlined,
+                      title: 'Email Support',
+                      subtitle: 'support@alanga.com',
+                      footnote: 'Typically responds in 2 hours • Tap to copy',
+                      onTap: () => _copyToClipboard('support@alanga.com', 'Support email'),
                     ),
                     const Divider(height: 1, color: Color(0xFFF1F5F2)),
                     _buildContactTile(
-                      Icons.phone_in_talk_outlined,
-                      'Helpline',
-                      '+91 1800 252 642',
-                      'Mon - Sat: 9:00 AM - 7:00 PM IST',
+                      icon: Icons.phone_in_talk_outlined,
+                      title: 'Helpline',
+                      subtitle: '+91 1800 252 642',
+                      footnote: 'Mon - Sat: 9:00 AM - 7:00 PM IST • Tap to copy',
+                      onTap: () => _copyToClipboard('+91 1800 252 642', 'Helpline number'),
                     ),
                     const Divider(height: 1, color: Color(0xFFF1F5F2)),
                     _buildContactTile(
-                      Icons.language_outlined,
-                      'Online Help Center',
-                      'https://alanga.com/vendor-support',
-                      'Guides, tutorials & platform FAQs',
+                      icon: Icons.language_outlined,
+                      title: 'Online Help Center',
+                      subtitle: 'https://alanga.com/vendor-support',
+                      footnote: 'Guides, tutorials & platform FAQs • Tap to copy',
+                      onTap: () => _copyToClipboard('https://alanga.com/vendor-support', 'Help center link'),
                     ),
                   ],
                 ),
@@ -275,34 +314,52 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  Widget _buildContactTile(IconData icon, String title, String subtitle, String footnote) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A3827).withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: const Color(0xFF1A3827), size: 20),
+  Widget _buildContactTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String footnote,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A3827).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: const Color(0xFF1A3827), size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF11261B))),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF28593E))),
+                    const SizedBox(height: 2),
+                    Text(footnote, style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight)),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy_rounded, size: 16, color: Color(0xFF1A3827)),
+                tooltip: 'Copy',
+                onPressed: onTap,
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF11261B))),
-                const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF28593E))),
-                const SizedBox(height: 2),
-                Text(footnote, style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight)),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

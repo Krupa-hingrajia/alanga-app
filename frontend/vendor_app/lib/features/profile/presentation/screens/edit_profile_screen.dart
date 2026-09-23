@@ -91,8 +91,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       currentData['state'] = _stateController.text.trim();
       currentData['pincode'] = _pincodeController.text.trim();
       currentData['address'] = _addressController.text.trim();
-      if (_selectedImageFile != null) {
-        currentData['profileImage'] = _selectedImageFile!.path;
+      final currentImagePath = _selectedImageFile?.path ?? _existingProfileImage;
+      if (currentImagePath != null && currentImagePath.isNotEmpty) {
+        currentData['profileImage'] = currentImagePath;
       }
 
       await storage.saveUserData(currentData);
@@ -102,14 +103,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await sl<AuthRepository>().updateProfile(
           fullName: _fullNameController.text.trim(),
           phoneNumber: _phoneController.text.trim(),
-          profileImage: _selectedImageFile?.path,
+          profileImage: currentImagePath,
         );
       } catch (_) {
         // Fallback local persist succeeded
       }
 
       if (!mounted) return;
-      setState(() => _isSaving = false);
+      setState(() {
+        _isSaving = false;
+        _existingProfileImage = currentImagePath;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -129,6 +133,51 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       );
     }
+  }
+
+  Widget _buildAvatarWidget() {
+    if (_selectedImageFile != null) {
+      return Image.file(_selectedImageFile!, fit: BoxFit.cover, width: 100, height: 100);
+    }
+    if (_existingProfileImage != null && _existingProfileImage!.isNotEmpty) {
+      final imgPath = _existingProfileImage!.trim();
+      if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
+        return Image.network(
+          imgPath,
+          fit: BoxFit.cover,
+          width: 100,
+          height: 100,
+          errorBuilder: (_, _, _) => _buildAvatarFallback(),
+        );
+      }
+      final file = File(imgPath);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          width: 100,
+          height: 100,
+          errorBuilder: (_, _, _) => _buildAvatarFallback(),
+        );
+      }
+    }
+    return _buildAvatarFallback();
+  }
+
+  Widget _buildAvatarFallback() {
+    final initial = _businessNameController.text.isNotEmpty
+        ? _businessNameController.text[0].toUpperCase()
+        : 'V';
+    return Center(
+      child: Text(
+        initial,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 
   @override
@@ -187,22 +236,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ],
                         ),
                         child: ClipOval(
-                          child: _selectedImageFile != null
-                              ? Image.file(_selectedImageFile!, fit: BoxFit.cover, width: 100, height: 100)
-                              : _existingProfileImage != null && _existingProfileImage!.startsWith('http')
-                                  ? Image.network(_existingProfileImage!, fit: BoxFit.cover, width: 100, height: 100)
-                                  : Center(
-                                      child: Text(
-                                        _businessNameController.text.isNotEmpty
-                                            ? _businessNameController.text[0].toUpperCase()
-                                            : 'V',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
+                          child: _buildAvatarWidget(),
                         ),
                       ),
                       Positioned(

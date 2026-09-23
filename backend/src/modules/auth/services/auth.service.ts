@@ -17,14 +17,15 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<UserEntity> {
-    const existingEmail = await this.authRepository.findUserByEmail(registerDto.email);
+    const normalizedEmail = registerDto.email.trim().toLowerCase();
+    const existingEmail = await this.authRepository.findUserByEmail(normalizedEmail);
     if (existingEmail) {
       throw new ConflictException('Email address is already registered');
     }
 
     const phone = registerDto.mobileNumber || (registerDto as any).countryCode;
     if (phone) {
-      const existingPhone = await this.authRepository.findUserByMobile(phone);
+      const existingPhone = await this.authRepository.findUserByMobile(phone.trim());
       if (existingPhone) {
         throw new ConflictException('Mobile number is already registered');
       }
@@ -37,9 +38,9 @@ export class AuthService {
     const status = role === Role.VENDOR ? AccountStatus.PENDING : AccountStatus.ACTIVE;
 
     return this.authRepository.createUser({
-      fullName: registerDto.fullName,
-      email: registerDto.email,
-      phoneNumber: registerDto.mobileNumber,
+      fullName: registerDto.fullName.trim(),
+      email: normalizedEmail,
+      phoneNumber: registerDto.mobileNumber?.trim(),
       password: hashedPassword,
       role: registerDto.role,
       status: status,
@@ -49,11 +50,12 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { identifier, password } = loginDto;
     let user: UserEntity | null = null;
+    const trimmed = identifier.trim();
 
-    if (identifier.includes('@')) {
-      user = await this.authRepository.findUserByEmail(identifier);
+    if (trimmed.includes('@')) {
+      user = await this.authRepository.findUserByEmail(trimmed.toLowerCase());
     } else {
-      user = await this.authRepository.findUserByMobile(identifier);
+      user = await this.authRepository.findUserByMobile(trimmed);
     }
 
     if (!user) {

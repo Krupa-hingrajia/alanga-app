@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shimmer/shimmer.dart';
@@ -41,7 +42,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _userData;
-  bool _userLoading = true;
+  bool _userLoading = false;
   bool _dataLoading = true;
 
   List<ProductModel> _products = [];
@@ -59,36 +60,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadUser() async {
-    final data = await sl<SecureStorageService>().getUserData();
-    setState(() {
-      _userData = data;
-      _userLoading = false;
-    });
+    try {
+      final data = await sl<SecureStorageService>().getUserData();
+      if (mounted) {
+        setState(() {
+          _userData = data;
+          _userLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _userLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadDashboardData() async {
-    setState(() {
-      _dataLoading = true;
-    });
-    try {
-      final results = await Future.wait([
-        sl<CategoryRepository>().getCategories(),
-        sl<SubCategoryRepository>().getSubCategories(),
-        sl<BrandRepository>().getBrands(),
-        sl<ProductRepository>().getProducts(),
-      ]);
+    // Only show shimmer skeleton if we have zero cached data
+    if (_categories.isEmpty && _products.isEmpty && _brands.isEmpty) {
+      setState(() {
+        _dataLoading = true;
+      });
+    }
 
-      setState(() {
-        _categories = results[0] as List<CategoryModel>;
-        _subCategories = results[1] as List<SubCategoryModel>;
-        _brands = results[2] as List<BrandModel>;
-        _products = results[3] as List<ProductModel>;
-        _dataLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _dataLoading = false;
-      });
+    try {
+      final catFuture = sl<CategoryRepository>().getCategories().then((res) {
+        if (mounted) setState(() => _categories = res);
+      }).catchError((_) => <CategoryModel>[]);
+
+      final subCatFuture = sl<SubCategoryRepository>().getSubCategories().then((res) {
+        if (mounted) setState(() => _subCategories = res);
+      }).catchError((_) => <SubCategoryModel>[]);
+
+      final brandFuture = sl<BrandRepository>().getBrands().then((res) {
+        if (mounted) setState(() => _brands = res);
+      }).catchError((_) => <BrandModel>[]);
+
+      final prodFuture = sl<ProductRepository>().getProducts().then((res) {
+        if (mounted) setState(() => _products = res);
+      }).catchError((_) => <ProductModel>[]);
+
+      await Future.wait([catFuture, subCatFuture, brandFuture, prodFuture]);
+    } catch (_) {
+      // ignore
+    } finally {
+      if (mounted) {
+        setState(() {
+          _dataLoading = false;
+        });
+      }
     }
   }
 
@@ -316,13 +338,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_userLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFF6F8F6),
-        body: _DashboardFullShimmer(),
-      );
-    }
-
     return PopScope(
       // On tab 0 (Dashboard) → exit the app. On tabs 2/3 → go back to tab 0.
       canPop: false,
@@ -376,6 +391,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               });
               if (index == 0) {
                 _loadDashboardData();
+              } else if (index == 4) {
+                _loadUser();
               }
             },
             type: BottomNavigationBarType.fixed,
@@ -534,6 +551,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildCustomAppBar() {
     final businessName = _userData?['businessName'] ?? 'Alanga Vendor';
     final initials = businessName.isNotEmpty ? businessName.substring(0, 1).toUpperCase() : 'V';
+    final profileImage = _userData?['profileImage'] as String?;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -609,28 +627,85 @@ class _DashboardScreenState extends State<DashboardScreen> {
               setState(() {
                 _currentIndex = 4;
               });
+              _loadUser();
             },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
-              ),
-              child: Center(
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
+            child: _buildAvatarWidget(size: 36, imagePath: profileImage, initials: initials),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarWidget({
+    required double size,
+    required String? imagePath,
+    required String initials,
+    Color backgroundColor = const Color(0xFF1A3827),
+    double fontSize = 14,
+  }) {
+    if (imagePath != null && imagePath.trim().isNotEmpty) {
+      final trimmed = imagePath.trim();
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+          ),
+          child: ClipOval(
+            child: Image.network(
+              trimmed,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildInitialsCircle(size, backgroundColor, initials, fontSize),
+            ),
+          ),
+        );
+      }
+      final file = File(trimmed);
+      if (file.existsSync()) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+          ),
+          child: ClipOval(
+            child: Image.file(
+              file,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildInitialsCircle(size, backgroundColor, initials, fontSize),
+            ),
+          ),
+        );
+      }
+    }
+    return _buildInitialsCircle(size, backgroundColor, initials, fontSize);
+  }
+
+  Widget _buildInitialsCircle(double size, Color backgroundColor, String initials, double fontSize) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+          ),
+        ),
       ),
     );
   }
@@ -728,9 +803,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _getBody() {
     switch (_currentIndex) {
       case 0:
-        if (_dataLoading) {
-          return const _DashboardFullShimmer();
-        }
         return RefreshIndicator(
           onRefresh: _loadDashboardData,
           color: const Color(0xFF1A3827),
@@ -2440,6 +2512,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final countryCode = _userData?['countryCode'] ?? '+91';
     final formattedMobile = mobileNumber.isNotEmpty ? '$countryCode $mobileNumber' : 'Not Provided';
     final initials = businessName.isNotEmpty ? businessName.substring(0, 1).toUpperCase() : 'V';
+    final profileImage = _userData?['profileImage'] as String?;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -2462,23 +2535,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1A3827),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
-                    ),
-                  ),
+                _buildAvatarWidget(
+                  size: 60,
+                  imagePath: profileImage,
+                  initials: initials,
+                  fontSize: 22,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -2516,7 +2577,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 IconButton(
                   onPressed: () async {
                     await context.push('/profile/edit');
-                    _loadUser();
+                    await _loadUser();
+                    if (mounted) setState(() {});
                   },
                   icon: const Icon(Icons.edit_outlined, color: Color(0xFF1A3827), size: 20),
                   tooltip: 'Edit Profile',

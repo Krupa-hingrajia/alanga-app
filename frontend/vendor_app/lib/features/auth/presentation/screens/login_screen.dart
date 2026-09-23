@@ -239,9 +239,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ? null
                                 : () {
                                     if (_formKey.currentState!.validate()) {
+                                      final raw = _identifierController.text.trim();
+                                      final identifier = raw.contains('@') ? raw.toLowerCase() : raw;
                                       BlocProvider.of<LoginBloc>(context).add(
                                         LoginSubmittedEvent(
-                                          identifier: _identifierController.text.trim(),
+                                          identifier: identifier,
                                           password: _passwordController.text,
                                         ),
                                       );

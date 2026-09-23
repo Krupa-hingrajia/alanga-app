@@ -293,7 +293,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 return 'Please enter email or mobile number';
               }
               final text = value.trim();
-              if (text.contains('@') && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text)) {
+              if (text.contains('@') && !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', caseSensitive: false).hasMatch(text)) {
                 return 'Please enter a valid email address';
               }
               return null;
@@ -305,9 +305,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ? null
                 : () {
                     if (_emailFormKey.currentState!.validate()) {
+                      final raw = _identifierController.text.trim();
+                      final identifier = raw.contains('@') ? raw.toLowerCase() : raw;
                       BlocProvider.of<ForgotPasswordBloc>(context).add(
                         ForgotPasswordRequestOtpEvent(
-                          identifier: _identifierController.text.trim(),
+                          identifier: identifier,
                         ),
                       );
                     }

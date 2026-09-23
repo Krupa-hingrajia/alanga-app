@@ -232,7 +232,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             BlocProvider.of<RegisterBloc>(context).add(
                                               RegisterSubmittedEvent(
                                                 fullName: _fullNameController.text.trim(),
-                                                email: _emailController.text.trim(),
+                                                email: _emailController.text.trim().toLowerCase(),
                                                 countryCode: _countryCodeController.text.trim(),
                                                 mobileNumber: _mobileNumberController.text.trim(),
                                                 password: _passwordController.text,
@@ -400,7 +400,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter your email';
-              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+              final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', caseSensitive: false);
               if (!emailRegex.hasMatch(value.trim())) return 'Please enter a valid email';
               return null;
             },

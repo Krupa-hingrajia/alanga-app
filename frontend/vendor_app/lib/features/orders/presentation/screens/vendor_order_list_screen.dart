@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/vendor_order_model.dart';
@@ -361,9 +362,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
     VendorOrderBloc bloc,
   ) {
     if (state is VendorOrderLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF1A3827)),
-      );
+      return const _VendorOrderListSkeleton();
     }
 
     if (state is VendorOrderError) {
@@ -517,4 +516,106 @@ class _StatusFilterMeta {
     required this.statusKey,
     this.color,
   });
+}
+
+class _VendorOrderListSkeleton extends StatelessWidget {
+  const _VendorOrderListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE4ECE8)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Shimmer.fromColors(
+            baseColor: const Color(0xFFE2E8E4),
+            highlightColor: const Color(0xFFF3F7F4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _pill(width: 80, height: 22, radius: 6),
+                    _pill(width: 74, height: 22, radius: 6),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _pill(width: 120, height: 14, radius: 4),
+                    _pill(width: 70, height: 12, radius: 4),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFE4ECE8)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _pill(width: 56, height: 56, radius: 10),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _pill(width: double.infinity, height: 14, radius: 4),
+                          const SizedBox(height: 6),
+                          _pill(width: 90, height: 12, radius: 4),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFE4ECE8)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _pill(width: 60, height: 10, radius: 3),
+                        const SizedBox(height: 4),
+                        _pill(width: 90, height: 16, radius: 4),
+                      ],
+                    ),
+                    _pill(width: 100, height: 32, radius: 8),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static Widget _pill({required double width, required double height, required double radius}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
 }

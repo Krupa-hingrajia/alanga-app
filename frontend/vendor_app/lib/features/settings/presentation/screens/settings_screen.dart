@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -25,10 +26,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadUser() async {
     final data = await sl<SecureStorageService>().getUserData();
-    setState(() {
-      _userData = data;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _userData = data;
+        _isLoading = false;
+      });
+    }
   }
 
   void _showLogoutDialog() {
@@ -142,24 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF1A3827),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          initials,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildAvatarWidget(50, _userData?['profileImage'] as String?, initials),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
@@ -187,7 +173,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     OutlinedButton(
                       onPressed: () async {
                         await context.push('/profile/edit');
-                        _loadUser();
+                        await _loadUser();
+                        if (mounted) setState(() {});
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF1A3827),
@@ -212,7 +199,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: 'Update business name, phone, address',
                   onTap: () async {
                     await context.push('/profile/edit');
-                    _loadUser();
+                    await _loadUser();
+                    if (mounted) setState(() {});
                   },
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
@@ -278,19 +266,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ]),
               const SizedBox(height: 24),
 
-              // App Version
-              const Center(
-                child: Text(
-                  'Alanga Vendor App v1.0.2 (Build 3)\nApple App Store Review Ready',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF8B9E94),
-                    height: 1.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // // App Version
+              // const Center(
+              //   child: Text(
+              //     'Alanga Vendor App v1.0.2 (Build 3)\nApple App Store Review Ready',
+              //     textAlign: TextAlign.center,
+              //     style: TextStyle(
+              //       fontSize: 11,
+              //       color: Color(0xFF8B9E94),
+              //       height: 1.5,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
             ],
           ),
         ),
@@ -364,6 +352,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildAvatarWidget(double size, String? imagePath, String initials) {
+    if (imagePath != null && imagePath.trim().isNotEmpty) {
+      final trimmed = imagePath.trim();
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF1A3827),
+          ),
+          child: ClipOval(
+            child: Image.network(
+              trimmed,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildInitialsCircle(size, initials),
+            ),
+          ),
+        );
+      }
+      final file = File(trimmed);
+      if (file.existsSync()) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF1A3827),
+          ),
+          child: ClipOval(
+            child: Image.file(
+              file,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildInitialsCircle(size, initials),
+            ),
+          ),
+        );
+      }
+    }
+    return _buildInitialsCircle(size, initials);
+  }
+
+  Widget _buildInitialsCircle(double size, String initials) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A3827),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+      ),
     );
   }
 }

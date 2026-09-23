@@ -858,10 +858,11 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                             onPressed: () => _submitForm(context, 'PENDING'),
                                             style: ElevatedButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(vertical: 16),
-                                              backgroundColor: AppColors.primaryGreen,
+                                              backgroundColor: const Color(0xFF1A3827),
                                               foregroundColor: Colors.white,
                                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                              elevation: 0,
+                                              elevation: 1,
+                                              shadowColor: const Color(0xFF1A3827).withValues(alpha: 0.3),
                                             ),
                                             child: const Text(
                                               'Submit Product',
@@ -892,7 +893,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: Color(0xFF5A7265), fontSize: 13),
-      prefixIcon: Icon(icon, color: AppColors.primaryGreen, size: 20),
+      prefixIcon: Icon(icon, color: const Color(0xFF1A3827), size: 20),
       filled: true,
       fillColor: const Color(0xFFF4F8F5),
       contentPadding: const EdgeInsets.all(16),
@@ -906,7 +907,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.primaryGreen, width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF1A3827), width: 1.5),
       ),
     );
   }

@@ -521,7 +521,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                   .add(SubmitProductForApprovalEvent(id: id));
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1A8C4E),
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),

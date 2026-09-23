@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/login/login_bloc.dart';
@@ -224,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
                               TextButton(
-                                onPressed: () => context.push('/forgot-password'),
+                                onPressed: () => _showForgotPasswordSupportDialog(context),
                                 child: const Text(
                                   'Forgot Password?',
                                   style: TextStyle(color: AppColors.brandOrange, fontSize: 13, fontWeight: FontWeight.bold),
@@ -300,6 +301,190 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showForgotPasswordSupportDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A3827).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.lock_reset_rounded,
+                color: Color(0xFF1A3827),
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Reset Password',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF11261B),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'For merchant security, vendor credentials are reset with administrative verification. Please reach out to our Seller Support desk:',
+              style: TextStyle(
+                fontSize: 12.5,
+                color: Color(0xFF4C6656),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // Helpline Card
+            InkWell(
+              onTap: () {
+                Clipboard.setData(const ClipboardData(text: '+91 1800 252 642'));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Helpline number copied to clipboard!'),
+                    backgroundColor: Color(0xFF1A3827),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F8F6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE4ECE8)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.phone_outlined, color: Color(0xFF1A3827), size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Seller Helpline',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF7A9A86), fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            '+91 1800 252 642',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF11261B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.copy_rounded, size: 16, color: Color(0xFF7A9A86)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Email Card
+            InkWell(
+              onTap: () {
+                Clipboard.setData(const ClipboardData(text: 'support@alanga.com'));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Support email copied to clipboard!'),
+                    backgroundColor: Color(0xFF1A3827),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F8F6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE4ECE8)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.email_outlined, color: Color(0xFF1A3827), size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Support Email',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF7A9A86), fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'support@alanga.com',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF11261B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.copy_rounded, size: 16, color: Color(0xFF7A9A86)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Hours note
+            const Center(
+              child: Text(
+                'Mon – Sat • 9:00 AM – 7:00 PM IST',
+                style: TextStyle(fontSize: 11, color: Color(0xFF8B9E94)),
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1A3827),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text('OKAY', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
+        ],
       ),
     );
   }

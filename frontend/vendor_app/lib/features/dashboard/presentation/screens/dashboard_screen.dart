@@ -338,20 +338,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      // On tab 0 (Dashboard) → exit the app. On tabs 2/3 → go back to tab 0.
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        if (_currentIndex != 0) {
-          setState(() => _currentIndex = 0);
-        } else {
-          // Exit the app
-          // ignore: deprecated_member_use
-          SystemNavigator.pop();
-        }
-      },
-      child: Scaffold(
+    final isDarkHeaderTab = _currentIndex == 0;
+    final overlayStyle = isDarkHeaderTab
+        ? const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          )
+        : const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: PopScope(
+        // On tab 0 (Dashboard) → exit the app. On tabs 2/3 → go back to tab 0.
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (_currentIndex != 0) {
+            setState(() => _currentIndex = 0);
+          } else {
+            // Exit the app
+            // ignore: deprecated_member_use
+            SystemNavigator.pop();
+          }
+        },
+        child: Scaffold(
         backgroundColor: const Color(0xFFF6F8F6),
         appBar: (_currentIndex == 0 || _currentIndex == 1 || _currentIndex == 2)
             ? null
@@ -437,8 +452,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   PreferredSizeWidget _buildDashboardAppBar() {
     final businessName = _userData?['businessName'] ?? 'Alanga Vendor';

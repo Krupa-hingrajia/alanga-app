@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -6,6 +7,22 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFFF6F8F6),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        iconTheme: IconThemeData(color: Color(0xFF11261B)),
+        titleTextStyle: TextStyle(
+          color: Color(0xFF11261B),
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       colorScheme: const ColorScheme.light(
         primary: AppColors.brandOrange,
         secondary: AppColors.forestGreen,

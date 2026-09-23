@@ -156,9 +156,34 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1A3827), size: 20),
-              onPressed: () => context.pop(_statusChanged),
+            automaticallyImplyLeading: false,
+            leadingWidth: 56,
+            leading: Center(
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFE4ECE8)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 18,
+                    color: Color(0xFF1A3827),
+                  ),
+                  onPressed: () => context.pop(_statusChanged),
+                ),
+              ),
             ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -99,6 +99,108 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<void> logout() async {
+    try {
+      await _remoteDataSource.logout();
+    } catch (_) {
+      // Continue clearing storage
+    } finally {
+      await _storageService.clearAll();
+    }
+  }
+
+  @override
+  Future<String?> forgotPassword(String identifier) async {
+    try {
+      return await _remoteDataSource.forgotPassword(identifier);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> verifyOtp({required String identifier, required String otp}) async {
+    try {
+      await _remoteDataSource.verifyOtp(identifier, otp);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String identifier,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      await _remoteDataSource.resetPassword(identifier, otp, newPassword);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _remoteDataSource.changePassword(currentPassword, newPassword);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteAccount({String? password, String? reason}) async {
+    try {
+      await _remoteDataSource.deleteAccount(password: password, reason: reason);
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      // If network offline or endpoint issue, still ensure local wipe for Apple compliance
+      await _storageService.clearAll();
+      rethrow;
+    } finally {
+      await _storageService.clearAll();
+    }
+  }
+
+  @override
+  Future<UserEntity> updateProfile({
+    String? fullName,
+    String? phoneNumber,
+    String? profileImage,
+  }) async {
+    try {
+      final updatedModel = await _remoteDataSource.updateProfile(
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        profileImage: profileImage,
+      );
+      final currentData = await _storageService.getUserData() ?? {};
+      if (fullName != null) currentData['fullName'] = fullName;
+      if (phoneNumber != null) currentData['phoneNumber'] = phoneNumber;
+      if (profileImage != null) currentData['profileImage'] = profileImage;
+      await _storageService.saveUserData(currentData);
+      return updatedModel.toEntity();
+    } on DioException catch (e) {
+      throw ServerFailure(_getErrorMessage(e));
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
+  }
+
   String _getErrorMessage(DioException e) {
     if (e.response != null && e.response?.data != null) {
       final responseData = e.response?.data;

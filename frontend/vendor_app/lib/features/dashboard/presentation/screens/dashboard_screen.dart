@@ -28,6 +28,10 @@ import '../../../../core/widgets/shimmer_widgets.dart';
 // Orders imports
 import '../../../orders/presentation/screens/vendor_order_list_screen.dart';
 
+// Settings & Auth imports
+import '../../../settings/presentation/widgets/delete_account_dialog.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -2509,6 +2513,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
+                IconButton(
+                  onPressed: () async {
+                    await context.push('/profile/edit');
+                    _loadUser();
+                  },
+                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF1A3827), size: 20),
+                  tooltip: 'Edit Profile',
+                ),
               ],
             ),
           ),
@@ -2567,14 +2579,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   leading: const Icon(Icons.settings_outlined, color: Color(0xFF4C6656)),
                   title: const Text('Store Settings', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
-                  onTap: () {},
+                  onTap: () async {
+                    await context.push('/settings');
+                    _loadUser();
+                  },
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
                 ListTile(
-                  leading: const Icon(Icons.help_outline, color: Color(0xFF4C6656)),
+                  leading: const Icon(Icons.headset_mic_outlined, color: Color(0xFF4C6656)),
                   title: const Text('Alanga Seller Support', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
-                  onTap: () {},
+                  onTap: () => context.push('/settings/support'),
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F2)),
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined, color: Color(0xFF4C6656)),
+                  title: const Text('Privacy Policy & Legal', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
+                  onTap: () => context.push('/settings/privacy-policy'),
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F2)),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: AppColors.brandRed),
+                  title: const Text('Delete Account', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandRed)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
+                  onTap: () => DeleteAccountDialog.show(context),
                 ),
               ],
             ),
@@ -2583,11 +2612,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Logout Action
           ElevatedButton.icon(
-            onPressed: () async {
-              await sl<SecureStorageService>().clearAll();
-              if (!mounted) return;
-              context.go('/login');
-            },
+            onPressed: () => _showDashboardLogoutDialog(),
             icon: const Icon(Icons.logout_outlined, size: 16),
             label: const Text(
               'LOGOUT FROM CENTRAL',
@@ -2602,6 +2627,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               elevation: 0,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDashboardLogoutDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        title: const Row(
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.brandRed, size: 22),
+            SizedBox(width: 8),
+            Text(
+              'Confirm Logout',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF11261B),
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to log out of your ALANGA account?',
+          style: TextStyle(fontSize: 14, color: Color(0xFF4C6656)),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF4C6656), fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                await sl<AuthRepository>().logout();
+              } catch (_) {
+                await sl<SecureStorageService>().clearAll();
+              }
+              if (mounted) {
+                context.go('/login');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

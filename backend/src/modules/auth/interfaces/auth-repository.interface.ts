@@ -5,5 +5,7 @@ export abstract class IAuthRepository {
   abstract createUser(data: Prisma.UserCreateInput): Promise<UserEntity>;
   abstract findUserByEmail(email: string): Promise<UserEntity | null>;
   abstract findUserByMobile(mobileNumber: string): Promise<UserEntity | null>;
+  abstract findUserById(id: string): Promise<UserEntity | null>;
+  abstract updateUser(id: string, data: Prisma.UserUpdateInput): Promise<UserEntity>;
   abstract updateRefreshToken(id: string, token: string | null): Promise<UserEntity>;
 }

@@ -1,9 +1,17 @@
-import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Delete, Patch, Put, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import {
+  ForgotPasswordDto,
+  VerifyOtpDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+  DeleteAccountDto,
+  UpdateProfileDto,
+} from '../dto/account-management.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
@@ -81,6 +89,73 @@ export class AuthController {
   async getMe(@CurrentUser() user: UserEntity) {
     return {
       message: 'Profile retrieved successfully',
+      data: user,
+    };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset OTP', description: 'Generates and dispatches a 6-digit OTP to the registered email or mobile.' })
+  @ApiResponse({ status: 200, description: 'OTP sent successfully' })
+  @ApiResponse({ status: 404, description: 'Account not found' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const result = await this.authService.forgotPassword(dto.identifier);
+    return result;
+  }
+
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify OTP code', description: 'Validates 6-digit OTP entered by user.' })
+  @ApiResponse({ status: 200, description: 'OTP is valid' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired OTP' })
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    const result = await this.authService.verifyOtp(dto.identifier, dto.otp);
+    return result;
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with OTP', description: 'Updates account password after verifying OTP.' })
+  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  @ApiResponse({ status: 400, description: 'Invalid OTP or validation failure' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    const result = await this.authService.resetPassword(dto.identifier, dto.otp, dto.newPassword);
+    return result;
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Change password', description: 'Changes password for the currently logged-in user.' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Incorrect current password' })
+  async changePassword(@CurrentUser('id') userId: string, @Body() dto: ChangePasswordDto) {
+    const result = await this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
+    return result;
+  }
+
+  @Delete('delete-account')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'In-app Account Deletion', description: 'Deletes the current user account and invalidates tokens in compliance with Apple Review Guidelines.' })
+  @ApiResponse({ status: 200, description: 'Account deleted successfully' })
+  async deleteAccount(@CurrentUser('id') userId: string, @Body() dto: DeleteAccountDto) {
+    const result = await this.authService.deleteAccount(userId, dto.password);
+    return result;
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update user profile', description: 'Updates profile name, phone number, and profile image.' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  async updateProfile(@CurrentUser('id') userId: string, @Body() dto: UpdateProfileDto) {
+    const user = await this.authService.updateProfile(userId, dto);
+    return {
+      message: 'Profile updated successfully',
       data: user,
     };
   }

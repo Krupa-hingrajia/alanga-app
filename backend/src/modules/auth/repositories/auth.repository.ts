@@ -42,6 +42,20 @@ export class AuthRepository implements IAuthRepository {
     return this.mapToEntity(user);
   }
 
+  async findUserById(id: string): Promise<UserEntity | null> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) return null;
+    return this.mapToEntity(user);
+  }
+
+  async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<UserEntity> {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data,
+    });
+    return this.mapToEntity(user);
+  }
+
   async updateRefreshToken(id: string, token: string | null): Promise<UserEntity> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     return this.mapToEntity(user);

@@ -24,4 +24,29 @@ abstract class AuthRepository {
   });
 
   Future<UserEntity> getCurrentUser();
+
+  Future<void> logout();
+
+  Future<String?> forgotPassword(String identifier);
+
+  Future<void> verifyOtp({required String identifier, required String otp});
+
+  Future<void> resetPassword({
+    required String identifier,
+    required String otp,
+    required String newPassword,
+  });
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  Future<void> deleteAccount({String? password, String? reason});
+
+  Future<UserEntity> updateProfile({
+    String? fullName,
+    String? phoneNumber,
+    String? profileImage,
+  });
 }

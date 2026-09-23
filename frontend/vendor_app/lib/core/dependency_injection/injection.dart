@@ -10,6 +10,7 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/login/login_bloc.dart';
 import '../../features/auth/presentation/bloc/register/register_bloc.dart';
+import '../../features/auth/presentation/bloc/forgot_password/forgot_password_bloc.dart';
 
 // Categories imports
 import '../../features/categories/data/datasource/category_remote_datasource.dart';
@@ -59,6 +60,7 @@ Future<void> init() async {
   // Blocs
   sl.registerFactory(() => LoginBloc(loginUseCase: sl()));
   sl.registerFactory(() => RegisterBloc(registerUseCase: sl()));
+  sl.registerFactory(() => ForgotPasswordBloc(authRepository: sl()));
   sl.registerFactory(() => CategoryBloc(categoryRepository: sl()));
   sl.registerFactory(() => BrandBloc(brandRepository: sl()));
   sl.registerFactory(() => ProductBloc(productRepository: sl()));

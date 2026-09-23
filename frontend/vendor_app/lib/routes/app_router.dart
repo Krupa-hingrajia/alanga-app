@@ -2,7 +2,15 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/success_screen.dart';
+import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/dashboard/presentation/screens/dashboard_screen.dart';
+
+// Settings & Profile imports
+import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/screens/change_password_screen.dart';
+import '../features/settings/presentation/screens/legal_content_screen.dart';
+import '../features/settings/presentation/screens/support_screen.dart';
+import '../features/profile/presentation/screens/edit_profile_screen.dart';
 
 // Products imports
 import '../features/products/data/models/product_model.dart';
@@ -34,13 +42,14 @@ class AppRouter {
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
       final isSuccess = state.matchedLocation == '/success';
+      final isForgotPassword = state.matchedLocation == '/forgot-password';
 
       if (token == null) {
-        if (!isLoggingIn && !isRegistering && !isSuccess) {
+        if (!isLoggingIn && !isRegistering && !isSuccess && !isForgotPassword) {
           return '/login';
         }
       } else {
-        if (isLoggingIn || isRegistering) {
+        if (isLoggingIn || isRegistering || isForgotPassword) {
           return '/home';
         }
       }
@@ -56,12 +65,42 @@ class AppRouter {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
         path: '/success',
         builder: (context, state) => const SuccessScreen(),
       ),
       GoRoute(
         path: '/home',
         builder: (context, state) => const DashboardScreen(),
+      ),
+
+      // Settings & Profile routes
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/change-password',
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: '/settings/privacy-policy',
+        builder: (context, state) => const LegalContentScreen(type: LegalContentType.privacyPolicy),
+      ),
+      GoRoute(
+        path: '/settings/terms',
+        builder: (context, state) => const LegalContentScreen(type: LegalContentType.termsOfService),
+      ),
+      GoRoute(
+        path: '/settings/support',
+        builder: (context, state) => const SupportScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const EditProfileScreen(),
       ),
 
       // Products routes

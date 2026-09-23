@@ -2701,6 +2701,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Future<void> _performDashboardLogout() async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A3827)),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text(
+                  'Logging out...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF11261B),
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      await sl<AuthRepository>().logout().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () async {
+          await sl<SecureStorageService>().clearAll();
+        },
+      );
+    } catch (_) {
+      try {
+        await sl<SecureStorageService>().clearAll();
+      } catch (_) {}
+    }
+
+    if (mounted) {
+      context.go('/login');
+    }
+  }
+
   void _showDashboardLogoutDialog() {
     showDialog<void>(
       context: context,
@@ -2735,16 +2803,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.of(ctx).pop();
-              try {
-                await sl<AuthRepository>().logout();
-              } catch (_) {
-                await sl<SecureStorageService>().clearAll();
-              }
-              if (mounted) {
-                context.go('/login');
-              }
+              _performDashboardLogout();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.brandRed,

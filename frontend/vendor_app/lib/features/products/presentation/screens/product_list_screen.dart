@@ -11,7 +11,9 @@ import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
 class ProductListScreen extends StatefulWidget {
-  const ProductListScreen({super.key});
+  final VoidCallback? onBackToDashboard;
+
+  const ProductListScreen({super.key, this.onBackToDashboard});
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -49,13 +51,112 @@ class _ProductListScreenState extends State<ProductListScreen>
     super.dispose();
   }
 
+  void _handleBack(BuildContext context) {
+    if (widget.onBackToDashboard != null) {
+      widget.onBackToDashboard!();
+    } else if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color(0xFFF6F8F6),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: Center(
+          child: GestureDetector(
+            onTap: () => _handleBack(context),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFE4ECE8), width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: Color(0xFF1A3827),
+              ),
+            ),
+          ),
+        ),
+      ),
+      title: const Text(
+        'My Products',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF11261B),
+        ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Center(
+            child: Builder(
+              builder: (btnCtx) => GestureDetector(
+                onTap: () {
+                  btnCtx.read<ProductBloc>().add(const FetchProductsEvent(isRefresh: true));
+                },
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFFE4ECE8), width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                    size: 18,
+                    color: Color(0xFF1A3827),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<ProductBloc>()..add(const FetchProductsEvent()),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        body: BlocConsumer<ProductBloc, ProductState>(
+      child: Builder(
+        builder: (context) {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) return;
+              _handleBack(context);
+            },
+            child: Scaffold(
+              backgroundColor: const Color(0xFFF6F8F6),
+              appBar: _buildAppBar(context),
+              body: BlocConsumer<ProductBloc, ProductState>(
           listener: (context, state) {
             if (state is ProductActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -203,6 +304,9 @@ class _ProductListScreenState extends State<ProductListScreen>
         ),
       ),
     );
+  },
+),
+);
   }
 
 
@@ -211,118 +315,52 @@ class _ProductListScreenState extends State<ProductListScreen>
 
     return Container(
       color: const Color(0xFFF6F8F6),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top bar — same style as Add Product AppBar
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  // Back button — circular, same as Add Product AppBar
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(
-                            color: const Color(0xFFE4ECE8), width: 1.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.arrow_back,
-                          size: 18, color: Color(0xFF1A3827)),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  // Title — centered same as Add Product AppBar
-                  Expanded(
-                    child: Text(
-                      'My Products',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF11261B),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  // Refresh button — circular, same style as back button
-                  GestureDetector(
-                    onTap: () => context
-                        .read<ProductBloc>()
-                        .add(const FetchProductsEvent(isRefresh: true)),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(
-                            color: const Color(0xFFE4ECE8), width: 1.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.refresh_rounded,
-                          size: 18, color: Color(0xFF1A3827)),
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE4ECE8)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-            ),
-
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F6F4),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFDDE8E1), width: 1),
-                ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  style: const TextStyle(
-                      fontSize: 14, color: Color(0xFF11261B)),
-                  decoration: InputDecoration(
-                    hintText: 'Search products by name or SKU...',
-                    hintStyle: const TextStyle(
-                        fontSize: 14, color: Color(0xFF7A9A86)),
-                    prefixIcon: const Icon(Icons.search_rounded,
-                        color: Color(0xFF7A9A86), size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? GestureDetector(
-                            onTap: () {
-                              _searchCtrl.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                            child: const Icon(Icons.close_rounded,
-                                color: Color(0xFF7A9A86), size: 18),
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-                  ),
+              child: TextField(
+                controller: _searchCtrl,
+                style: const TextStyle(
+                    fontSize: 13, color: Color(0xFF11261B)),
+                decoration: InputDecoration(
+                  hintText: 'Search products by name or SKU...',
+                  hintStyle: const TextStyle(
+                      fontSize: 13, color: Color(0xFF9CA3AF)),
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: Color(0xFF1A3827), size: 22),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? GestureDetector(
+                          onTap: () {
+                            _searchCtrl.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Icon(Icons.clear,
+                              color: Color(0xFF9CA3AF), size: 18),
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
             ),
+          ),
 
             // Stats strip
             if (state is ProductListLoaded) ...[
@@ -384,8 +422,7 @@ class _ProductListScreenState extends State<ProductListScreen>
             const SizedBox(height: 10),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildProductTab(

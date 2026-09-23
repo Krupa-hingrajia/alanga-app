@@ -852,7 +852,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         );
       case 2:
-        return const ProductListScreen();
+        return ProductListScreen(
+          onBackToDashboard: () {
+            setState(() {
+              _currentIndex = 0;
+            });
+          },
+        );
       case 3:
         return _buildNotificationsTab();
       case 4:
@@ -2853,170 +2859,4 @@ class _ReelItem {
     required this.emoji,
     this.onTap,
   });
-}
-
-// ── Full-screen shimmer skeleton shown while the dashboard loads ──────────────
-class _DashboardFullShimmer extends StatelessWidget {
-  const _DashboardFullShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header shimmer ──────────────────────────────────────────────────
-          _shimmerBlock(
-            child: Container(
-              height: 205,
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _pill(40, 40, 12),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _pill(120, 14, 7),
-                            const SizedBox(height: 6),
-                            _pill(80, 10, 5),
-                          ],
-                        ),
-                      ),
-                      _pill(40, 40, 12),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Hero welcome card shimmer
-                  Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _pill(160, 16, 8),
-                              const SizedBox(height: 8),
-                              _pill(100, 12, 6),
-                            ],
-                          ),
-                        ),
-                        _pill(64, 64, 14),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // ── Quick Actions card shimmer ────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _shimmerBlock(
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    4,
-                    (_) => Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _pill(48, 48, 24),
-                        const SizedBox(height: 8),
-                        _pill(44, 10, 5),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ── Stats section label ───────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _shimmerBlock(child: _pill(160, 16, 8)),
-          ),
-          const SizedBox(height: 12),
-
-          // ── Stats 2×2 grid shimmer ───────────────────────────────────────
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: DashboardStatsSkeleton(),
-          ),
-
-          const SizedBox(height: 22),
-
-          // ── Pending list label + items ───────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _shimmerBlock(child: _pill(140, 16, 8)),
-          ),
-          const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: DashboardListSkeleton(itemCount: 3),
-          ),
-
-          const SizedBox(height: 22),
-
-          // ── Activity timeline label + items ──────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _shimmerBlock(child: _pill(120, 16, 8)),
-          ),
-          const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: DashboardListSkeleton(itemCount: 4),
-          ),
-
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
-
-  static Widget _shimmerBlock({required Widget child}) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE8EFE9),
-      highlightColor: const Color(0xFFF5F9F6),
-      child: child,
-    );
-  }
-
-  static Widget _pill(double w, double h, double r) {
-    return Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(r),
-      ),
-    );
-  }
 }

@@ -9,6 +9,7 @@ import '../../data/models/inventory_model.dart';
 import '../widgets/inventory_card.dart';
 import '../widgets/update_inventory_bottom_sheet.dart';
 import '../widgets/inventory_history_bottom_sheet.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 
 class ProductInventoryScreen extends StatefulWidget {
   final String productId;
@@ -260,9 +261,7 @@ class _ProductInventoryScreenState extends State<ProductInventoryScreen> {
 
   Widget _buildBody(InventoryState state) {
     if (state is InventoryLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryGreen),
-      );
+      return const InventoryListSkeleton(itemCount: 5);
     }
 
     if (state is InventoryLoaded) {

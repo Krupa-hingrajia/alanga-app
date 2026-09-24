@@ -38,6 +38,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (commonImages.isNotEmpty) {
       _images = List.from(commonImages);
     }
+    if (widget.product.variants.isNotEmpty) {
+      _variants = widget.product.variants.map((v) {
+        final variantImages = v.images.where((img) => img.productVariantId == v.id).toList();
+        return v.copyWith(images: variantImages);
+      }).toList();
+    }
     _categoryName = widget.product.categoryName;
     _subCategoryName = widget.product.subCategoryName;
     _fetchClassificationNames();
@@ -538,7 +544,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _variants.length,
-                            separatorBuilder: (_, __) => const Divider(height: 16, color: Color(0xFFE8EFE9)),
+                            separatorBuilder: (context, index) => const Divider(height: 16, color: Color(0xFFE8EFE9)),
                             itemBuilder: (ctx, i) {
                               final v = _variants[i];
                               final variantImages = v.images.where((img) => img.productVariantId == v.id).toList();
@@ -548,45 +554,69 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 vImg = primary.imageUrl;
                               }
 
-                              return Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF4F8F5),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: const Color(0xFFE4ECE8)),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(9),
-                                      child: (vImg != null && vImg.isNotEmpty)
-                                          ? CustomImageView(imageUrl: vImg, width: 40, height: 40, fit: BoxFit.cover)
-                                          : const Icon(Icons.style_outlined, color: Color(0xFF1A3827), size: 18),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          v.variantName,
-                                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                              return InkWell(
+                                onTap: () => _showVariantDetailsModal(context, v),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF4F8F5),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: const Color(0xFFE4ECE8)),
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'SKU: ${v.sku} | Stock: ${v.stock}',
-                                          style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Color(0xFF7A9A86)),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(9),
+                                          child: (vImg != null && vImg.isNotEmpty)
+                                              ? CustomImageView(imageUrl: vImg, width: 44, height: 44, fit: BoxFit.cover)
+                                              : const Icon(Icons.style_outlined, color: Color(0xFF1A3827), size: 20),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              v.variantName,
+                                              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'SKU: ${v.sku} | Stock: ${v.stock}',
+                                              style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Color(0xFF7A9A86)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            '₹${v.price.toStringAsFixed(0)}',
+                                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'View',
+                                                style: TextStyle(fontSize: 11, color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
+                                              ),
+                                              SizedBox(width: 2),
+                                              Icon(Icons.chevron_right, size: 14, color: AppColors.primaryGreen),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    '₹${v.price.toStringAsFixed(0)}',
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
-                                  ),
-                                ],
+                                ),
                               );
                             },
                           ),
@@ -883,6 +913,381 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           },
         ),
       ),
+    );
+  }
+
+  void _showVariantDetailsModal(BuildContext context, ProductVariantModel v) {
+    final List<ProductImageModel> variantImages = v.images.where((img) => img.productVariantId == v.id).toList();
+    if (variantImages.isEmpty && v.images.isNotEmpty) {
+      variantImages.addAll(v.images);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalCtx) {
+        int selectedImgIdx = 0;
+
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final activeImgUrl = variantImages.isNotEmpty
+                ? variantImages[selectedImgIdx].imageUrl
+                : null;
+
+            final Map<String, String> displayAttrs = {};
+            if (v.color != null && v.color!.trim().isNotEmpty) {
+              displayAttrs['Color'] = v.color!.trim();
+            }
+            if (v.size != null && v.size!.trim().isNotEmpty) {
+              displayAttrs['Size'] = v.size!.trim();
+            }
+            if (v.storage != null && v.storage!.trim().isNotEmpty) {
+              displayAttrs['Storage'] = v.storage!.trim();
+            }
+            v.attributes.forEach((key, val) {
+              if (val.trim().isNotEmpty && !displayAttrs.containsKey(key)) {
+                displayAttrs[key] = val.trim();
+              }
+            });
+
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(modalCtx).size.height * 0.88,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCE5DF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                v.variantName.isNotEmpty ? v.variantName : 'Variant Details',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF11261B),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'SKU: ${v.sku}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                  color: Color(0xFF7A9A86),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (v.isDefault)
+                          Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E9),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFC8E6C9)),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.star, size: 13, color: AppColors.primaryGreen),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Default',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(modalCtx),
+                          icon: const Icon(Icons.close, color: Color(0xFF556960)),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 16, color: Color(0xFFE8EFE9)),
+
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF6FAF7),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFE4ECE8)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: (activeImgUrl != null && activeImgUrl.isNotEmpty)
+                                  ? CustomImageView(
+                                      imageUrl: activeImgUrl,
+                                      fit: BoxFit.contain,
+                                      width: double.infinity,
+                                      height: 220,
+                                    )
+                                  : Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: const [
+                                        Icon(Icons.image_not_supported_outlined, size: 48, color: Color(0xFF9EAEA4)),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          'No variant image uploaded',
+                                          style: TextStyle(fontSize: 13, color: Color(0xFF7A9A86)),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+
+                          if (variantImages.length > 1) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 60,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: variantImages.length,
+                                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                                itemBuilder: (_, imgIndex) {
+                                  final isSelected = selectedImgIdx == imgIndex;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setModalState(() {
+                                        selectedImgIdx = imgIndex;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: isSelected ? AppColors.primaryGreen : const Color(0xFFE4ECE8),
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: CustomImageView(
+                                          imageUrl: variantImages[imgIndex].imageUrl,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 20),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryGreen.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.primaryGreen.withValues(alpha: 0.2)),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Price',
+                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF7A9A86)),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '₹${v.price.toStringAsFixed(0)}',
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: (v.stock > 0 ? const Color(0xFF2E7D32) : AppColors.brandRed).withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: (v.stock > 0 ? const Color(0xFF2E7D32) : AppColors.brandRed).withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Stock Status',
+                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF7A9A86)),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        v.stock > 0 ? '${v.stock} in stock' : 'Out of Stock',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: v.stock > 0 ? const Color(0xFF2E7D32) : AppColors.brandRed,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          if (displayAttrs.isNotEmpty) ...[
+                            const Text(
+                              'Attributes',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: displayAttrs.entries.map((entry) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF4F8F5),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: const Color(0xFFE4ECE8)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '${entry.key}: ',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF556960),
+                                        ),
+                                      ),
+                                      Text(
+                                        entry.value,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF11261B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9FBF9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFE8EFE9)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Variant Status',
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF556960), fontWeight: FontWeight.w500),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: v.status.toUpperCase() == 'ACTIVE'
+                                        ? const Color(0xFFE8F5E9)
+                                        : const Color(0xFFFFEBEE),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    v.status.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: v.status.toUpperCase() == 'ACTIVE'
+                                          ? const Color(0xFF2E7D32)
+                                          : AppColors.brandRed,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(modalCtx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF11261B),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

@@ -10,6 +10,7 @@ import '../widgets/shipping_card.dart';
 import '../widgets/shipping_summary_card.dart';
 import '../widgets/customer_shipping_preview.dart';
 import '../widgets/shipping_empty_state.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 
 class ProductShippingScreen extends StatefulWidget {
   final String productId;
@@ -96,9 +97,7 @@ class _ProductShippingScreenState extends State<ProductShippingScreen> {
           },
           builder: (context, state) {
             if (state is ShippingLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
-              );
+              return const ShippingScreenSkeleton();
             }
 
             final isSaving = state is ShippingSaving;

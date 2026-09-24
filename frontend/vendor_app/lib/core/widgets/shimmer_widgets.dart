@@ -181,3 +181,134 @@ class DropdownSkeleton extends StatelessWidget {
     );
   }
 }
+
+/// Shimmer skeleton for Inventory Management list
+class InventoryListSkeleton extends StatelessWidget {
+  final int itemCount;
+  const InventoryListSkeleton({super.key, this.itemCount = 4});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE8EFE9),
+      highlightColor: const Color(0xFFF5F9F6),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemCount,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, __) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 140,
+                            height: 15,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: 90,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 60,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Shimmer skeleton for Shipping Management screen
+class ShippingScreenSkeleton extends StatelessWidget {
+  const ShippingScreenSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE8EFE9),
+      highlightColor: const Color(0xFFF5F9F6),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            Container(
+              height: 130,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              height: 110,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              height: 280,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -32,6 +32,8 @@
 	<string>Alanga Vendor requires access to your photo library to select and upload product images and store branding.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Alanga Vendor requires permission to save product invoices and barcode labels to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Alanga Vendor requires microphone access when recording product videos.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

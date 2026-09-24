@@ -216,6 +216,7 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
           maxWidth: 1920,
           maxHeight: 1920,
           imageQuality: 85,
+          requestFullMetadata: false,
         );
         if (photo != null) pickedFiles.add(photo);
       } else {
@@ -224,6 +225,7 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
             maxWidth: 1920,
             maxHeight: 1920,
             imageQuality: 85,
+            requestFullMetadata: false,
           );
           pickedFiles.addAll(photos);
         } catch (_) {
@@ -232,6 +234,7 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
             maxWidth: 1920,
             maxHeight: 1920,
             imageQuality: 85,
+            requestFullMetadata: false,
           );
           if (single != null) pickedFiles.add(single);
         }
@@ -246,14 +249,25 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
           break;
         }
 
-        final name = file.name.isNotEmpty ? file.name : file.path;
+        String path = file.path;
+        if (path.isEmpty) continue;
+
+        if (path.startsWith('file://')) {
+          try {
+            path = Uri.parse(path).toFilePath();
+          } catch (_) {
+            path = path.replaceFirst('file://', '');
+          }
+        }
+
+        final name = file.name.isNotEmpty ? file.name : path;
         final ext = name.contains('.') ? name.substring(name.lastIndexOf('.')).toLowerCase() : '';
         final isAllowed = allowedExtensions.contains(ext) ||
             ext.isEmpty ||
             ext == '.tmp' ||
             (file.mimeType != null && file.mimeType!.startsWith('image/')) ||
-            file.path.contains('image_picker') ||
-            file.path.contains('Camera');
+            path.contains('image_picker') ||
+            path.contains('Camera');
 
         if (!isAllowed) {
           _showErrorSnackBar('Invalid file format: ${file.name}.');
@@ -268,7 +282,7 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
 
         final isFirst = _images.isEmpty;
         _images.add(LocalOrRemoteImage(
-          localPath: file.path,
+          localPath: path,
           isPrimary: isFirst,
           displayOrder: _images.length,
           isUploaded: false,

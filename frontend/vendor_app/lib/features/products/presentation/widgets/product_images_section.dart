@@ -173,8 +173,10 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
                   children: [
                     Expanded(
                       child: InkWell(
-                        onTap: () {
+                        onTap: () async {
                           Navigator.pop(ctx);
+                          await Future.delayed(const Duration(milliseconds: 250));
+                          if (!mounted) return;
                           _pickFromCamera();
                         },
                         borderRadius: BorderRadius.circular(16),
@@ -204,8 +206,10 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: InkWell(
-                        onTap: () {
+                        onTap: () async {
                           Navigator.pop(ctx);
+                          await Future.delayed(const Duration(milliseconds: 250));
+                          if (!mounted) return;
                           _pickFromGallery();
                         },
                         borderRadius: BorderRadius.circular(16),
@@ -249,6 +253,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
+        requestFullMetadata: false,
       );
       if (photo != null) {
         _validateAndAddFiles([photo]);
@@ -265,6 +270,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
+        requestFullMetadata: false,
       );
       if (selected.isNotEmpty) {
         _validateAndAddFiles(selected);
@@ -278,6 +284,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
           maxWidth: 1920,
           maxHeight: 1920,
           imageQuality: 85,
+          requestFullMetadata: false,
         );
         if (single != null) {
           _validateAndAddFiles([single]);
@@ -299,8 +306,16 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
         break;
       }
 
-      final path = file.path;
+      String path = file.path;
       if (path.isEmpty) continue;
+
+      if (path.startsWith('file://')) {
+        try {
+          path = Uri.parse(path).toFilePath();
+        } catch (_) {
+          path = path.replaceFirst('file://', '');
+        }
+      }
 
       final name = file.name.isNotEmpty ? file.name : path;
       final ext = name.contains('.') ? name.substring(name.lastIndexOf('.')).toLowerCase() : '';

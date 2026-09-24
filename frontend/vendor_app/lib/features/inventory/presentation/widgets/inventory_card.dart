@@ -175,7 +175,7 @@ class InventoryCard extends StatelessWidget {
                     icon: const Icon(Icons.edit_note_rounded, size: 18),
                     label: const Text('Update Stock', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
+                      backgroundColor: const Color(0xFF1A3827),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

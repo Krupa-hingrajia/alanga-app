@@ -1598,8 +1598,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
                     label: const Text('Request New Brand'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryGreen,
-                      side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                      foregroundColor: const Color(0xFF1A3827),
+                      side: const BorderSide(color: Color(0xFF1A3827), width: 1.2),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -2072,8 +2072,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
                       label: const Text('Request New Brand'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryGreen,
-                        side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                        foregroundColor: const Color(0xFF1A3827),
+                        side: const BorderSide(color: Color(0xFF1A3827), width: 1.2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),

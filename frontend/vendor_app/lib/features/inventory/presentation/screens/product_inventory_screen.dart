@@ -341,7 +341,7 @@ class _ProductInventoryScreenState extends State<ProductInventoryScreen> {
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: const Text('Try Again'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryGreen,
+                    backgroundColor: const Color(0xFF1A3827),
                     foregroundColor: Colors.white,
                   ),
                 ),

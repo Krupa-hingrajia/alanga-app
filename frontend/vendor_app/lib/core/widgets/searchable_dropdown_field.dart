@@ -401,8 +401,8 @@ class _SearchModalContentState extends State<_SearchModalContent> {
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryGreen,
-                        side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                        foregroundColor: const Color(0xFF1A3827),
+                        side: const BorderSide(color: Color(0xFF1A3827), width: 1.2),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),

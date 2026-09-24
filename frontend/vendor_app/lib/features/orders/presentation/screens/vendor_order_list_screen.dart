@@ -138,7 +138,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
               ));
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -430,7 +430,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Try Again'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
+                  backgroundColor: const Color(0xFF1A3827),
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -505,7 +505,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                         icon: const Icon(Icons.filter_alt_off_rounded, size: 18),
                         label: const Text('Clear All Filters'),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primaryGreen,
+                          foregroundColor: const Color(0xFF1A3827),
                         ),
                       ),
                   ],

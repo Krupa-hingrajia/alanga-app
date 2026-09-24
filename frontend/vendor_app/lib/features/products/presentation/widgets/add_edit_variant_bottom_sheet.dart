@@ -232,13 +232,13 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                     ),
                     TextButton.icon(
                       onPressed: _addAttributePair,
-                      icon: const Icon(Icons.add, size: 16, color: AppColors.primaryGreen),
+                      icon: const Icon(Icons.add, size: 16, color: Color(0xFF1A3827)),
                       label: const Text(
                         '+ Add another Attribute',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryGreen,
+                          color: Color(0xFF1A3827),
                         ),
                       ),
                     ),

@@ -385,7 +385,7 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
                           child: ElevatedButton.icon(
                             onPressed: widget.onManageImages ?? widget.onEdit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryGreen,
+                              backgroundColor: const Color(0xFF1A3827),
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

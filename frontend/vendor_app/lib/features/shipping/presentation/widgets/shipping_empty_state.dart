@@ -67,7 +67,7 @@ class ShippingEmptyState extends StatelessWidget {
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

@@ -129,7 +129,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               ));
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -893,7 +893,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                         ? () => _confirmStatusAdvance(context, nextStatus!, actionLabel!)
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: canAdvance ? AppColors.primaryGreen : const Color(0xFFCBD5E1),
+                      backgroundColor: canAdvance ? const Color(0xFF1A3827) : const Color(0xFFCBD5E1),
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: const Color(0xFFE2E8F0),
                       disabledForegroundColor: const Color(0xFF94A3B8),

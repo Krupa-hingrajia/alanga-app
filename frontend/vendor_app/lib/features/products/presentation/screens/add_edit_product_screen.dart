@@ -798,8 +798,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                               icon: const Icon(Icons.tune_rounded, size: 18),
                                               label: const Text('CONFIGURE SHIPPING INFORMATION'),
                                               style: OutlinedButton.styleFrom(
-                                                foregroundColor: AppColors.primaryGreen,
-                                                side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                                                foregroundColor: const Color(0xFF1A3827),
+                                                side: const BorderSide(color: Color(0xFF1A3827), width: 1.2),
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                               ),

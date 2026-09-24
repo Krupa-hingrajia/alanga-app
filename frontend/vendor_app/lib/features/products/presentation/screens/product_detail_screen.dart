@@ -606,10 +606,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             children: [
                                               Text(
                                                 'View',
-                                                style: TextStyle(fontSize: 11, color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
+                                                style: TextStyle(fontSize: 11, color: Color(0xFF1A3827), fontWeight: FontWeight.bold),
                                               ),
                                               SizedBox(width: 2),
-                                              Icon(Icons.chevron_right, size: 14, color: AppColors.primaryGreen),
+                                              Icon(Icons.chevron_right, size: 14, color: Color(0xFF1A3827)),
                                             ],
                                           ),
                                         ],
@@ -1271,7 +1271,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(modalCtx),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF11261B),
+                          backgroundColor: const Color(0xFF1A3827),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(

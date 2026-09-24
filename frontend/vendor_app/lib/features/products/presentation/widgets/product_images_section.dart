@@ -587,8 +587,8 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
                 icon: const Icon(Icons.add_a_photo_outlined, size: 18),
                 label: Text('Add Images ($totalCount/$maxTotalImages)'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryGreen,
-                  side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+                  foregroundColor: const Color(0xFF1A3827),
+                  side: const BorderSide(color: Color(0xFF1A3827), width: 1.2),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

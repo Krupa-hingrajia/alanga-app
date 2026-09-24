@@ -32,8 +32,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.product.images.isNotEmpty) {
-      _images = List.from(widget.product.images);
+    final commonImages = widget.product.images
+        .where((img) => img.productVariantId == null || img.productVariantId!.isEmpty)
+        .toList();
+    if (commonImages.isNotEmpty) {
+      _images = List.from(commonImages);
     }
     _categoryName = widget.product.categoryName;
     _subCategoryName = widget.product.subCategoryName;
@@ -191,7 +194,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               final commonImages = state.images
                   .where((img) => img.productVariantId == null || img.productVariantId!.isEmpty)
                   .toList();
-              final sorted = List<ProductImageModel>.from(commonImages.isNotEmpty ? commonImages : state.images);
+              final sorted = List<ProductImageModel>.from(commonImages);
               sorted.sort((a, b) {
                 if (a.isPrimary && !b.isPrimary) return -1;
                 if (!a.isPrimary && b.isPrimary) return 1;
@@ -199,7 +202,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               });
               setState(() {
                 _images = sorted;
-                _selectedIndex = 0;
+                if (_selectedIndex >= sorted.length) {
+                  _selectedIndex = 0;
+                }
               });
             } else if (state is ProductVariantsLoadedState) {
               setState(() {

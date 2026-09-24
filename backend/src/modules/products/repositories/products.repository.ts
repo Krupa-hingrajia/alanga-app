@@ -10,11 +10,12 @@ export class ProductsRepository implements IProductsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private mapToEntity(product: any): ProductEntity {
-    const images = product.productImages || product.images || [];
+    const rawImages = product.productImages || product.images || [];
+    const images = rawImages.filter((img: any) => !img.productVariantId);
 
     const variants = (product.productVariants || product.variants || []).map((v: any) => ({
       ...v,
-      images: v.images || v.productImages || [],
+      images: v.images || v.productImages || rawImages.filter((img: any) => img.productVariantId === v.id),
     }));
 
     return new ProductEntity({

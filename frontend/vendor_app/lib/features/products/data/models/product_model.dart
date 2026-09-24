@@ -62,12 +62,16 @@ class ProductModel extends Equatable {
 
   String? get primaryImageUrl {
     if (image != null && image!.trim().isNotEmpty) return image;
-    if (images.isNotEmpty) {
-      final primary = images.firstWhere(
+    final common = images.where((img) => img.productVariantId == null || img.productVariantId!.isEmpty).toList();
+    if (common.isNotEmpty) {
+      final primary = common.firstWhere(
         (img) => img.isPrimary,
-        orElse: () => images.first,
+        orElse: () => common.first,
       );
       return primary.imageUrl;
+    }
+    if (images.isNotEmpty) {
+      return images.first.imageUrl;
     }
     return null;
   }
@@ -90,6 +94,10 @@ class ProductModel extends Equatable {
 
       return variantModel.copyWith(images: finalImages);
     }).toList();
+
+    final commonImages = parsedImages
+        .where((img) => img.productVariantId == null || img.productVariantId!.isEmpty)
+        .toList();
 
     String? catName;
     if (json['category'] != null && json['category'] is Map && json['category']['name'] != null) {
@@ -134,7 +142,7 @@ class ProductModel extends Equatable {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : DateTime.now(),
-      images: parsedImages,
+      images: commonImages.isNotEmpty ? commonImages : parsedImages,
       variants: parsedVariants,
     );
   }

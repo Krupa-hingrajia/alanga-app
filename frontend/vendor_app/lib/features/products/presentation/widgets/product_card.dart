@@ -70,7 +70,7 @@ class ProductCard extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(14),
                             child: CustomImageView(
-                              imageUrl: product.image,
+                              imageUrl: product.primaryImageUrl ?? product.image,
                               placeholderIcon: Icons.shopping_bag_rounded,
                             ),
                           ),

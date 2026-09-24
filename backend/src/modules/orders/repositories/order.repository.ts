@@ -65,7 +65,11 @@ export class OrderRepository implements IOrderRepository {
                 productImages: { where: { deletedAt: null } },
               },
             },
-            productVariant: true,
+            productVariant: {
+              include: {
+                images: { where: { deletedAt: null } },
+              },
+            },
           },
         },
       },
@@ -98,7 +102,11 @@ export class OrderRepository implements IOrderRepository {
                 productImages: { where: { deletedAt: null } },
               },
             },
-            productVariant: true,
+            productVariant: {
+              include: {
+                images: { where: { deletedAt: null } },
+              },
+            },
           },
         },
       },
@@ -150,7 +158,11 @@ export class OrderRepository implements IOrderRepository {
                 productImages: { where: { deletedAt: null } },
               },
             },
-            productVariant: true,
+            productVariant: {
+              include: {
+                images: { where: { deletedAt: null } },
+              },
+            },
           },
         },
       },
@@ -203,7 +215,11 @@ export class OrderRepository implements IOrderRepository {
                 productImages: { where: { deletedAt: null } },
               },
             },
-            productVariant: true,
+            productVariant: {
+              include: {
+                images: { where: { deletedAt: null } },
+              },
+            },
           },
         },
       },
@@ -264,7 +280,11 @@ export class OrderRepository implements IOrderRepository {
                   productImages: { where: { deletedAt: null } },
                 },
               },
-              productVariant: true,
+              productVariant: {
+                include: {
+                  images: { where: { deletedAt: null } },
+                },
+              },
             },
           },
         },

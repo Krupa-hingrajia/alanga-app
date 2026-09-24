@@ -32,6 +32,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.product.images.isNotEmpty) {
+      _images = List.from(widget.product.images);
+    }
     _categoryName = widget.product.categoryName;
     _subCategoryName = widget.product.subCategoryName;
     _fetchClassificationNames();
@@ -219,7 +222,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           builder: (context, state) {
             final activeImage = _images.isNotEmpty
                 ? _images[_selectedIndex].imageUrl
-                : widget.product.image;
+                : (widget.product.primaryImageUrl ?? widget.product.image);
 
             final bool isSelectedPrimary = _images.isNotEmpty
                 ? _images[_selectedIndex].isPrimary

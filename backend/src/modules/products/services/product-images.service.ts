@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import { extname, join } from 'path';
 import {
   Injectable,
   NotFoundException,
@@ -85,13 +87,43 @@ export class ProductImagesService {
     // Process file uploads
     fileList.forEach((file, index) => {
       const isPrimary = shouldSetFirstAsPrimary && index === 0 && imagesToCreate.length === 0;
-      const imageUrl = file.path ? `/uploads/products/${file.filename}` : `/uploads/products/${file.originalname}`;
-      imagesToCreate.push({
-        imageUrl,
-        isPrimary,
-        displayOrder: nextDisplayOrder++,
-        productVariantId: productVariantId || null,
-      });
+      let imageUrl = '';
+
+      if (file.buffer) {
+        const isVercel = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+        if (!isVercel) {
+          try {
+            const uploadPath = './uploads/products';
+            if (!fs.existsSync(uploadPath)) {
+              fs.mkdirSync(uploadPath, { recursive: true });
+            }
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = extname(file.originalname || '.jpg');
+            const filename = `${uniqueSuffix}${ext}`;
+            fs.writeFileSync(join(uploadPath, filename), file.buffer);
+            imageUrl = `/uploads/products/${filename}`;
+          } catch (_) {
+            imageUrl = '';
+          }
+        }
+
+        // If serverless (Vercel) or disk write failed, use Data URI
+        if (!imageUrl) {
+          const mime = file.mimetype || 'image/jpeg';
+          imageUrl = `data:${mime};base64,${file.buffer.toString('base64')}`;
+        }
+      } else if (file.path) {
+        imageUrl = `/uploads/products/${file.filename || file.originalname}`;
+      }
+
+      if (imageUrl) {
+        imagesToCreate.push({
+          imageUrl,
+          isPrimary,
+          displayOrder: nextDisplayOrder++,
+          productVariantId: productVariantId || null,
+        });
+      }
     });
 
     // Process URL inputs

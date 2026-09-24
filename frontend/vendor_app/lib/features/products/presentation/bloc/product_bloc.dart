@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/product_repository.dart';
 import 'product_event.dart';
@@ -55,7 +56,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(const ProductActionLoading(message: 'Uploading common images...'));
         try {
           await _productRepository.uploadProductImages(product.id, event.pendingImagePaths);
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Upload product images error: $e');
+        }
       }
 
       if (event.variants.isNotEmpty) {
@@ -67,13 +70,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             final createdVariant = await _productRepository.createProductVariant(product.id, v.toJson());
             if (v.pendingLocalPaths.isNotEmpty) {
               emit(ProductActionLoading(message: 'Uploading images for $vName...'));
-              await _productRepository.uploadProductImages(
-                product.id,
-                v.pendingLocalPaths,
-                productVariantId: createdVariant.id,
-              );
+              try {
+                await _productRepository.uploadProductImages(
+                  product.id,
+                  v.pendingLocalPaths,
+                  productVariantId: createdVariant.id,
+                );
+              } catch (e) {
+                debugPrint('Upload variant images error for $vName: $e');
+              }
             }
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('Create variant error for $vName: $e');
+          }
         }
       }
 
@@ -102,7 +111,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(const ProductActionLoading(message: 'Uploading new images...'));
         try {
           await _productRepository.uploadProductImages(product.id, event.pendingImagePaths);
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Upload product images error on update: $e');
+        }
       }
 
       final refreshed = await _productRepository.getProductById(product.id);

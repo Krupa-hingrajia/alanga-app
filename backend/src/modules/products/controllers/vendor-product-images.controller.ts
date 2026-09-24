@@ -16,9 +16,8 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import * as fs from 'fs';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
@@ -30,26 +29,13 @@ import { ReorderProductImagesDto } from '../dto/reorder-product-images.dto';
 import { ProductImageResponseDto } from '../dto/product-image-response.dto';
 
 const multerOptions = {
-  storage: diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = './uploads/products';
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-      cb(null, `${uniqueSuffix}${ext}`);
-    },
-  }),
+  storage: memoryStorage(),
   fileFilter: (req: any, file: any, cb: any) => {
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-    const ext = extname(file.originalname).toLowerCase();
+    const ext = extname(file.originalname || '').toLowerCase();
 
-    if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
+    if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(ext) || !ext) {
       cb(null, true);
     } else {
       cb(
@@ -61,7 +47,7 @@ const multerOptions = {
     }
   },
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
+    fileSize: 10 * 1024 * 1024, // 10 MB
   },
 };
 

@@ -7,12 +7,16 @@ import express from 'express';
 import { AppModule } from '../src/app.module';
 import { TransformInterceptor } from '../src/common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
+import { join } from 'path';
 import { ValidationFilter } from '../src/common/filters/validation.filter';
 import { PrismaExceptionFilter } from '../src/common/filters/prisma-exception.filter';
 import { ValidationException } from '../src/common/exceptions/validation.exception';
 
 // Create Express server instance
 const server = express();
+server.use(express.json({ limit: '50mb' }));
+server.use(express.urlencoded({ limit: '50mb', extended: true }));
+server.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
 let isAppInitialized = false;
 

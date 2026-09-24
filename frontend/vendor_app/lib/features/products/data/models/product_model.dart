@@ -60,6 +60,18 @@ class ProductModel extends Equatable {
     this.variants = const [],
   });
 
+  String? get primaryImageUrl {
+    if (image != null && image!.trim().isNotEmpty) return image;
+    if (images.isNotEmpty) {
+      final primary = images.firstWhere(
+        (img) => img.isPrimary,
+        orElse: () => images.first,
+      );
+      return primary.imageUrl;
+    }
+    return null;
+  }
+
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     var rawImages = (json['images'] as List<dynamic>?) ?? (json['productImages'] as List<dynamic>?) ?? [];
     List<ProductImageModel> parsedImages = rawImages

@@ -124,29 +124,62 @@ class VendorOrderItemModel {
     final productMap = json['product'] is Map
         ? Map<String, dynamic>.from(json['product'] as Map)
         : null;
-    if (productMap != null) {
-      if (productMap['image'] != null) {
-        img = productMap['image'].toString();
-      } else if (productMap['productImages'] is List &&
-          (productMap['productImages'] as List).isNotEmpty) {
-        final list = productMap['productImages'] as List;
-        final thumb = list.firstWhere(
-          (element) => element is Map && element['isThumbnail'] == true,
-          orElse: () => list.first,
-        );
-        if (thumb is Map) {
-          img = thumb['imageUrl']?.toString();
+
+    // 1. Variant image takes highest priority when available
+    final variantMap = json['productVariant'] is Map
+        ? Map<String, dynamic>.from(json['productVariant'] as Map)
+        : null;
+    if (variantMap != null) {
+      if (variantMap['image'] != null && variantMap['image'].toString().trim().isNotEmpty) {
+        img = variantMap['image'].toString().trim();
+      } else if (variantMap['images'] is List && (variantMap['images'] as List).isNotEmpty) {
+        final vList = variantMap['images'] as List;
+        final firstItem = vList.first;
+        if (firstItem is Map) {
+          img = (firstItem['imageUrl'] ?? firstItem['image'] ?? firstItem['url'])?.toString().trim();
+        } else if (firstItem is String && firstItem.trim().isNotEmpty) {
+          img = firstItem.trim();
+        }
+      } else if (variantMap['productImages'] is List && (variantMap['productImages'] as List).isNotEmpty) {
+        final vList = variantMap['productImages'] as List;
+        final firstItem = vList.first;
+        if (firstItem is Map) {
+          img = (firstItem['imageUrl'] ?? firstItem['image'] ?? firstItem['url'])?.toString().trim();
+        } else if (firstItem is String && firstItem.trim().isNotEmpty) {
+          img = firstItem.trim();
         }
       }
     }
 
-    final variantMap = json['productVariant'] is Map
-        ? Map<String, dynamic>.from(json['productVariant'] as Map)
-        : null;
-    if (img == null && variantMap != null && variantMap['images'] is List) {
-      final vList = variantMap['images'] as List;
-      if (vList.isNotEmpty) {
-        img = vList.first.toString();
+    // 2. Fall back to product image if variant has no specific image
+    if (img == null || img.isEmpty) {
+      if (productMap != null) {
+        if (productMap['image'] != null && productMap['image'].toString().trim().isNotEmpty) {
+          img = productMap['image'].toString().trim();
+        } else if (productMap['productImages'] is List &&
+            (productMap['productImages'] as List).isNotEmpty) {
+          final list = productMap['productImages'] as List;
+          final thumb = list.firstWhere(
+            (element) => element is Map && (element['isPrimary'] == true || element['isThumbnail'] == true),
+            orElse: () => list.first,
+          );
+          if (thumb is Map) {
+            img = (thumb['imageUrl'] ?? thumb['image'] ?? thumb['url'])?.toString().trim();
+          } else if (thumb is String && thumb.trim().isNotEmpty) {
+            img = thumb.trim();
+          }
+        } else if (productMap['images'] is List && (productMap['images'] as List).isNotEmpty) {
+          final list = productMap['images'] as List;
+          final thumb = list.firstWhere(
+            (element) => element is Map && (element['isPrimary'] == true || element['isThumbnail'] == true),
+            orElse: () => list.first,
+          );
+          if (thumb is Map) {
+            img = (thumb['imageUrl'] ?? thumb['image'] ?? thumb['url'])?.toString().trim();
+          } else if (thumb is String && thumb.trim().isNotEmpty) {
+            img = thumb.trim();
+          }
+        }
       }
     }
 

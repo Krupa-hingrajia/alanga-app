@@ -1,7 +1,7 @@
 name: vendor_app
 description: "A new Flutter project for Alanga Vendors."
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.2+4
 
 environment:
   sdk: ^3.11.0
@@ -21,6 +21,9 @@ dependencies:
   freezed_annotation: ^2.4.1
   image_picker: ^1.2.3
   shimmer: ^3.0.0
+
+dependency_overrides:
+  path_provider_foundation: 2.3.2
 
 dev_dependencies:
   flutter_test:

@@ -615,7 +615,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                     uploadProgress: _uploadProgress,
                                     onAddLocalImages: (newPaths) {
                                       setState(() {
-                                        _pendingLocalPaths.addAll(newPaths);
+                                        _pendingLocalPaths = [..._pendingLocalPaths, ...newPaths];
                                       });
                                     },
                                     onDeleteImage: (item) {
@@ -628,7 +628,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                             );
                                       } else if (item.localPath != null) {
                                         setState(() {
-                                          _pendingLocalPaths.remove(item.localPath);
+                                          _pendingLocalPaths = _pendingLocalPaths
+                                              .where((p) => p != item.localPath)
+                                              .toList();
                                         });
                                       }
                                     },

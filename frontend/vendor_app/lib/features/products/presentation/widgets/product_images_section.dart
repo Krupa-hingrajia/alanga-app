@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -72,8 +73,10 @@ class ProductImagesSection extends StatefulWidget {
 class _ProductImagesSectionState extends State<ProductImagesSection> {
   final ImagePicker _picker = ImagePicker();
 
-  static const List<String> allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-  static const int maxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+  static const List<String> allowedExtensions = [
+    '.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.bmp', '.gif'
+  ];
+  static const int maxFileSizeBytes = 25 * 1024 * 1024; // 25 MB
   static const int maxTotalImages = 10;
 
   List<LocalOrRemoteImage> _combinedImages = [];
@@ -87,8 +90,9 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
   @override
   void didUpdateWidget(covariant ProductImagesSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.uploadedImages != widget.uploadedImages ||
-        oldWidget.pendingLocalPaths != widget.pendingLocalPaths) {
+    if (!listEquals(oldWidget.uploadedImages, widget.uploadedImages) ||
+        !listEquals(oldWidget.pendingLocalPaths, widget.pendingLocalPaths) ||
+        oldWidget.pendingLocalPaths.length != widget.pendingLocalPaths.length) {
       _buildCombinedList();
     }
   }
@@ -242,12 +246,15 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
     try {
       final XFile? photo = await _picker.pickImage(
         source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
         imageQuality: 85,
       );
       if (photo != null) {
         _validateAndAddFiles([photo]);
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error picking from camera: $e');
       _showSnackBar('Failed to capture photo from camera.');
     }
   }
@@ -255,13 +262,30 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
   Future<void> _pickFromGallery() async {
     try {
       final List<XFile> selected = await _picker.pickMultiImage(
+        maxWidth: 1920,
+        maxHeight: 1920,
         imageQuality: 85,
       );
       if (selected.isNotEmpty) {
         _validateAndAddFiles(selected);
       }
-    } catch (_) {
-      _showSnackBar('Failed to pick images from gallery.');
+    } catch (e) {
+      debugPrint('Error picking from gallery: $e');
+      // Fallback for devices where pickMultiImage is unsupported
+      try {
+        final XFile? single = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 1920,
+          maxHeight: 1920,
+          imageQuality: 85,
+        );
+        if (single != null) {
+          _validateAndAddFiles([single]);
+        }
+      } catch (e2) {
+        debugPrint('Fallback error picking from gallery: $e2');
+        _showSnackBar('Failed to pick images from gallery.');
+      }
     }
   }
 
@@ -276,22 +300,26 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
       }
 
       final path = file.path;
+      if (path.isEmpty) continue;
+
       final name = file.name.isNotEmpty ? file.name : path;
       final ext = name.contains('.') ? name.substring(name.lastIndexOf('.')).toLowerCase() : '';
 
       final isAllowed = allowedExtensions.contains(ext) ||
-          ext == '.tmp' ||
           ext.isEmpty ||
-          (file.mimeType != null && file.mimeType!.startsWith('image/'));
+          ext == '.tmp' ||
+          (file.mimeType != null && file.mimeType!.startsWith('image/')) ||
+          path.contains('image_picker') ||
+          path.contains('Camera');
 
       if (!isAllowed) {
-        _showSnackBar('Unsupported file format.');
+        _showSnackBar('Unsupported file format ($ext).');
         continue;
       }
 
       final fileObj = File(path);
       if (fileObj.existsSync() && fileObj.lengthSync() > maxFileSizeBytes) {
-        _showSnackBar('Image size exceeds the allowed limit.');
+        _showSnackBar('Image size exceeds 25MB limit.');
         continue;
       }
 
@@ -299,6 +327,19 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
     }
 
     if (validPaths.isNotEmpty) {
+      // Immediately reflect newly picked local images on screen
+      setState(() {
+        final bool hasPrimary = _combinedImages.any((img) => img.isPrimary);
+        for (int i = 0; i < validPaths.length; i++) {
+          final p = validPaths[i];
+          _combinedImages.add(LocalOrRemoteImage(
+            localPath: p,
+            isPrimary: !hasPrimary && i == 0,
+            displayOrder: _combinedImages.length,
+            isUploaded: false,
+          ));
+        }
+      });
       widget.onAddLocalImages(validPaths);
     }
   }
@@ -324,6 +365,12 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
+              setState(() {
+                _combinedImages.remove(item);
+                if (item.isPrimary && _combinedImages.isNotEmpty) {
+                  _combinedImages[0] = _combinedImages[0].copyWith(isPrimary: true);
+                }
+              });
               widget.onDeleteImage(item);
             },
             style: ElevatedButton.styleFrom(
@@ -356,7 +403,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -554,7 +601,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -568,13 +615,28 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
             child: SizedBox(
               width: 110,
               height: 140,
-              child: CustomImageView(
-                imageUrl: item.remoteUrl ?? item.localPath,
-                width: 110,
-                height: 140,
-                fit: BoxFit.cover,
-                placeholderIcon: Icons.broken_image_outlined,
-              ),
+              child: item.localPath != null
+                  ? Image.file(
+                      File(item.localPath!),
+                      width: 110,
+                      height: 140,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, error, stackTrace) {
+                        return Container(
+                          width: 110,
+                          height: 140,
+                          color: const Color(0xFFF4F8F5),
+                          child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                        );
+                      },
+                    )
+                  : CustomImageView(
+                      imageUrl: item.remoteUrl,
+                      width: 110,
+                      height: 140,
+                      fit: BoxFit.cover,
+                      placeholderIcon: Icons.broken_image_outlined,
+                    ),
             ),
           ),
 
@@ -587,9 +649,9 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.4),
+                    Colors.black.withValues(alpha: 0.4),
                     Colors.transparent,
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                   ],
                   stops: const [0.0, 0.5, 1.0],
                 ),
@@ -605,13 +667,20 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
             child: GestureDetector(
               onTap: () {
                 if (!isPrimary) {
+                  setState(() {
+                    for (int i = 0; i < _combinedImages.length; i++) {
+                      _combinedImages[i] = _combinedImages[i].copyWith(
+                        isPrimary: _combinedImages[i] == item,
+                      );
+                    }
+                  });
                   widget.onSetPrimary(item);
                 }
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isPrimary ? const Color(0xFF1A3827) : Colors.black.withOpacity(0.5),
+                  color: isPrimary ? const Color(0xFF1A3827) : Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                   border: isPrimary ? Border.all(color: const Color(0xFFFFD700), width: 1) : null,
                 ),
@@ -652,7 +721,7 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.55),
+                  color: Colors.black.withValues(alpha: 0.55),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

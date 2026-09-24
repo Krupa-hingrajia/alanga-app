@@ -175,8 +175,10 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
   late List<LocalOrRemoteImage> _images;
 
   static const int maxGalleryImages = 10;
-  static const int maxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
-  static const List<String> allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+  static const int maxFileSizeBytes = 25 * 1024 * 1024; // 25 MB
+  static const List<String> allowedExtensions = [
+    '.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.bmp', '.gif'
+  ];
 
   @override
   void initState() {
@@ -209,11 +211,30 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
     try {
       final List<XFile> pickedFiles = [];
       if (source == ImageSource.camera) {
-        final XFile? photo = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1920,
+          maxHeight: 1920,
+          imageQuality: 85,
+        );
         if (photo != null) pickedFiles.add(photo);
       } else {
-        final List<XFile> photos = await _picker.pickMultiImage(imageQuality: 85);
-        pickedFiles.addAll(photos);
+        try {
+          final List<XFile> photos = await _picker.pickMultiImage(
+            maxWidth: 1920,
+            maxHeight: 1920,
+            imageQuality: 85,
+          );
+          pickedFiles.addAll(photos);
+        } catch (_) {
+          final XFile? single = await _picker.pickImage(
+            source: ImageSource.gallery,
+            maxWidth: 1920,
+            maxHeight: 1920,
+            imageQuality: 85,
+          );
+          if (single != null) pickedFiles.add(single);
+        }
       }
 
       if (pickedFiles.isEmpty) return;
@@ -225,15 +246,23 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
           break;
         }
 
-        final ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-        if (!allowedExtensions.contains(ext)) {
-          _showErrorSnackBar('Invalid file format: ${file.name}. Only JPG, PNG & WEBP allowed.');
+        final name = file.name.isNotEmpty ? file.name : file.path;
+        final ext = name.contains('.') ? name.substring(name.lastIndexOf('.')).toLowerCase() : '';
+        final isAllowed = allowedExtensions.contains(ext) ||
+            ext.isEmpty ||
+            ext == '.tmp' ||
+            (file.mimeType != null && file.mimeType!.startsWith('image/')) ||
+            file.path.contains('image_picker') ||
+            file.path.contains('Camera');
+
+        if (!isAllowed) {
+          _showErrorSnackBar('Invalid file format: ${file.name}.');
           continue;
         }
 
         final fileLength = await file.length();
         if (fileLength > maxFileSizeBytes) {
-          _showErrorSnackBar('File size too large: ${file.name}. Maximum 5MB per image.');
+          _showErrorSnackBar('File size too large: ${file.name}. Maximum 25MB allowed.');
           continue;
         }
 

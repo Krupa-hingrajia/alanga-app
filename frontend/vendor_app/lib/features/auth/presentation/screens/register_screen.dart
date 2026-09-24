@@ -114,6 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         extendBodyBehindAppBar: true,
         body: Center(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: kToolbarHeight + 10.0, bottom: 24.0),
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -418,6 +419,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Code', null),
                   keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return 'Required';
                     if (!value.startsWith('+')) return 'Use +';
@@ -432,6 +434,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Mobile Number', Icons.phone_outlined),
                   keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return 'Please enter mobile number';
                     if (!RegExp(r'^\d{7,15}$').hasMatch(value.trim())) {
@@ -570,6 +573,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Pincode', Icons.pin_outlined),
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter pincode';
               if (!RegExp(r'^\d{4,10}$').hasMatch(value.trim())) return 'Enter a valid pincode';

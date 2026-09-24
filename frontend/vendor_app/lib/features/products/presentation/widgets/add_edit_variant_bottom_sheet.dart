@@ -178,6 +178,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Form(
             key: _formKey,
             child: Column(
@@ -402,6 +403,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                       child: TextFormField(
                         controller: _priceCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           labelText: 'Price (₹) *',
                           hintText: '999',
@@ -420,6 +422,8 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                       child: TextFormField(
                         controller: _stockCtrl,
                         keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: const InputDecoration(
                           labelText: 'Stock Quantity *',
                           hintText: '50',

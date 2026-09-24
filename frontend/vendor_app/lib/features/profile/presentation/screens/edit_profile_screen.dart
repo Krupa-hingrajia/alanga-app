@@ -237,6 +237,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
@@ -322,6 +323,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: 'Mobile Phone Number',
                         prefixIcon: const Icon(Icons.phone_outlined, size: 20),
@@ -390,6 +392,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     TextFormField(
                       controller: _pincodeController,
                       keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                       decoration: InputDecoration(
                         labelText: 'Pincode / Postal Code',
                         prefixIcon: const Icon(Icons.markunread_mailbox_outlined, size: 20),

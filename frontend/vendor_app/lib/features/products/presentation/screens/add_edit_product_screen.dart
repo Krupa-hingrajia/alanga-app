@@ -444,6 +444,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
                           return SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
+                            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
                             child: Form(
                               key: _formKey,
@@ -566,7 +567,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                           Expanded(
                                             child: TextFormField(
                                               controller: _mrpController,
-                                              keyboardType: TextInputType.number,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.next,
                                               decoration: _inputDecoration('MRP (₹) *', Icons.money),
                                               validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
                                             ),
@@ -575,7 +577,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                           Expanded(
                                             child: TextFormField(
                                               controller: _sellingPriceController,
-                                              keyboardType: TextInputType.number,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.next,
                                               decoration: _inputDecoration('Selling Price (₹) *', Icons.sell_outlined),
                                               validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
                                             ),
@@ -588,7 +591,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                           Expanded(
                                             child: TextFormField(
                                               controller: _taxController,
-                                              keyboardType: TextInputType.number,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.next,
                                               decoration: _inputDecoration('Tax %', Icons.percent_outlined),
                                             ),
                                           ),
@@ -597,6 +601,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                             child: TextFormField(
                                               controller: _stockController,
                                               keyboardType: TextInputType.number,
+                                              textInputAction: TextInputAction.done,
+                                              onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                                               decoration: _inputDecoration('Initial Stock', Icons.storage_outlined),
                                             ),
                                           ),

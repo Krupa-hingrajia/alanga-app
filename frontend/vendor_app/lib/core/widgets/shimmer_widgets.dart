@@ -154,31 +154,357 @@ class DashboardListSkeleton extends StatelessWidget {
   }
 }
 
-/// Shimmer skeleton for the Add Product dropdowns section (3 field rows).
+/// Shimmer skeleton for the entire Add/Edit Product screen.
+/// Accurately mirrors the real multi-step product creation form:
+/// - Step 1: Product Classification (Category, Sub Category, Brand)
+/// - Step 2: Basic Information (Product Name, Short Description, Full Description)
+/// - Step 3: Pricing & Stock (MRP, Selling Price, Tax, Stock)
+/// - Step 4: Media & Gallery upload zone
+/// - Bottom sticky/action buttons (Save Draft & Submit Product)
+class AddProductFormSkeleton extends StatelessWidget {
+  const AddProductFormSkeleton({super.key});
+
+  static const _baseColor = Color(0xFFE4EDE7);
+  static const _highlightColor = Color(0xFFF7FAF8);
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 28.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // STEP 1: Product Classification
+          _buildCard(
+            stepNumber: '1',
+            titleWidth: 160,
+            subtitleWidth: 220,
+            children: [
+              _buildField(labelWidth: 75, placeholderWidth: 130, hasChevron: true),
+              const SizedBox(height: 16),
+              _buildField(labelWidth: 100, placeholderWidth: 160, hasChevron: true),
+              const SizedBox(height: 16),
+              _buildField(labelWidth: 60, placeholderWidth: 120, hasChevron: true),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // STEP 2: Basic Information
+          _buildCard(
+            stepNumber: '2',
+            titleWidth: 140,
+            subtitleWidth: 210,
+            children: [
+              _buildField(labelWidth: 105, placeholderWidth: 180),
+              const SizedBox(height: 16),
+              _buildField(labelWidth: 120, placeholderWidth: 210),
+              const SizedBox(height: 16),
+              _buildTextarea(labelWidth: 110),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // STEP 3: Pricing & Stock
+          _buildCard(
+            stepNumber: '3',
+            titleWidth: 130,
+            subtitleWidth: 180,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _buildField(labelWidth: 70, placeholderWidth: 75)),
+                  const SizedBox(width: 14),
+                  Expanded(child: _buildField(labelWidth: 110, placeholderWidth: 75)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _buildField(labelWidth: 50, placeholderWidth: 65)),
+                  const SizedBox(width: 14),
+                  Expanded(child: _buildField(labelWidth: 55, placeholderWidth: 65)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // STEP 4: Product Images
+          _buildCard(
+            stepNumber: '4',
+            titleWidth: 120,
+            subtitleWidth: 190,
+            children: [
+              Shimmer.fromColors(
+                baseColor: _baseColor,
+                highlightColor: _highlightColor,
+                child: Container(
+                  height: 105,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFD6E3DC), width: 1.2),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEFF5F1),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 130,
+                          height: 11,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF5F1),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // ACTION BUTTONS SKELETON
+          Shimmer.fromColors(
+            baseColor: _baseColor,
+            highlightColor: _highlightColor,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFD6E3DC), width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A3827).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required String stepNumber,
+    required double titleWidth,
+    required double subtitleWidth,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFE6EFEA)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1A3827).withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Shimmer.fromColors(
+            baseColor: _baseColor,
+            highlightColor: _highlightColor,
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        width: titleWidth,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        width: subtitleWidth,
+                        height: 11,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required double labelWidth,
+    required double placeholderWidth,
+    bool hasChevron = false,
+  }) {
+    return Shimmer.fromColors(
+      baseColor: _baseColor,
+      highlightColor: _highlightColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: labelWidth,
+            height: 12,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFDCE6DF), width: 1.0),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF5F1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: placeholderWidth,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF5F1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const Spacer(),
+                if (hasChevron)
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEFF5F1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextarea({required double labelWidth}) {
+    return Shimmer.fromColors(
+      baseColor: _baseColor,
+      highlightColor: _highlightColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: labelWidth,
+            height: 12,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 86,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFDCE6DF), width: 1.0),
+            ),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                width: 170,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF5F1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shimmer skeleton for the Add Product dropdowns section (backwards compatibility).
 class DropdownSkeleton extends StatelessWidget {
   final int itemCount;
   const DropdownSkeleton({super.key, this.itemCount = 3});
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE4EDE7),
-      highlightColor: const Color(0xFFF2F7F4),
-      child: Column(
-        children: List.generate(itemCount, (i) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Container(
-              height: 54,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
+    return const AddProductFormSkeleton();
   }
 }
 
@@ -196,8 +522,8 @@ class InventoryListSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (_, __) {
+        separatorBuilder: (_, index) => const SizedBox(height: 12),
+        itemBuilder: (_, index) {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

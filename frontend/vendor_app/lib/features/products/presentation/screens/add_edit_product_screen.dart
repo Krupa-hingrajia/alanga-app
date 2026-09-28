@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/product_bloc.dart';
@@ -381,78 +380,83 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           child: Column(
             children: [
               Expanded(
-                child: _loadingDropdowns
-                    ? const DropdownSkeleton()
-                    : BlocConsumer<ProductBloc, ProductState>(
-                        listener: (context, state) {
-                          if (state is AttributesLoadedState) {
-                            setState(() {
-                              _availableAttributes = state.attributes;
-                            });
-                          } else if (state is ProductImagesUploading) {
-                            setState(() {
-                              _isUploading = true;
-                              _uploadProgress = state.progress;
-                            });
-                          } else if (state is ProductImageActionSuccess) {
-                            setState(() {
-                              _isUploading = false;
-                              if (state.productVariantId == null || state.productVariantId!.isEmpty) {
-                                _uploadedImages = state.images;
-                              }
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.message),
-                                backgroundColor: AppColors.primaryGreen,
-                              ),
-                            );
-                          } else if (state is ProductImageActionError) {
-                            setState(() {
-                              _isUploading = false;
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.message),
-                                backgroundColor: AppColors.brandRed,
-                              ),
-                            );
-                          } else if (state is ProductVariantsLoadedState) {
-                            setState(() {
-                              _productVariants = state.variants;
-                            });
-                          } else if (state is ProductVariantActionSuccess) {
-                            setState(() {
-                              _productVariants = state.variants;
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
-                            );
-                          } else if (state is ProductActionSuccess) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
-                            );
-                            context.pop();
-                          } else if (state is ProductActionError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message), backgroundColor: AppColors.brandRed),
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          final bool isSaveDisabled = _isUploading || state is ProductActionLoading;
+                child: BlocConsumer<ProductBloc, ProductState>(
+                  listener: (context, state) {
+                    if (state is AttributesLoadedState) {
+                      setState(() {
+                        _availableAttributes = state.attributes;
+                      });
+                    } else if (state is ProductImagesUploading) {
+                      setState(() {
+                        _isUploading = true;
+                        _uploadProgress = state.progress;
+                      });
+                    } else if (state is ProductImageActionSuccess) {
+                      setState(() {
+                        _isUploading = false;
+                        if (state.productVariantId == null || state.productVariantId!.isEmpty) {
+                          _uploadedImages = state.images;
+                        }
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.primaryGreen,
+                        ),
+                      );
+                    } else if (state is ProductImageActionError) {
+                      setState(() {
+                        _isUploading = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.brandRed,
+                        ),
+                      );
+                    } else if (state is ProductVariantsLoadedState) {
+                      setState(() {
+                        _productVariants = state.variants;
+                      });
+                    } else if (state is ProductVariantActionSuccess) {
+                      setState(() {
+                        _productVariants = state.variants;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
+                      );
+                    } else if (state is ProductActionSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message), backgroundColor: AppColors.primaryGreen),
+                      );
+                      context.pop();
+                    } else if (state is ProductActionError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message), backgroundColor: AppColors.brandRed),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (_loadingDropdowns) {
+                      return const AddProductFormSkeleton();
+                    }
 
-                          return SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                            padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // STEP 1: Product Classification (Category -> Sub Category -> Brand FIRST!)
-                                  _buildSectionCard(
+                    final bool isSaveDisabled = _isUploading || state is ProductActionLoading;
+
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: SingleChildScrollView(
+                        key: const ValueKey('loaded_form'),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // STEP 1: Product Classification (Category -> Sub Category -> Brand FIRST!)
+                              _buildSectionCard(
                                     step: '1',
                                     title: 'Product Classification',
                                     subtitle: 'Select category, sub category & marketplace brand',
@@ -811,84 +815,85 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                   const SizedBox(height: 28),
 
                                   // Action Buttons (Save Draft & Submit)
-                                  if (isSaveDisabled)
-                                    Shimmer.fromColors(
-                                      baseColor: const Color(0xFFE4EDE7),
-                                      highlightColor: const Color(0xFFF2F7F4),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Container(
-                                              height: 52,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(14),
-                                              ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: isSaveDisabled ? null : () => _submitForm(context, 'DRAFT'),
+                                          style: OutlinedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(vertical: 16),
+                                            side: BorderSide(
+                                              color: isSaveDisabled ? const Color(0xFFD6E3DC) : const Color(0xFF1A3827),
+                                              width: 1.5,
+                                            ),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                          ),
+                                          child: Text(
+                                            'Save Draft',
+                                            style: TextStyle(
+                                              color: isSaveDisabled ? Colors.grey.shade400 : const Color(0xFF1A3827),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Container(
-                                              height: 52,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(14),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    )
-                                  else
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            onPressed: () => _submitForm(context, 'DRAFT'),
-                                            style: OutlinedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(vertical: 16),
-                                              side: const BorderSide(color: Color(0xFF1A3827), width: 1.5),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                            ),
-                                            child: const Text(
-                                              'Save Draft',
-                                              style: TextStyle(
-                                                color: Color(0xFF1A3827),
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
-                                            ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: isSaveDisabled ? null : () => _submitForm(context, 'PENDING'),
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(vertical: 16),
+                                            backgroundColor: const Color(0xFF1A3827),
+                                            foregroundColor: Colors.white,
+                                            disabledBackgroundColor: const Color(0xFF1A3827).withValues(alpha: 0.65),
+                                            disabledForegroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                            elevation: 1,
+                                            shadowColor: const Color(0xFF1A3827).withValues(alpha: 0.3),
                                           ),
+                                          child: isSaveDisabled
+                                              ? Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    const SizedBox(
+                                                      width: 16,
+                                                      height: 16,
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      _isUploading
+                                                          ? 'Uploading (${(_uploadProgress * 100).toInt()}%)...'
+                                                          : 'Submitting...',
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : const Text(
+                                                  'Submit Product',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
                                         ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: () => _submitForm(context, 'PENDING'),
-                                            style: ElevatedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(vertical: 16),
-                                              backgroundColor: const Color(0xFF1A3827),
-                                              foregroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                              elevation: 1,
-                                              shadowColor: const Color(0xFF1A3827).withValues(alpha: 0.3),
-                                            ),
-                                            child: const Text(
-                                              'Submit Product',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
+                    ),
               ),
             ],
           ),

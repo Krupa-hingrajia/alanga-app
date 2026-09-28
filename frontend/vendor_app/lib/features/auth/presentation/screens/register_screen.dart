@@ -73,8 +73,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  late final RegisterBloc _registerBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _registerBloc = sl<RegisterBloc>();
+  }
+
   @override
   void dispose() {
+    _registerBloc.close();
     _fullNameController.dispose();
     _emailController.dispose();
     _countryCodeController.dispose();
@@ -139,7 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ? phone
         : _pickupPhoneController.text.trim();
 
-    BlocProvider.of<RegisterBloc>(context).add(
+    _registerBloc.add(
       RegisterSubmittedEvent(
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim().toLowerCase(),
@@ -201,8 +210,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final size = MediaQuery.of(context).size;
     final isTablet = size.width > 600;
 
-    return BlocProvider(
-      create: (_) => sl<RegisterBloc>(),
+    return BlocProvider.value(
+      value: _registerBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFE6EFEA),
         appBar: AppBar(

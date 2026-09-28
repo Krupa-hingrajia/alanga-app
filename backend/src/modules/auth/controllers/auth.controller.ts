@@ -22,6 +22,17 @@ import { UserEntity } from '../../users/entities/user.entity';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('check-availability')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Check if email or mobile number is already registered' })
+  async checkAvailability(@Body() body: { email?: string; mobileNumber?: string }) {
+    const data = await this.authService.checkAvailability(body.email, body.mobileNumber);
+    return {
+      message: 'Availability check completed',
+      data,
+    };
+  }
+
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user', description: 'Creates a new user record with CUSTOMER, VENDOR, or ADMIN role.' })

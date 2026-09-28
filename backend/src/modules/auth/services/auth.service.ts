@@ -16,6 +16,30 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  async checkAvailability(email?: string, mobileNumber?: string): Promise<{ emailAvailable: boolean; mobileAvailable: boolean; message?: string }> {
+    let emailAvailable = true;
+    let mobileAvailable = true;
+    let message: string | undefined;
+
+    if (email && email.trim().length > 0) {
+      const existingEmail = await this.authRepository.findUserByEmail(email.trim().toLowerCase());
+      if (existingEmail) {
+        emailAvailable = false;
+        message = 'Email address is already registered';
+      }
+    }
+
+    if (mobileNumber && mobileNumber.trim().length > 0) {
+      const existingPhone = await this.authRepository.findUserByMobile(mobileNumber.trim());
+      if (existingPhone) {
+        mobileAvailable = false;
+        message = message ? `${message} and Mobile number is already registered` : 'Mobile number is already registered';
+      }
+    }
+
+    return { emailAvailable, mobileAvailable, message };
+  }
+
   async register(registerDto: RegisterDto): Promise<UserEntity> {
     const normalizedEmail = registerDto.email.trim().toLowerCase();
     const existingEmail = await this.authRepository.findUserByEmail(normalizedEmail);

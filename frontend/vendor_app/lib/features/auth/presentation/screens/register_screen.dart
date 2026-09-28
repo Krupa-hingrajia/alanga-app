@@ -7,6 +7,8 @@ import '../bloc/register/register_state.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/api_service.dart';
+import '../../../../core/network/api_endpoints.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,6 +25,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey4 = GlobalKey<FormState>();
 
   int _currentStep = 0;
+  bool _isCheckingStep0 = false;
+  String? _emailError;
+  String? _phoneError;
 
   // Step 1: Personal & Login Info
   final _fullNameController = TextEditingController();
@@ -112,10 +117,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _nextStep() {
+  Future<void> _nextStep() async {
     if (_currentStep == 0) {
-      if (_formKey0.currentState!.validate()) {
-        setState(() => _currentStep = 1);
+      if (!_formKey0.currentState!.validate()) return;
+
+      setState(() {
+        _isCheckingStep0 = true;
+        _emailError = null;
+        _phoneError = null;
+      });
+
+      final email = _emailController.text.trim().toLowerCase();
+      final phone = _mobileNumberController.text.trim();
+
+      try {
+        final apiService = sl<ApiService>();
+        final response = await apiService.post(
+          ApiEndpoints.checkAvailability,
+          data: {
+            'email': email,
+            'mobileNumber': phone,
+          },
+        );
+
+        final data = response.data['data'] as Map<String, dynamic>?;
+        final bool emailAvailable = data?['emailAvailable'] ?? true;
+        final bool mobileAvailable = data?['mobileAvailable'] ?? true;
+
+        if (!mounted) return;
+
+        if (!emailAvailable || !mobileAvailable) {
+          setState(() {
+            _isCheckingStep0 = false;
+            if (!emailAvailable) {
+              _emailError = 'This email address is already registered. Please login or use another email.';
+            }
+            if (!mobileAvailable) {
+              _phoneError = 'This mobile number is already registered. Please use another number.';
+            }
+          });
+          _formKey0.currentState!.validate();
+          return;
+        }
+
+        setState(() {
+          _isCheckingStep0 = false;
+          _currentStep = 1;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isCheckingStep0 = false;
+          _currentStep = 1;
+        });
       }
     } else if (_currentStep == 1) {
       if (_formKey1.currentState!.validate()) {
@@ -243,6 +297,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (state is RegisterSuccess) {
                     context.go('/success');
                   } else if (state is RegisterFailure) {
+                    final errLower = state.errorMessage.toLowerCase();
+                    if (errLower.contains('email') || errLower.contains('mail')) {
+                      setState(() {
+                        _currentStep = 0; // Take user back to Step 1 directly
+                        _emailError = state.errorMessage;
+                      });
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _formKey0.currentState?.validate();
+                      });
+                    } else if (errLower.contains('mobile') || errLower.contains('phone')) {
+                      setState(() {
+                        _currentStep = 0; // Take user back to Step 1 directly
+                        _phoneError = state.errorMessage;
+                      });
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _formKey0.currentState?.validate();
+                      });
+                    } else if (errLower.contains('pan') || errLower.contains('gst')) {
+                      setState(() {
+                        _currentStep = 2; // Jump to Step 3 (Tax & Legal KYC)
+                      });
+                    }
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(state.errorMessage),
@@ -339,7 +416,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               SizedBox(
                                 width: 95,
                                 child: OutlinedButton(
-                                  onPressed: state is RegisterLoading ? null : _previousStep,
+                                  onPressed: (state is RegisterLoading || _isCheckingStep0) ? null : _previousStep,
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                     side: const BorderSide(color: Color(0xFF1A3827)),
@@ -368,7 +445,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             if (_currentStep > 0) const SizedBox(width: 12),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: state is RegisterLoading
+                                onPressed: (state is RegisterLoading || _isCheckingStep0)
                                     ? null
                                     : () {
                                         if (_currentStep < 4) {
@@ -386,7 +463,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                   elevation: 1,
                                 ),
-                                child: state is RegisterLoading
+                                child: (state is RegisterLoading || _isCheckingStep0)
                                     ? const SizedBox(
                                         height: 18,
                                         width: 18,
@@ -538,6 +615,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_emailError != null || _phoneError != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDE8E8),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFF87171), width: 1),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: AppColors.brandRed, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _emailError ?? _phoneError ?? '',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.brandRed,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           TextFormField(
             controller: _fullNameController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
@@ -552,9 +657,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextFormField(
             controller: _emailController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Email Address', Icons.email_outlined),
+            decoration: _buildInputDecoration('Email Address', Icons.email_outlined).copyWith(
+              errorText: _emailError,
+            ),
             keyboardType: TextInputType.emailAddress,
+            onChanged: (val) {
+              if (_emailError != null) {
+                setState(() => _emailError = null);
+              }
+            },
             validator: (value) {
+              if (_emailError != null) return _emailError;
               if (value == null || value.trim().isEmpty) return 'Please enter your email';
               final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', caseSensitive: false);
               if (!emailRegex.hasMatch(value.trim())) return 'Please enter a valid email';
@@ -583,9 +696,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: TextFormField(
                   controller: _mobileNumberController,
                   style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-                  decoration: _buildInputDecoration('Mobile Number', Icons.phone_outlined),
+                  decoration: _buildInputDecoration('Mobile Number', Icons.phone_outlined).copyWith(
+                    errorText: _phoneError,
+                  ),
                   keyboardType: TextInputType.phone,
+                  onChanged: (val) {
+                    if (_phoneError != null) {
+                      setState(() => _phoneError = null);
+                    }
+                  },
                   validator: (value) {
+                    if (_phoneError != null) return _phoneError;
                     if (value == null || value.trim().isEmpty) return 'Please enter mobile number';
                     if (!RegExp(r'^\d{7,15}$').hasMatch(value.trim())) {
                       return 'Must be 7 to 15 digits';

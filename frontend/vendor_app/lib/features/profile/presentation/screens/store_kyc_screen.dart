@@ -44,8 +44,7 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
   final _bankNameController = TextEditingController();
   String _bankAccountType = 'CURRENT';
 
-  // 5. Digital Signature
-  final _signatureController = TextEditingController();
+
 
   final List<String> _businessTypes = [
     'Individual Seller',
@@ -82,7 +81,6 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
     _bankAccountController.dispose();
     _bankIfscController.dispose();
     _bankNameController.dispose();
-    _signatureController.dispose();
     super.dispose();
   }
 
@@ -124,8 +122,6 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
         if (_accountTypes.contains(profile.bankAccountType)) {
           _bankAccountType = profile.bankAccountType;
         }
-
-        _signatureController.text = profile.digitalSignatureUrl ?? '';
       });
     } catch (e) {
       if (!mounted) return;
@@ -158,7 +154,6 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
         'bankIfscCode': _bankIfscController.text.trim().isEmpty ? null : _bankIfscController.text.trim().toUpperCase(),
         'bankName': _bankNameController.text.trim().isEmpty ? null : _bankNameController.text.trim(),
         'bankAccountType': _bankAccountType,
-        'digitalSignatureUrl': _signatureController.text.trim().isEmpty ? null : _signatureController.text.trim(),
       };
 
       final updated = await _repository.updateProfile(updateData);
@@ -352,24 +347,7 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
                           _buildTextField(_bankNameController, 'Bank Name (e.g. HDFC, ICICI, SBI)'),
                         ],
                       ),
-                      const SizedBox(height: 16),
 
-                      // Section 5: Digital Signature
-                      _buildSectionCard(
-                        title: '5. Digital Signature',
-                        icon: Icons.draw_outlined,
-                        children: [
-                          _buildTextField(
-                            _signatureController,
-                            'Authorized Signatory Name / Digital Sign',
-                          ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'Used automatically on seller invoices, shipping labels, and credit notes.',
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondaryLight),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),

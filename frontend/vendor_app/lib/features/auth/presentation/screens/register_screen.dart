@@ -49,14 +49,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _pincodeController = TextEditingController();
   final _pickupPhoneController = TextEditingController();
 
-  // Step 5: Bank Details & Digital Signature
+  // Step 5: Bank Details (Payouts)
   final _bankHolderController = TextEditingController();
   final _bankAccountController = TextEditingController();
   final _confirmBankAccountController = TextEditingController();
   final _bankIfscController = TextEditingController();
   final _bankNameController = TextEditingController();
   String _bankAccountType = 'CURRENT';
-  final _digitalSignatureController = TextEditingController();
 
   final List<String> _businessTypes = [
     'Individual Seller',
@@ -109,7 +108,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _confirmBankAccountController.dispose();
     _bankIfscController.dispose();
     _bankNameController.dispose();
-    _digitalSignatureController.dispose();
 
     super.dispose();
   }
@@ -141,7 +139,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _submitRegistration() {
-    if (!_formKey4.currentState!.validate()) return;
+    if (!_formKey4.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please check highlighted fields before submitting.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
 
     final phone = _mobileNumberController.text.trim();
     final pickupPhone = _pickupPhoneController.text.trim().isEmpty
@@ -197,10 +203,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ? null
             : _bankNameController.text.trim(),
         bankAccountType: _bankAccountType,
-        // 5. Digital Signature
-        digitalSignatureUrl: _digitalSignatureController.text.trim().isEmpty
-            ? null
-            : _digitalSignatureController.text.trim(),
       ),
     );
   }
@@ -315,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _buildStepLine(),
                               _buildStepIndicator(3, 'Pickup'),
                               _buildStepLine(),
-                              _buildStepIndicator(4, 'Bank & Sign'),
+                              _buildStepIndicator(4, 'Bank'),
                             ],
                           ),
                         ),
@@ -326,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         if (_currentStep == 1) _buildBusinessInfoForm(),
                         if (_currentStep == 2) _buildTaxInfoForm(),
                         if (_currentStep == 3) _buildPickupAddressForm(),
-                        if (_currentStep == 4) _buildBankAndSignatureForm(state),
+                        if (_currentStep == 4) _buildBankDetailsForm(state),
 
                         const SizedBox(height: 28),
 
@@ -334,7 +336,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Row(
                           children: [
                             if (_currentStep > 0)
-                              Expanded(
+                              SizedBox(
+                                width: 95,
                                 child: OutlinedButton(
                                   onPressed: state is RegisterLoading ? null : _previousStep,
                                   style: OutlinedButton.styleFrom(
@@ -344,13 +347,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'BACK',
-                                    style: TextStyle(
-                                      color: Color(0xFF1A3827),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.arrow_back_rounded, size: 16, color: Color(0xFF1A3827)),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'BACK',
+                                        style: TextStyle(
+                                          color: Color(0xFF1A3827),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -367,13 +378,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                   backgroundColor: const Color(0xFF1A3827),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  elevation: 0,
+                                  elevation: 1,
                                 ),
                                 child: state is RegisterLoading
                                     ? const SizedBox(
@@ -384,12 +395,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : Text(
-                                        _currentStep == 4 ? 'COMPLETE REGISTRATION' : 'NEXT',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.5,
+                                    : FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _currentStep == 4 ? 'COMPLETE REGISTRATION' : 'NEXT',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              _currentStep == 4
+                                                  ? Icons.check_circle_outline_rounded
+                                                  : Icons.arrow_forward_rounded,
+                                              size: 18,
+                                            ),
+                                          ],
                                         ),
                                       ),
                               ),
@@ -440,7 +467,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 3:
         return 'Step 4 of 5: Pickup & Warehouse Address';
       case 4:
-        return 'Step 5 of 5: Bank Payouts & Signature';
+        return 'Step 5 of 5: Bank Account Details (Payouts)';
       default:
         return '';
     }
@@ -804,8 +831,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Step 4: Bank Details & Digital Signature Form
-  Widget _buildBankAndSignatureForm(RegisterState state) {
+  // Step 4: Bank Details Form
+  Widget _buildBankDetailsForm(RegisterState state) {
     return Form(
       key: _formKey4,
       child: Column(
@@ -889,12 +916,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: _bankNameController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
             decoration: _buildInputDecoration('Bank Name (e.g. HDFC Bank, SBI)', Icons.account_balance_outlined),
-          ),
-          const SizedBox(height: 14),
-          TextFormField(
-            controller: _digitalSignatureController,
-            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Authorized Signatory Name (Digital Signature)', Icons.draw_outlined),
           ),
         ],
       ),

@@ -29,6 +29,10 @@ import '../../../../core/widgets/shimmer_widgets.dart';
 // Orders imports
 import '../../../orders/presentation/screens/vendor_order_list_screen.dart';
 
+// Dashboard Summary imports
+import '../../domain/repositories/vendor_dashboard_repository.dart';
+import '../../data/models/vendor_dashboard_summary_model.dart';
+
 // Settings & Auth imports
 import '../../../settings/presentation/widgets/delete_account_dialog.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
@@ -49,6 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<CategoryModel> _categories = [];
   List<SubCategoryModel> _subCategories = [];
   List<BrandModel> _brands = [];
+  VendorDashboardSummaryModel? _summary;
 
   int _currentIndex = 0;
 
@@ -79,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadDashboardData() async {
     // Only show shimmer skeleton if we have zero cached data
-    if (_categories.isEmpty && _products.isEmpty && _brands.isEmpty) {
+    if (_categories.isEmpty && _products.isEmpty && _brands.isEmpty && _summary == null) {
       setState(() {
         _dataLoading = true;
       });
@@ -102,7 +107,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (mounted) setState(() => _products = res);
       }).catchError((_) => <ProductModel>[]);
 
-      await Future.wait([catFuture, subCatFuture, brandFuture, prodFuture]);
+      final summaryFuture = sl<VendorDashboardRepository>().getSummary().then((res) {
+        if (mounted) setState(() => _summary = res);
+      }).catchError((_) => null);
+
+      await Future.wait([catFuture, subCatFuture, brandFuture, prodFuture, summaryFuture]);
     } catch (_) {
       // ignore
     } finally {
@@ -1006,6 +1015,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 1. KYC Verification Action Banner
+          _buildKycBannerSection(),
+          const SizedBox(height: 16),
+
+          // 2. Real-time Orders & Sales Performance Section
+          _buildSalesPerformanceSection(),
+          const SizedBox(height: 20),
 
           // Business Overview Section
           const Text(
@@ -1203,6 +1219,349 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKycBannerSection() {
+    final kycStatus = _summary?.kycStatus ?? 'NOT_SUBMITTED';
+
+    if (kycStatus == 'VERIFIED') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF81C784)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Color(0xFF2E7D32), size: 20),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Seller KYC & Bank Verified • Payouts Active',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1B5E20),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await context.push('/kyc');
+                _loadDashboardData();
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('View', style: TextStyle(fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final isPending = kycStatus == 'PENDING';
+    final bgColor = isPending ? const Color(0xFFFFF8E1) : const Color(0xFFE8F4EC);
+    final borderColor = isPending ? const Color(0xFFFFB74D) : const Color(0xFFA5D6A7);
+    final primaryColor = isPending ? const Color(0xFFE65100) : const Color(0xFF1A3827);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPending ? Icons.hourglass_top_rounded : Icons.verified_user_outlined,
+              color: primaryColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isPending
+                      ? 'KYC & Bank Verification Under Review'
+                      : 'Complete KYC & Bank Details to Start Selling',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isPending
+                      ? 'Your legal tax documents and bank account are under review.'
+                      : 'Add your Store PAN, Warehouse Pickup Address, and Bank Account for payouts.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: primaryColor.withOpacity(0.85),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () async {
+                    await context.push('/kyc');
+                    _loadDashboardData();
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isPending ? 'CHECK STATUS' : 'COMPLETE KYC NOW',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSalesPerformanceSection() {
+    final todayRevenue = _summary?.todayRevenue ?? 0.0;
+    final ordersToDispatch = _summary?.ordersToDispatch ?? 0;
+    final todayOrders = _summary?.todayOrders ?? 0;
+    final lowStock = _summary?.lowStockProducts ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.bolt, color: AppColors.primaryGreen, size: 18),
+                SizedBox(width: 4),
+                Text(
+                  'Orders & Sales Performance',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF11261B),
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F4EC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                children: [
+                  CircleAvatar(radius: 3, backgroundColor: AppColors.primaryGreen),
+                  SizedBox(width: 4),
+                  Text(
+                    'Live Metrics',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF1A3827)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.55,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            // Card 1: Today Sales
+            _buildPerformanceCard(
+              title: "Today's Sales",
+              value: '₹${todayRevenue.toStringAsFixed(todayRevenue.truncateToDouble() == todayRevenue ? 0 : 2)}',
+              subtitle: 'Revenue generated today',
+              icon: Icons.currency_rupee_rounded,
+              accentColor: const Color(0xFF1A3827),
+              bgTint: const Color(0xFFF0F7F3),
+            ),
+            // Card 2: Orders to Dispatch
+            _buildPerformanceCard(
+              title: 'Orders to Dispatch',
+              value: '$ordersToDispatch',
+              subtitle: ordersToDispatch > 0 ? 'Action needed' : 'All clear',
+              icon: Icons.local_shipping_outlined,
+              accentColor: const Color(0xFFE65100),
+              bgTint: const Color(0xFFFFF3E0),
+              badgeText: ordersToDispatch > 0 ? 'URGENT' : null,
+              onTap: () {
+                setState(() => _currentIndex = 1);
+              },
+            ),
+            // Card 3: Today's Orders
+            _buildPerformanceCard(
+              title: "Today's Orders",
+              value: '$todayOrders',
+              subtitle: 'New orders placed',
+              icon: Icons.shopping_cart_outlined,
+              accentColor: const Color(0xFF1565C0),
+              bgTint: const Color(0xFFE3F2FD),
+              onTap: () {
+                setState(() => _currentIndex = 1);
+              },
+            ),
+            // Card 4: Low Stock alerts
+            _buildPerformanceCard(
+              title: 'Low Stock Alerts',
+              value: '$lowStock',
+              subtitle: lowStock > 0 ? 'Reorder needed' : 'Healthy inventory',
+              icon: Icons.warning_amber_rounded,
+              accentColor: const Color(0xFFC62828),
+              bgTint: const Color(0xFFFFEBEE),
+              badgeText: lowStock > 0 ? 'ALERT' : null,
+              onTap: () {
+                setState(() => _currentIndex = 2);
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerformanceCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+    required Color bgTint,
+    String? badgeText,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5EDE8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: bgTint,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 18),
+                ),
+                if (badgeText != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: accentColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
+                    ),
+                  )
+                else if (onTap != null)
+                  const Icon(Icons.arrow_forward_ios, size: 10, color: Color(0xFFB0C4B8)),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: accentColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF11261B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -2659,6 +3018,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.verified_user_outlined, color: Color(0xFF1A3827)),
+                  title: const Text('Store KYC & Bank Details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  subtitle: Text(
+                    _summary?.kycStatus == 'VERIFIED'
+                        ? 'Verified Partner ✓'
+                        : _summary?.kycStatus == 'PENDING'
+                            ? 'Verification In Review ⏳'
+                            : 'Action Required • Incomplete ⚠️',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _summary?.kycStatus == 'VERIFIED'
+                          ? AppColors.primaryGreen
+                          : _summary?.kycStatus == 'PENDING'
+                              ? const Color(0xFFE65100)
+                              : AppColors.brandRed,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
+                  onTap: () async {
+                    await context.push('/kyc');
+                    _loadDashboardData();
+                  },
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F2)),
                 ListTile(
                   leading: const Icon(Icons.settings_outlined, color: Color(0xFF4C6656)),
                   title: const Text('Store Settings', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),

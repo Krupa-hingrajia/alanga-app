@@ -19,6 +19,7 @@ export class AuthRepository implements IAuthRepository {
       status: user.status,
       kycStatus: user.kycStatus,
       profileImage: user.profileImage,
+      vendorProfile: user.vendorProfile || null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       deletedAt: user.deletedAt,
@@ -26,24 +27,36 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<UserEntity> {
-    const user = await this.prisma.user.create({ data });
+    const user = await this.prisma.user.create({
+      data,
+      include: { vendorProfile: true },
+    });
     return this.mapToEntity(user);
   }
 
   async findUserByEmail(email: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { vendorProfile: true },
+    });
     if (!user) return null;
     return this.mapToEntity(user);
   }
 
   async findUserByMobile(phoneNumber: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findFirst({ where: { phoneNumber } });
+    const user = await this.prisma.user.findFirst({
+      where: { phoneNumber },
+      include: { vendorProfile: true },
+    });
     if (!user) return null;
     return this.mapToEntity(user);
   }
 
   async findUserById(id: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { vendorProfile: true },
+    });
     if (!user) return null;
     return this.mapToEntity(user);
   }

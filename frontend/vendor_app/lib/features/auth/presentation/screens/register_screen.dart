@@ -19,10 +19,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey0 = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
+  final _formKey3 = GlobalKey<FormState>();
+  final _formKey4 = GlobalKey<FormState>();
 
   int _currentStep = 0;
 
-  // Step 1: Personal Info
+  // Step 1: Personal & Login Info
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _countryCodeController = TextEditingController(text: '+91');
@@ -30,25 +32,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  // Step 2: Business Info
+  // Step 2: Business Identity
   final _businessNameController = TextEditingController();
+  final _legalNameController = TextEditingController();
   String _businessType = 'Individual Seller';
 
-  // Step 3: Address & Identification
+  // Step 3: Tax & Legal (KYC)
+  final _panNumberController = TextEditingController();
+  final _gstNumberController = TextEditingController();
+
+  // Step 4: Pickup & Warehouse Address
+  final _pickupAddress1Controller = TextEditingController();
+  final _pickupAddress2Controller = TextEditingController();
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
   final _pincodeController = TextEditingController();
-  final _gstNumberController = TextEditingController();
-  final _panNumberController = TextEditingController();
+  final _pickupPhoneController = TextEditingController();
+
+  // Step 5: Bank Details & Digital Signature
+  final _bankHolderController = TextEditingController();
+  final _bankAccountController = TextEditingController();
+  final _confirmBankAccountController = TextEditingController();
+  final _bankIfscController = TextEditingController();
+  final _bankNameController = TextEditingController();
+  String _bankAccountType = 'CURRENT';
+  final _digitalSignatureController = TextEditingController();
 
   final List<String> _businessTypes = [
     'Individual Seller',
-    'Retailer',
-    'Wholesaler',
-    'Distributor',
-    'Manufacturer',
-    'Online Seller'
+    'Proprietorship',
+    'Partnership Firm',
+    'Private Limited (Pvt Ltd)',
+    'Public Limited',
+    'Retailer / Wholesaler',
+    'Manufacturer'
   ];
+
+  final List<String> _accountTypes = ['CURRENT', 'SAVINGS'];
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -61,37 +81,119 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _mobileNumberController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
     _businessNameController.dispose();
+    _legalNameController.dispose();
+
+    _panNumberController.dispose();
+    _gstNumberController.dispose();
+
+    _pickupAddress1Controller.dispose();
+    _pickupAddress2Controller.dispose();
     _cityController.dispose();
     _stateController.dispose();
     _pincodeController.dispose();
-    _gstNumberController.dispose();
-    _panNumberController.dispose();
+    _pickupPhoneController.dispose();
+
+    _bankHolderController.dispose();
+    _bankAccountController.dispose();
+    _confirmBankAccountController.dispose();
+    _bankIfscController.dispose();
+    _bankNameController.dispose();
+    _digitalSignatureController.dispose();
+
     super.dispose();
   }
 
   void _nextStep() {
     if (_currentStep == 0) {
       if (_formKey0.currentState!.validate()) {
-        setState(() {
-          _currentStep = 1;
-        });
+        setState(() => _currentStep = 1);
       }
     } else if (_currentStep == 1) {
       if (_formKey1.currentState!.validate()) {
-        setState(() {
-          _currentStep = 2;
-        });
+        setState(() => _currentStep = 2);
+      }
+    } else if (_currentStep == 2) {
+      if (_formKey2.currentState!.validate()) {
+        setState(() => _currentStep = 3);
+      }
+    } else if (_currentStep == 3) {
+      if (_formKey3.currentState!.validate()) {
+        setState(() => _currentStep = 4);
       }
     }
   }
 
   void _previousStep() {
     if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
+      setState(() => _currentStep--);
     }
+  }
+
+  void _submitRegistration() {
+    if (!_formKey4.currentState!.validate()) return;
+
+    final phone = _mobileNumberController.text.trim();
+    final pickupPhone = _pickupPhoneController.text.trim().isEmpty
+        ? phone
+        : _pickupPhoneController.text.trim();
+
+    BlocProvider.of<RegisterBloc>(context).add(
+      RegisterSubmittedEvent(
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim().toLowerCase(),
+        countryCode: _countryCodeController.text.trim(),
+        mobileNumber: phone,
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        role: UserRole.vendor,
+        // 1. Business Identity
+        businessName: _businessNameController.text.trim().isEmpty
+            ? _fullNameController.text.trim()
+            : _businessNameController.text.trim(),
+        legalName: _legalNameController.text.trim().isEmpty
+            ? null
+            : _legalNameController.text.trim(),
+        businessType: _businessType,
+        // 2. Tax & Legal (KYC)
+        panNumber: _panNumberController.text.trim().isEmpty
+            ? null
+            : _panNumberController.text.trim().toUpperCase(),
+        gstNumber: _gstNumberController.text.trim().isEmpty
+            ? null
+            : _gstNumberController.text.trim().toUpperCase(),
+        // 3. Pickup & Warehouse Address
+        pickupAddressLine1: _pickupAddress1Controller.text.trim().isEmpty
+            ? null
+            : _pickupAddress1Controller.text.trim(),
+        pickupAddressLine2: _pickupAddress2Controller.text.trim().isEmpty
+            ? null
+            : _pickupAddress2Controller.text.trim(),
+        city: _cityController.text.trim(),
+        state: _stateController.text.trim(),
+        pincode: _pincodeController.text.trim(),
+        pickupContactPhone: pickupPhone,
+        // 4. Bank Account Details (Payouts)
+        bankAccountHolderName: _bankHolderController.text.trim().isEmpty
+            ? null
+            : _bankHolderController.text.trim(),
+        bankAccountNumber: _bankAccountController.text.trim().isEmpty
+            ? null
+            : _bankAccountController.text.trim(),
+        bankIfscCode: _bankIfscController.text.trim().isEmpty
+            ? null
+            : _bankIfscController.text.trim().toUpperCase(),
+        bankName: _bankNameController.text.trim().isEmpty
+            ? null
+            : _bankNameController.text.trim(),
+        bankAccountType: _bankAccountType,
+        // 5. Digital Signature
+        digitalSignatureUrl: _digitalSignatureController.text.trim().isEmpty
+            ? null
+            : _digitalSignatureController.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -115,10 +217,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: Center(
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: kToolbarHeight + 10.0, bottom: 24.0),
+            padding: const EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+              top: kToolbarHeight + 10.0,
+              bottom: 24.0,
+            ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: isTablet ? 450 : double.infinity,
+                maxWidth: isTablet ? 480 : double.infinity,
               ),
               child: BlocConsumer<RegisterBloc, RegisterState>(
                 listener: (context, state) {
@@ -135,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
                 builder: (context, state) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -157,44 +264,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             borderRadius: BorderRadius.circular(12),
                             child: Image.asset(
                               'assets/images/app_icon.jpg',
-                              height: 64, // Small logo size
-                              width: 64,
+                              height: 56,
+                              width: 56,
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         // Title
                         const Text(
-                          'Register as Vendor',
+                          'Seller Onboarding',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF0F2016),
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
-
-                        // Progress Indicator Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildStepIndicator(0, 'Personal'),
-                            _buildStepLine(),
-                            _buildStepIndicator(1, 'Business'),
-                            _buildStepLine(),
-                            _buildStepIndicator(2, 'Address'),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          _getStepSubTitle(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 20),
+
+                        // Progress Indicator Row (5 Steps)
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildStepIndicator(0, 'Login'),
+                              _buildStepLine(),
+                              _buildStepIndicator(1, 'Business'),
+                              _buildStepLine(),
+                              _buildStepIndicator(2, 'Tax & KYC'),
+                              _buildStepLine(),
+                              _buildStepIndicator(3, 'Pickup'),
+                              _buildStepLine(),
+                              _buildStepIndicator(4, 'Bank & Sign'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
 
                         // Step Forms
                         if (_currentStep == 0) _buildPersonalInfoForm(),
                         if (_currentStep == 1) _buildBusinessInfoForm(),
-                        if (_currentStep == 2) _buildAddressInfoForm(state),
+                        if (_currentStep == 2) _buildTaxInfoForm(),
+                        if (_currentStep == 3) _buildPickupAddressForm(),
+                        if (_currentStep == 4) _buildBankAndSignatureForm(state),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
 
                         // Navigation Buttons
                         Row(
@@ -215,44 +340,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     style: TextStyle(
                                       color: Color(0xFF1A3827),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
                               ),
-                            if (_currentStep > 0) const SizedBox(width: 16),
+                            if (_currentStep > 0) const SizedBox(width: 12),
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: state is RegisterLoading
                                     ? null
                                     : () {
-                                        if (_currentStep < 2) {
+                                        if (_currentStep < 4) {
                                           _nextStep();
                                         } else {
-                                          if (_formKey2.currentState!.validate()) {
-                                            BlocProvider.of<RegisterBloc>(context).add(
-                                              RegisterSubmittedEvent(
-                                                fullName: _fullNameController.text.trim(),
-                                                email: _emailController.text.trim().toLowerCase(),
-                                                countryCode: _countryCodeController.text.trim(),
-                                                mobileNumber: _mobileNumberController.text.trim(),
-                                                password: _passwordController.text,
-                                                confirmPassword: _confirmPasswordController.text,
-                                                role: UserRole.vendor,
-                                                businessName: _businessNameController.text.trim(),
-                                                businessType: _businessType,
-                                                city: _cityController.text.trim(),
-                                                state: _stateController.text.trim(),
-                                                pincode: _pincodeController.text.trim(),
-                                                gstNumber: _gstNumberController.text.trim().isEmpty
-                                                    ? null
-                                                    : _gstNumberController.text.trim(),
-                                                panNumber: _panNumberController.text.trim().isEmpty
-                                                    ? null
-                                                    : _panNumberController.text.trim(),
-                                              ),
-                                            );
-                                          }
+                                          _submitRegistration();
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
@@ -274,18 +376,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         ),
                                       )
                                     : Text(
-                                        _currentStep == 2 ? 'SUBMIT' : 'NEXT',
+                                        _currentStep == 4 ? 'COMPLETE REGISTRATION' : 'NEXT',
                                         style: const TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 13,
                                           fontWeight: FontWeight.bold,
-                                          letterSpacing: 1,
+                                          letterSpacing: 0.5,
                                         ),
                                       ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
                         // Link to Login
                         if (state is! RegisterLoading)
@@ -318,82 +420,99 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  String _getStepSubTitle() {
+    switch (_currentStep) {
+      case 0:
+        return 'Step 1 of 5: Account & Login Credentials';
+      case 1:
+        return 'Step 2 of 5: Business Identity';
+      case 2:
+        return 'Step 3 of 5: Tax & Legal (KYC)';
+      case 3:
+        return 'Step 4 of 5: Pickup & Warehouse Address';
+      case 4:
+        return 'Step 5 of 5: Bank Payouts & Signature';
+      default:
+        return '';
+    }
+  }
+
   Widget _buildStepIndicator(int stepIndex, String title) {
     final isActive = _currentStep == stepIndex;
     final isCompleted = _currentStep > stepIndex;
 
-    return Column(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isCompleted
-                ? AppColors.primaryGreen
-                : isActive
-                    ? AppColors.primaryGreen
-                    : const Color(0xFFD1DDD6),
-            border: isActive
-                ? Border.all(color: AppColors.primaryGreen, width: 2)
-                : null,
-          ),
-          child: Center(
-            child: isCompleted
-                ? const Icon(Icons.check, size: 16, color: Colors.white)
-                : Text(
-                    '${stepIndex + 1}',
-                    style: TextStyle(
-                      color: isActive || isCompleted ? Colors.white : AppColors.textSecondaryLight,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Column(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCompleted
+                  ? AppColors.primaryGreen
+                  : isActive
+                      ? AppColors.primaryGreen
+                      : const Color(0xFFD1DDD6),
+              border: isActive
+                  ? Border.all(color: AppColors.primaryGreen, width: 2)
+                  : null,
+            ),
+            child: Center(
+              child: isCompleted
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : Text(
+                      '${stepIndex + 1}',
+                      style: TextStyle(
+                        color: isActive || isCompleted ? Colors.white : AppColors.textSecondaryLight,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 10,
-            color: isActive ? AppColors.primaryGreen : AppColors.textSecondaryLight,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
-        )
-      ],
+          const SizedBox(height: 3),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 9,
+              color: isActive ? AppColors.primaryGreen : AppColors.textSecondaryLight,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildStepLine() {
     return Container(
-      width: 40,
+      width: 18,
       height: 2,
       margin: const EdgeInsets.only(bottom: 12),
       color: const Color(0xFFD1DDD6),
     );
   }
 
-  // Personal Info Form
+  // Step 0: Personal & Login Form
   Widget _buildPersonalInfoForm() {
     return Form(
       key: _formKey0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Full Name
           TextFormField(
             controller: _fullNameController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Full Name', Icons.person_outline),
+            decoration: _buildInputDecoration('Full Name / Owner Name', Icons.person_outline),
             validator: (value) {
               if (value == null || value.trim().isEmpty) return 'Please enter your full name';
               if (value.trim().length < 2) return 'Name must be at least 2 characters';
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Email
+          const SizedBox(height: 14),
           TextFormField(
             controller: _emailController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
@@ -406,35 +525,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Mobile Row
+          const SizedBox(height: 14),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 75,
+                width: 70,
                 child: TextFormField(
                   controller: _countryCodeController,
                   style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Code', null),
                   keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return 'Required';
-                    if (!value.startsWith('+')) return 'Use +';
                     return null;
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextFormField(
                   controller: _mobileNumberController,
                   style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                   decoration: _buildInputDecoration('Mobile Number', Icons.phone_outlined),
                   keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return 'Please enter mobile number';
                     if (!RegExp(r'^\d{7,15}$').hasMatch(value.trim())) {
@@ -446,42 +560,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Password
+          const SizedBox(height: 14),
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildPasswordInputDecoration(
-              'Password',
-              _obscurePassword,
-              () => setState(() => _obscurePassword = !_obscurePassword),
+            decoration: _buildInputDecoration('Password', Icons.lock_outline).copyWith(
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  color: AppColors.textSecondaryLight,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Please enter a password';
               if (value.length < 8) return 'Password must be at least 8 characters';
-              final hasUppercase = RegExp(r'[A-Z]').hasMatch(value);
-              final hasLowercase = RegExp(r'[a-z]').hasMatch(value);
-              final hasDigits = RegExp(r'\d').hasMatch(value);
-              final hasSpecial = RegExp(r'[@$!%*?&]').hasMatch(value);
-              if (!hasUppercase || !hasLowercase || !hasDigits || !hasSpecial) {
-                return 'Must contain uppercase, lowercase, number, special char';
-              }
+              if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) return 'Must contain a lowercase letter';
+              if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) return 'Must contain an uppercase letter';
+              if (!RegExp(r'(?=.*\d)').hasMatch(value)) return 'Must contain a digit';
+              if (!RegExp(r'(?=.*[@$!%*?&])').hasMatch(value)) return r'Must contain a special char (@$!%*?&)';
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Confirm Password
+          const SizedBox(height: 14),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildPasswordInputDecoration(
-              'Confirm Password',
-              _obscureConfirmPassword,
-              () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+            decoration: _buildInputDecoration('Confirm Password', Icons.lock_outline).copyWith(
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  color: AppColors.textSecondaryLight,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Please confirm your password';
@@ -494,41 +611,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Business Info Form
+  // Step 1: Business Identity Form
   Widget _buildBusinessInfoForm() {
     return Form(
       key: _formKey1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Business Name
           TextFormField(
             controller: _businessNameController,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Business Name', Icons.store_outlined),
+            decoration: _buildInputDecoration('Store / Display Name *', Icons.storefront_outlined),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Please enter business name';
+              if (value == null || value.trim().isEmpty) return 'Please enter your Store Name';
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // Business Type Dropdown
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _legalNameController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Legal Entity Name (As on PAN/GST)', Icons.badge_outlined),
+          ),
+          const SizedBox(height: 14),
           DropdownButtonFormField<String>(
             value: _businessType,
-            dropdownColor: Colors.white,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Business Type', Icons.business_outlined),
+            decoration: _buildInputDecoration('Business Type', Icons.category_outlined),
             items: _businessTypes.map((type) {
-              return DropdownMenuItem<String>(
-                value: type,
-                child: Text(type),
-              );
+              return DropdownMenuItem(value: type, child: Text(type));
             }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _businessType = value ?? 'Individual Seller';
-              });
+            onChanged: (val) {
+              if (val != null) setState(() => _businessType = val);
             },
           ),
         ],
@@ -536,125 +650,269 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // Address Info Form
-  Widget _buildAddressInfoForm(RegisterState state) {
+  // Step 2: Tax & Legal (KYC) Form
+  Widget _buildTaxInfoForm() {
     return Form(
       key: _formKey2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // City
-          TextFormField(
-            controller: _cityController,
-            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('City', Icons.location_city_outlined),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Please enter city';
-              return null;
-            },
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F4EC),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Color(0xFF1A3827), size: 20),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'PAN and GST are required for legal payouts and tax compliance. You can also update them later in KYC Settings.',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF1A3827)),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
-
-          // State
-          TextFormField(
-            controller: _stateController,
-            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('State', Icons.map_outlined),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Please enter state';
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Pincode
-          TextFormField(
-            controller: _pincodeController,
-            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('Pincode', Icons.pin_outlined),
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Please enter pincode';
-              if (!RegExp(r'^\d{4,10}$').hasMatch(value.trim())) return 'Enter a valid pincode';
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // GST Number (Optional)
-          TextFormField(
-            controller: _gstNumberController,
-            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('GST Number (Optional)', Icons.description_outlined),
-          ),
-          const SizedBox(height: 16),
-
-          // PAN Number (Optional)
           TextFormField(
             controller: _panNumberController,
+            textCapitalization: TextCapitalization.characters,
             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-            decoration: _buildInputDecoration('PAN Number (Optional)', Icons.payment_outlined),
+            decoration: _buildInputDecoration('PAN Number (e.g. ABCDE1234F)', Icons.credit_card_outlined),
+            validator: (value) {
+              if (value != null && value.trim().isNotEmpty) {
+                final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$');
+                if (!panRegex.hasMatch(value.trim().toUpperCase())) {
+                  return 'Invalid PAN format (e.g. ABCDE1234F)';
+                }
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _gstNumberController,
+            textCapitalization: TextCapitalization.characters,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('GSTIN Number (Optional for exempt)', Icons.receipt_long_outlined),
+            validator: (value) {
+              if (value != null && value.trim().isNotEmpty) {
+                final gstRegex = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$');
+                if (!gstRegex.hasMatch(value.trim().toUpperCase())) {
+                  return 'Invalid GSTIN format (15 digits)';
+                }
+              }
+              return null;
+            },
           ),
         ],
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String labelText, IconData? icon) {
-    return InputDecoration(
-      labelText: labelText,
-      labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
-      prefixIcon: icon != null ? Icon(icon, color: AppColors.textSecondaryLight, size: 20) : null,
-      filled: true,
-      fillColor: const Color(0xFFF1F5F2),
-      contentPadding: const EdgeInsets.all(16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
+  // Step 3: Pickup & Warehouse Address Form
+  Widget _buildPickupAddressForm() {
+    return Form(
+      key: _formKey3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            controller: _pickupAddress1Controller,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Pickup Address Line 1 / Street *', Icons.location_on_outlined),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) return 'Please enter pickup address';
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _pickupAddress2Controller,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Address Line 2 / Landmark (Optional)', Icons.navigation_outlined),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _cityController,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('City *', Icons.location_city_outlined),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'City is required';
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _stateController,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('State *', Icons.map_outlined),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'State is required';
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _pincodeController,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('Pincode *', Icons.pin_drop_outlined),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Pincode required';
+                    if (value.trim().length != 6) return 'Must be 6 digits';
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextFormField(
+                  controller: _pickupPhoneController,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('Pickup Phone', Icons.phone_callback_outlined),
+                  keyboardType: TextInputType.phone,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  InputDecoration _buildPasswordInputDecoration(
-    String labelText,
-    bool obscureText,
-    VoidCallback toggleObscure,
-  ) {
-    return InputDecoration(
-      labelText: labelText,
-      labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
-      prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight, size: 20),
-      suffixIcon: IconButton(
-        icon: Icon(
-          obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-          color: AppColors.textSecondaryLight,
-          size: 18,
-        ),
-        onPressed: toggleObscure,
+  // Step 4: Bank Details & Digital Signature Form
+  Widget _buildBankAndSignatureForm(RegisterState state) {
+    return Form(
+      key: _formKey4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F4EC),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.account_balance_outlined, color: Color(0xFF1A3827), size: 20),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Bank details are used for weekly seller payouts. You can also review or update them anytime from your KYC Dashboard.',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF1A3827)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _bankHolderController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Account Holder Name', Icons.person_pin_outlined),
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _bankAccountController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Bank Account Number', Icons.numbers_outlined),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _confirmBankAccountController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Confirm Account Number', Icons.numbers_outlined),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (_bankAccountController.text.trim().isNotEmpty &&
+                  value != _bankAccountController.text) {
+                return 'Account numbers do not match';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _bankIfscController,
+                  textCapitalization: TextCapitalization.characters,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('IFSC Code', Icons.qr_code_outlined),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _bankAccountType,
+                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+                  decoration: _buildInputDecoration('Type', null),
+                  items: _accountTypes.map((t) {
+                    return DropdownMenuItem(value: t, child: Text(t));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _bankAccountType = val);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _bankNameController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Bank Name (e.g. HDFC Bank, SBI)', Icons.account_balance_outlined),
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _digitalSignatureController,
+            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
+            decoration: _buildInputDecoration('Authorized Signatory Name (Digital Signature)', Icons.draw_outlined),
+          ),
+        ],
       ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration(String label, IconData? icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+      prefixIcon: icon != null
+          ? Icon(icon, color: const Color(0xFF1A3827), size: 20)
+          : null,
       filled: true,
-      fillColor: const Color(0xFFF1F5F2),
-      contentPadding: const EdgeInsets.all(16),
+      fillColor: const Color(0xFFF7FAF8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFDCE6E1)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFDCE6E1)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFF1A3827), width: 1.5),
       ),
     );
   }

@@ -12,6 +12,7 @@ import '../features/settings/presentation/screens/change_password_screen.dart';
 import '../features/settings/presentation/screens/legal_content_screen.dart';
 import '../features/settings/presentation/screens/support_screen.dart';
 import '../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../features/profile/presentation/screens/store_kyc_screen.dart';
 
 // Products imports
 import '../features/products/data/models/product_model.dart';
@@ -109,6 +110,10 @@ class AppRouter {
       GoRoute(
         path: '/profile/edit',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/kyc',
+        builder: (context, state) => const StoreKycScreen(),
       ),
 
       // Products routes

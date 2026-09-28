@@ -3,14 +3,24 @@ export abstract class IVendorDashboardRepository {
     total: number;
     active: number;
     outOfStock: number;
+    lowStock: number;
   }>;
 
   abstract getOrdersCountAndRevenue(vendorId: string): Promise<{
     totalOrders: number;
     pendingOrders: number;
+    ordersToDispatch: number;
     completedOrders: number;
     totalRevenue: number;
     currentMonthRevenue: number;
+    todayRevenue: number;
+    todayOrders: number;
+  }>;
+
+  abstract getVendorKycStatus(vendorId: string): Promise<{
+    kycStatus: string;
+    hasProfile: boolean;
+    storeName?: string;
   }>;
 
   abstract getSalesOverview(

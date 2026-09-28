@@ -15,4 +15,8 @@ class ApiEndpoints {
   static const String changePassword = '/auth/change-password';
   static const String deleteAccount = '/auth/delete-account';
   static const String updateProfile = '/auth/profile';
+
+  // Vendor Dashboard & Profile endpoints
+  static const String vendorDashboardSummary = '/vendor/dashboard/summary';
+  static const String vendorProfile = '/vendor/profile';
 }

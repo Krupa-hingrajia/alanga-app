@@ -9,13 +9,33 @@ class RegisterParams {
   final String password;
   final String confirmPassword;
   final UserRole role;
+
+  // 1. Business Identity
   final String? businessName;
+  final String? legalName;
   final String? businessType;
+
+  // 2. Tax & Legal (KYC)
+  final String? panNumber;
+  final String? gstNumber;
+
+  // 3. Pickup & Warehouse Address
+  final String? pickupAddressLine1;
+  final String? pickupAddressLine2;
   final String? city;
   final String? state;
   final String? pincode;
-  final String? gstNumber;
-  final String? panNumber;
+  final String? pickupContactPhone;
+
+  // 4. Bank Account Details (Payouts)
+  final String? bankAccountHolderName;
+  final String? bankAccountNumber;
+  final String? bankIfscCode;
+  final String? bankName;
+  final String? bankAccountType;
+
+  // 5. Digital Signature
+  final String? digitalSignatureUrl;
 
   RegisterParams({
     required this.fullName,
@@ -26,12 +46,22 @@ class RegisterParams {
     required this.confirmPassword,
     required this.role,
     this.businessName,
+    this.legalName,
     this.businessType,
+    this.panNumber,
+    this.gstNumber,
+    this.pickupAddressLine1,
+    this.pickupAddressLine2,
     this.city,
     this.state,
     this.pincode,
-    this.gstNumber,
-    this.panNumber,
+    this.pickupContactPhone,
+    this.bankAccountHolderName,
+    this.bankAccountNumber,
+    this.bankIfscCode,
+    this.bankName,
+    this.bankAccountType,
+    this.digitalSignatureUrl,
   });
 }
 
@@ -50,12 +80,22 @@ class RegisterUseCase {
       confirmPassword: params.confirmPassword,
       role: params.role,
       businessName: params.businessName,
+      legalName: params.legalName,
       businessType: params.businessType,
       city: params.city,
       state: params.state,
       pincode: params.pincode,
       gstNumber: params.gstNumber,
       panNumber: params.panNumber,
+      pickupAddressLine1: params.pickupAddressLine1,
+      pickupAddressLine2: params.pickupAddressLine2,
+      pickupContactPhone: params.pickupContactPhone,
+      bankAccountHolderName: params.bankAccountHolderName,
+      bankAccountNumber: params.bankAccountNumber,
+      bankIfscCode: params.bankIfscCode,
+      bankName: params.bankName,
+      bankAccountType: params.bankAccountType,
+      digitalSignatureUrl: params.digitalSignatureUrl,
     );
   }
 }

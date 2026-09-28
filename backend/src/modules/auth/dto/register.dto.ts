@@ -81,4 +81,69 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   panNumber?: string;
+
+  @ApiProperty({ example: 'My Store Pvt Ltd', description: 'Legal Entity Name', required: false })
+  @IsOptional()
+  @IsString()
+  legalName?: string;
+
+  @ApiProperty({ example: 'Shop 12, Main Market', description: 'Pickup Address Line 1', required: false })
+  @IsOptional()
+  @IsString()
+  pickupAddressLine1?: string;
+
+  @ApiProperty({ example: 'Near Metro Station', description: 'Pickup Address Line 2 / Landmark', required: false })
+  @IsOptional()
+  @IsString()
+  pickupAddressLine2?: string;
+
+  @ApiProperty({ example: '9876543210', description: 'Pickup Contact Phone', required: false })
+  @IsOptional()
+  @IsString()
+  pickupContactPhone?: string;
+
+  @ApiProperty({ example: 'John Doe', description: 'Bank Account Holder Name', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountHolderName?: string;
+
+  @ApiProperty({ example: '123456789012', description: 'Bank Account Number', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountNumber?: string;
+
+  @ApiProperty({ example: 'HDFC0001234', description: 'Bank IFSC Code', required: false })
+  @IsOptional()
+  @IsString()
+  bankIfscCode?: string;
+
+  @ApiProperty({ example: 'HDFC Bank', description: 'Bank Name', required: false })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiProperty({ example: 'CURRENT', description: 'Bank Account Type (CURRENT / SAVINGS)', required: false })
+  @IsOptional()
+  @IsString()
+  bankAccountType?: string;
+
+  @ApiProperty({ description: 'PAN Card Image / URL', required: false })
+  @IsOptional()
+  @IsString()
+  panCardUrl?: string;
+
+  @ApiProperty({ description: 'GST Certificate Image / URL', required: false })
+  @IsOptional()
+  @IsString()
+  gstCertificateUrl?: string;
+
+  @ApiProperty({ description: 'Cancelled Cheque Image / URL', required: false })
+  @IsOptional()
+  @IsString()
+  cancelledChequeUrl?: string;
+
+  @ApiProperty({ description: 'Digital Signature Image / URL', required: false })
+  @IsOptional()
+  @IsString()
+  digitalSignatureUrl?: string;
 }

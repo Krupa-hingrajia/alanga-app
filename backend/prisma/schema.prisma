@@ -47,6 +47,7 @@ model User {
 
   // Vendor relations
   products Product[] @relation("VendorProducts")
+  vendorProfile VendorProfile?
 
   // Customer relations
   wishlists     Wishlist[]
@@ -403,5 +404,47 @@ model ReviewReply {
   deletedAt DateTime? @map("deleted_at")
 
   @@map("review_replies")
+}
+
+model VendorProfile {
+  id                    String        @id @default(uuid())
+  userId                String        @unique @map("user_id")
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 1. Business Identity
+  storeName             String        @map("store_name")
+  legalName             String?       @map("legal_name")
+  businessType          String?       @map("business_type")
+  businessDescription   String?       @map("business_description")
+
+  // 2. Tax & Legal (KYC)
+  panNumber             String?       @map("pan_number")
+  panCardUrl            String?       @map("pan_card_url")
+  gstNumber             String?       @map("gst_number")
+  gstCertificateUrl     String?       @map("gst_certificate_url")
+
+  // 3. Pickup & Warehouse Address
+  pickupAddressLine1    String?       @map("pickup_address_line1")
+  pickupAddressLine2    String?       @map("pickup_address_line2")
+  pickupCity            String?       @map("pickup_city")
+  pickupState           String?       @map("pickup_state")
+  pickupPincode         String?       @map("pickup_pincode")
+  pickupContactPhone    String?       @map("pickup_contact_phone")
+
+  // 4. Bank Account Details (Payouts)
+  bankAccountHolderName String?       @map("bank_account_holder_name")
+  bankAccountNumber     String?       @map("bank_account_number")
+  bankIfscCode          String?       @map("bank_ifsc_code")
+  bankName              String?       @map("bank_name")
+  bankAccountType       String?       @default("CURRENT") @map("bank_account_type")
+  cancelledChequeUrl    String?       @map("cancelled_cheque_url")
+
+  // 5. Digital Signature
+  digitalSignatureUrl   String?       @map("digital_signature_url")
+
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  @@map("vendor_profiles")
 }
 

@@ -54,6 +54,12 @@ import '../../features/orders/domain/repositories/vendor_order_repository.dart';
 import '../../features/orders/data/repositories/vendor_order_repository_impl.dart';
 import '../../features/orders/presentation/bloc/vendor_order_bloc.dart';
 
+// Dashboard & Profile imports
+import '../../features/dashboard/domain/repositories/vendor_dashboard_repository.dart';
+import '../../features/dashboard/data/repositories/vendor_dashboard_repository_impl.dart';
+import '../../features/profile/domain/repositories/vendor_profile_repository.dart';
+import '../../features/profile/data/repositories/vendor_profile_repository_impl.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -74,6 +80,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
 
   // Repository
+  sl.registerLazySingleton<VendorDashboardRepository>(
+    () => VendorDashboardRepositoryImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<VendorProfileRepository>(
+    () => VendorProfileRepositoryImpl(apiService: sl()),
+  );
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl(), storageService: sl()),
   );

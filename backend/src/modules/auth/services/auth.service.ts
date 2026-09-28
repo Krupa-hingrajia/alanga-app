@@ -6,7 +6,7 @@ import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { UserEntity } from '../../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { Role, AccountStatus } from '@prisma/client';
+import { Role, AccountStatus, KYCStatus } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -35,16 +35,58 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(registerDto.password, saltRounds);
 
     const role = registerDto.role;
-    const status = role === Role.VENDOR ? AccountStatus.PENDING : AccountStatus.ACTIVE;
+    const status = AccountStatus.ACTIVE;
+    
+    // Determine KYC status based on submitted documents/details
+    let kycStatus: KYCStatus = KYCStatus.NOT_SUBMITTED;
+    if (role === Role.VENDOR) {
+      const hasKycInfo = !!(
+        registerDto.panNumber ||
+        registerDto.gstNumber ||
+        registerDto.bankAccountNumber ||
+        registerDto.pickupAddressLine1
+      );
+      kycStatus = hasKycInfo ? KYCStatus.PENDING : KYCStatus.NOT_SUBMITTED;
+    }
 
-    return this.authRepository.createUser({
+    const userData: any = {
       fullName: registerDto.fullName.trim(),
       email: normalizedEmail,
       phoneNumber: registerDto.mobileNumber?.trim(),
       password: hashedPassword,
       role: registerDto.role,
       status: status,
-    });
+      kycStatus: kycStatus,
+    };
+
+    if (role === Role.VENDOR) {
+      userData.vendorProfile = {
+        create: {
+          storeName: registerDto.businessName?.trim() || registerDto.fullName.trim(),
+          legalName: registerDto.legalName?.trim() || null,
+          businessType: registerDto.businessType?.trim() || 'Individual Seller',
+          panNumber: registerDto.panNumber?.trim() || null,
+          panCardUrl: registerDto.panCardUrl || null,
+          gstNumber: registerDto.gstNumber?.trim() || null,
+          gstCertificateUrl: registerDto.gstCertificateUrl || null,
+          pickupAddressLine1: registerDto.pickupAddressLine1?.trim() || null,
+          pickupAddressLine2: registerDto.pickupAddressLine2?.trim() || null,
+          pickupCity: registerDto.city?.trim() || null,
+          pickupState: registerDto.state?.trim() || null,
+          pickupPincode: registerDto.pincode?.trim() || null,
+          pickupContactPhone: registerDto.pickupContactPhone?.trim() || registerDto.mobileNumber?.trim() || null,
+          bankAccountHolderName: registerDto.bankAccountHolderName?.trim() || null,
+          bankAccountNumber: registerDto.bankAccountNumber?.trim() || null,
+          bankIfscCode: registerDto.bankIfscCode?.trim() || null,
+          bankName: registerDto.bankName?.trim() || null,
+          bankAccountType: registerDto.bankAccountType?.trim() || 'CURRENT',
+          cancelledChequeUrl: registerDto.cancelledChequeUrl || null,
+          digitalSignatureUrl: registerDto.digitalSignatureUrl || null,
+        },
+      };
+    }
+
+    return this.authRepository.createUser(userData);
   }
 
   async login(loginDto: LoginDto) {
@@ -73,10 +115,6 @@ export class AuthService {
 
     if (user.status === AccountStatus.REJECTED) {
       throw new ForbiddenException('Your account registration was rejected');
-    }
-
-    if (user.status === AccountStatus.PENDING && user.role === Role.VENDOR) {
-      throw new ForbiddenException('Your vendor account is pending approval by administrator');
     }
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);

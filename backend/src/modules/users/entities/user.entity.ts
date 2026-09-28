@@ -14,6 +14,7 @@ export class UserEntity {
   status: AccountStatus;
   kycStatus: KYCStatus;
   profileImage?: string | null;
+  vendorProfile?: any;
 
   createdAt: Date;
   updatedAt: Date;

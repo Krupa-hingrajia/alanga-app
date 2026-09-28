@@ -21,6 +21,7 @@ import { CartModule } from './modules/cart/cart.module';
 import { AddressModule } from './modules/addresses/address.module';
 import { OrderModule } from './modules/orders/order.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { VendorProfileModule } from './modules/vendor-profile/vendor-profile.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     UsersModule,
     AuthModule,
     VendorDashboardModule,
+    VendorProfileModule,
     AdminAuthModule,
     AdminDashboardModule,
     CategoriesModule,

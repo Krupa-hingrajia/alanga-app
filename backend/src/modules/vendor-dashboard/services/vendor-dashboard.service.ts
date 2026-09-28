@@ -8,20 +8,28 @@ export class VendorDashboardService {
   ) {}
 
   async getSummary(vendorId: string) {
-    const [productsCount, ordersCountAndRev] = await Promise.all([
+    const [productsCount, ordersCountAndRev, kycInfo] = await Promise.all([
       this.dashboardRepository.getProductsCount(vendorId),
       this.dashboardRepository.getOrdersCountAndRevenue(vendorId),
+      this.dashboardRepository.getVendorKycStatus(vendorId),
     ]);
 
     return {
       totalProducts: productsCount.total,
       activeProducts: productsCount.active,
       outOfStockProducts: productsCount.outOfStock,
+      lowStockProducts: productsCount.lowStock,
       totalOrders: ordersCountAndRev.totalOrders,
       pendingOrders: ordersCountAndRev.pendingOrders,
+      ordersToDispatch: ordersCountAndRev.ordersToDispatch,
       completedOrders: ordersCountAndRev.completedOrders,
       totalRevenue: ordersCountAndRev.totalRevenue,
       currentMonthRevenue: ordersCountAndRev.currentMonthRevenue,
+      todayRevenue: ordersCountAndRev.todayRevenue,
+      todayOrders: ordersCountAndRev.todayOrders,
+      kycStatus: kycInfo.kycStatus,
+      hasProfile: kycInfo.hasProfile,
+      storeName: kycInfo.storeName,
     };
   }
 

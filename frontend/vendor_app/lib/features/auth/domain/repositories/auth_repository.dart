@@ -15,12 +15,22 @@ abstract class AuthRepository {
     required String confirmPassword,
     required UserRole role,
     String? businessName,
+    String? legalName,
     String? businessType,
     String? city,
     String? state,
     String? pincode,
     String? gstNumber,
     String? panNumber,
+    String? pickupAddressLine1,
+    String? pickupAddressLine2,
+    String? pickupContactPhone,
+    String? bankAccountHolderName,
+    String? bankAccountNumber,
+    String? bankIfscCode,
+    String? bankName,
+    String? bankAccountType,
+    String? digitalSignatureUrl,
   });
 
   Future<UserEntity> getCurrentUser();

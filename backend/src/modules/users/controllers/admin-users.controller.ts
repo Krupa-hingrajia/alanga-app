@@ -1,6 +1,6 @@
 import { Controller, Get, Put, Param, Query, UseGuards, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Role, AccountStatus } from '@prisma/client';
+import { Role, AccountStatus, KYCStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -64,7 +64,7 @@ export class AdminUsersController {
 
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Approve vendor registration request' })
+  @ApiOperation({ summary: 'Approve vendor registration request and KYC' })
   @ApiResponse({ status: 200, description: 'Vendor approved successfully.' })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async approveVendor(@Param('id') id: string) {
@@ -73,10 +73,36 @@ export class AdminUsersController {
       throw new NotFoundException(`Vendor with ID "${id}" not found.`);
     }
 
-    const data = await this.usersService.updateStatus(id, AccountStatus.ACTIVE);
+    const data = await this.usersService.update(id, {
+      status: AccountStatus.ACTIVE,
+      kycStatus: KYCStatus.VERIFIED,
+    });
     return {
       success: true,
-      message: 'Vendor approved successfully',
+      message: 'Vendor and KYC approved successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Put(':id/approve-kyc')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Approve vendor KYC verification specifically' })
+  @ApiResponse({ status: 200, description: 'Vendor KYC approved successfully.' })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async approveVendorKyc(@Param('id') id: string) {
+    const vendor = await this.usersService.findById(id);
+    if (!vendor || vendor.role !== Role.VENDOR) {
+      throw new NotFoundException(`Vendor with ID "${id}" not found.`);
+    }
+
+    const data = await this.usersService.update(id, {
+      status: AccountStatus.ACTIVE,
+      kycStatus: KYCStatus.VERIFIED,
+    });
+    return {
+      success: true,
+      message: 'Vendor KYC approved successfully',
       data,
       statusCode: HttpStatus.OK,
     };
@@ -93,10 +119,35 @@ export class AdminUsersController {
       throw new NotFoundException(`Vendor with ID "${id}" not found.`);
     }
 
-    const data = await this.usersService.updateStatus(id, AccountStatus.REJECTED);
+    const data = await this.usersService.update(id, {
+      status: AccountStatus.REJECTED,
+      kycStatus: KYCStatus.REJECTED,
+    });
     return {
       success: true,
       message: 'Vendor rejected successfully',
+      data,
+      statusCode: HttpStatus.OK,
+    };
+  }
+
+  @Put(':id/reject-kyc')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reject vendor KYC verification specifically' })
+  @ApiResponse({ status: 200, description: 'Vendor KYC rejected.' })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async rejectVendorKyc(@Param('id') id: string) {
+    const vendor = await this.usersService.findById(id);
+    if (!vendor || vendor.role !== Role.VENDOR) {
+      throw new NotFoundException(`Vendor with ID "${id}" not found.`);
+    }
+
+    const data = await this.usersService.update(id, {
+      kycStatus: KYCStatus.REJECTED,
+    });
+    return {
+      success: true,
+      message: 'Vendor KYC rejected',
       data,
       statusCode: HttpStatus.OK,
     };

@@ -78,4 +78,8 @@ export class UsersService {
   async updateStatus(id: string, status: any): Promise<UserEntity> {
     return this.usersRepository.update(id, { status });
   }
+
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<UserEntity> {
+    return this.usersRepository.update(id, data);
+  }
 }

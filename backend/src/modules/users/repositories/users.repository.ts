@@ -19,6 +19,7 @@ export class UsersRepository implements IUsersRepository {
       status: user.status,
       kycStatus: user.kycStatus,
       profileImage: user.profileImage,
+      vendorProfile: user.vendorProfile,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       deletedAt: user.deletedAt,
@@ -31,7 +32,10 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { vendorProfile: true },
+    });
     if (!user) return null;
     return this.mapToEntity(user);
   }
@@ -65,18 +69,37 @@ export class UsersRepository implements IUsersRepository {
     const whereClause: any = { role: 'VENDOR' };
     if (filters) {
       if (filters.status) {
-        whereClause.status = filters.status;
+        if (filters.status === 'PENDING') {
+          whereClause.OR = [
+            { status: 'PENDING' },
+            { kycStatus: 'PENDING' },
+          ];
+        } else {
+          whereClause.status = filters.status;
+        }
       }
       if (filters.search) {
-        whereClause.OR = [
+        const searchArr = [
           { fullName: { contains: filters.search, mode: 'insensitive' } },
           { email: { contains: filters.search, mode: 'insensitive' } },
+          { phoneNumber: { contains: filters.search, mode: 'insensitive' } },
+          { vendorProfile: { is: { storeName: { contains: filters.search, mode: 'insensitive' } } } },
         ];
+        if (whereClause.OR) {
+          whereClause.AND = [
+            { OR: whereClause.OR },
+            { OR: searchArr },
+          ];
+          delete whereClause.OR;
+        } else {
+          whereClause.OR = searchArr;
+        }
       }
     }
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({
         where: whereClause,
+        include: { vendorProfile: true },
         orderBy: { createdAt: 'desc' },
         skip: filters?.skip,
         take: filters?.take,

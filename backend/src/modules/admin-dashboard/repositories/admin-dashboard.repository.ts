@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IAdminDashboardRepository } from '../interfaces/admin-dashboard-repository.interface';
 import { PrismaService } from '../../../database/prisma.service';
-import { Role, AccountStatus } from '@prisma/client';
+import { Role, AccountStatus, KYCStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminDashboardRepository implements IAdminDashboardRepository {
@@ -40,7 +40,15 @@ export class AdminDashboardRepository implements IAdminDashboardRepository {
       this.prisma.user.count({ where: { role: Role.CUSTOMER } }),
       this.prisma.user.count({ where: { role: Role.VENDOR } }),
       this.prisma.user.count({ where: { role: Role.VENDOR, status: AccountStatus.ACTIVE } }),
-      this.prisma.user.count({ where: { role: Role.VENDOR, status: AccountStatus.PENDING } }),
+      this.prisma.user.count({
+        where: {
+          role: Role.VENDOR,
+          OR: [
+            { status: AccountStatus.PENDING },
+            { kycStatus: KYCStatus.PENDING },
+          ],
+        },
+      }),
       this.prisma.product.count({ where: { deletedAt: null } }),
       this.prisma.product.count({ where: { status: 'PENDING', deletedAt: null } }),
       this.prisma.category.count({ where: { deletedAt: null } }),

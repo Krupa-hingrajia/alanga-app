@@ -1,5 +1,29 @@
 import { client } from '@/services/api/client';
 
+export interface VendorProfile {
+  id?: string;
+  storeName?: string;
+  legalName?: string;
+  businessType?: string;
+  businessDescription?: string;
+  panNumber?: string;
+  panCardUrl?: string;
+  gstNumber?: string;
+  gstCertificateUrl?: string;
+  pickupAddressLine1?: string;
+  pickupAddressLine2?: string;
+  pickupCity?: string;
+  pickupState?: string;
+  pickupPincode?: string;
+  pickupContactPhone?: string;
+  bankAccountHolderName?: string;
+  bankAccountNumber?: string;
+  bankIfscCode?: string;
+  bankName?: string;
+  bankAccountType?: string;
+  cancelledChequeUrl?: string;
+}
+
 export interface Vendor {
   id: string;
   fullName: string;
@@ -10,6 +34,7 @@ export interface Vendor {
   role: string;
   status: string;
   kycStatus?: string;
+  vendorProfile?: VendorProfile;
   businessName?: string;
   businessType?: string;
   city?: string;
@@ -49,8 +74,18 @@ export const approveVendor = async (id: string): Promise<Vendor> => {
   return response.data.data;
 };
 
+export const approveVendorKyc = async (id: string): Promise<Vendor> => {
+  const response = await client.put(`/admin/vendors/${id}/approve-kyc`);
+  return response.data.data;
+};
+
 export const rejectVendor = async (id: string): Promise<Vendor> => {
   const response = await client.put(`/admin/vendors/${id}/reject`);
+  return response.data.data;
+};
+
+export const rejectVendorKyc = async (id: string): Promise<Vendor> => {
+  const response = await client.put(`/admin/vendors/${id}/reject-kyc`);
   return response.data.data;
 };
 

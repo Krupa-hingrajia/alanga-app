@@ -71,13 +71,14 @@ const navigationSections: NavSection[] = [
   {
     title: 'Users',
     items: [
-      { href: '/vendors', label: 'Vendors', icon: Users, badgeKey: 'pendingVendorApprovals' },
+      { href: '/vendors', label: 'Vendors', icon: Users },
       { href: '/customers', label: 'Customers', icon: UserCheck },
     ],
   },
   {
-    title: 'Requests',
+    title: 'Requests & Approvals',
     items: [
+      { href: '/vendors?status=PENDING', label: 'Vendor Approvals', icon: ShieldCheck, badgeKey: 'pendingVendorApprovals' },
       { href: '/requests/brands', label: 'Brand Requests', icon: Clock, badgeKey: 'pendingBrands' },
       { href: '/requests/products', label: 'Product Approvals', icon: CheckCircle, badgeKey: 'pendingProducts' },
     ],

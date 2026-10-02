@@ -61,13 +61,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         }
       }
 
+      final List<String> variantErrors = [];
       if (event.variants.isNotEmpty) {
         for (int i = 0; i < event.variants.length; i++) {
           final v = event.variants[i];
           final vName = v.variantName.isNotEmpty ? v.variantName : 'Variant ${i + 1}';
           emit(ProductActionLoading(message: 'Creating $vName...'));
           try {
-            final createdVariant = await _productRepository.createProductVariant(product.id, v.toJson());
+            final createdVariant = await _productRepository.createProductVariant(product.id, v.toCreateJson());
             if (v.pendingLocalPaths.isNotEmpty) {
               emit(ProductActionLoading(message: 'Uploading images for $vName...'));
               try {
@@ -82,14 +83,23 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             }
           } catch (e) {
             debugPrint('Create variant error for $vName: $e');
+            String errStr = e.toString();
+            if (e is ServerFailure) {
+              errStr = e.message;
+            }
+            variantErrors.add('$vName: $errStr');
           }
         }
       }
 
       final refreshed = await _productRepository.getProductById(product.id);
+      String successMsg = 'Product created successfully as ${refreshed.status}.';
+      if (variantErrors.isNotEmpty) {
+        successMsg = 'Product created, but variant warning: ${variantErrors.join("; ")}';
+      }
       emit(ProductActionSuccess(
         product: refreshed,
-        message: 'Product created successfully as ${refreshed.status}.',
+        message: successMsg,
       ));
     } catch (e) {
       String message = 'An error occurred';

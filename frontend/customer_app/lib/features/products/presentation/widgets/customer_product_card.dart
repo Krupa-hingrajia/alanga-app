@@ -159,18 +159,25 @@ class CustomerProductCard extends StatelessWidget {
                         color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.star_rounded, size: 11, color: Color(0xFFD97706)),
-                          SizedBox(width: 2),
+                          const Icon(Icons.star_rounded, size: 11, color: Color(0xFFD97706)),
+                          const SizedBox(width: 2),
                           Text(
-                            '4.5',
-                            style: TextStyle(
+                            product.averageRating > 0 ? product.averageRating.toStringAsFixed(1) : '4.5',
+                            style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFFB45309),
                             ),
                           ),
+                          if (product.totalReviews > 0) ...[
+                            const SizedBox(width: 2),
+                            Text(
+                              '(${product.totalReviews})',
+                              style: const TextStyle(fontSize: 8, color: Color(0xFFB45309)),
+                            ),
+                          ],
                         ],
                       ),
                     ),

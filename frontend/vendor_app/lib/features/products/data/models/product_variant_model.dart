@@ -84,23 +84,42 @@ class ProductVariantModel {
     );
   }
 
+  /// Produces a payload conforming strictly to backend CreateProductVariantDto
+  Map<String, dynamic> toCreateJson() {
+    String? colorVal = (color != null && color!.trim().isNotEmpty) ? color!.trim() : attributes['Color']?.trim();
+    String? sizeVal = (size != null && size!.trim().isNotEmpty) ? size!.trim() : attributes['Size']?.trim();
+    String? storageVal = (storage != null && storage!.trim().isNotEmpty) ? storage!.trim() : attributes['Storage']?.trim();
+
+    return {
+      'sku': sku.trim().isNotEmpty ? sku.trim() : 'VAR-${DateTime.now().millisecondsSinceEpoch.toRadixString(36).toUpperCase()}',
+      'variantName': variantName.trim().isNotEmpty ? variantName.trim() : 'Variant',
+      'price': price,
+      'stock': stock,
+      if (colorVal != null && colorVal.isNotEmpty) 'color': colorVal,
+      if (sizeVal != null && sizeVal.isNotEmpty) 'size': sizeVal,
+      if (storageVal != null && storageVal.isNotEmpty) 'storage': storageVal,
+      'status': status.isNotEmpty ? status : 'ACTIVE',
+      'isDefault': isDefault,
+    };
+  }
+
   Map<String, dynamic> toJson() {
-    String? colorVal = color ?? attributes['Color'];
-    String? sizeVal = size ?? attributes['Size'];
-    String? storageVal = storage ?? attributes['Storage'];
+    String? colorVal = (color != null && color!.trim().isNotEmpty) ? color!.trim() : attributes['Color']?.trim();
+    String? sizeVal = (size != null && size!.trim().isNotEmpty) ? size!.trim() : attributes['Size']?.trim();
+    String? storageVal = (storage != null && storage!.trim().isNotEmpty) ? storage!.trim() : attributes['Storage']?.trim();
 
     return {
       if (id.isNotEmpty) 'id': id,
-      'productId': productId,
-      'sku': sku,
-      'variantName': variantName,
-      if (colorVal != null) 'color': colorVal,
-      if (sizeVal != null) 'size': sizeVal,
-      if (storageVal != null) 'storage': storageVal,
+      if (productId.isNotEmpty) 'productId': productId,
+      'sku': sku.trim().isNotEmpty ? sku.trim() : 'VAR-${DateTime.now().millisecondsSinceEpoch.toRadixString(36).toUpperCase()}',
+      'variantName': variantName.trim().isNotEmpty ? variantName.trim() : 'Variant',
+      if (colorVal != null && colorVal.isNotEmpty) 'color': colorVal,
+      if (sizeVal != null && sizeVal.isNotEmpty) 'size': sizeVal,
+      if (storageVal != null && storageVal.isNotEmpty) 'storage': storageVal,
       'price': price,
       'stock': stock,
-      'status': status,
-      'images': images.map((img) => img.toJson()).toList(),
+      'status': status.isNotEmpty ? status : 'ACTIVE',
+      if (images.isNotEmpty) 'images': images.map((img) => img.toJson()).toList(),
       'isDefault': isDefault,
     };
   }

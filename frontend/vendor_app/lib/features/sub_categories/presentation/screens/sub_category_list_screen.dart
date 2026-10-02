@@ -12,7 +12,9 @@ import '../../../../core/widgets/delete_confirmation_dialog.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 
 class SubCategoryListScreen extends StatefulWidget {
-  const SubCategoryListScreen({super.key});
+  final String? initialStatus;
+
+  const SubCategoryListScreen({super.key, this.initialStatus});
 
   @override
   State<SubCategoryListScreen> createState() => _SubCategoryListScreenState();
@@ -21,7 +23,7 @@ class SubCategoryListScreen extends StatefulWidget {
 class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedStatus = 'All';
+  late String _selectedStatus;
 
   Map<String, String> _categoryNameMap = {};
   bool _loadingCategories = true;
@@ -30,6 +32,7 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedStatus = widget.initialStatus ?? 'All';
     _loadCategories();
   }
 

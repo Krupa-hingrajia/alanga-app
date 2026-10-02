@@ -39,7 +39,11 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
     final v = widget.initialVariant;
 
     _variantNameCtrl = TextEditingController(text: v?.variantName ?? '');
-    _skuCtrl = TextEditingController(text: v?.sku ?? '');
+    _skuCtrl = TextEditingController(
+      text: (v != null && v.sku.isNotEmpty)
+          ? v.sku
+          : 'VAR-${DateTime.now().millisecondsSinceEpoch.toRadixString(36).toUpperCase()}',
+    );
     _priceCtrl = TextEditingController(text: v != null ? v.price.toStringAsFixed(0) : '');
     _stockCtrl = TextEditingController(text: v != null ? v.stock.toString() : '0');
     _isDefault = v?.isDefault ?? false;
@@ -268,7 +272,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                             flex: 4,
                             child: widget.availableAttributes.isNotEmpty
                                 ? DropdownButtonFormField<String>(
-                                    value: widget.availableAttributes.any((a) => a.name.toLowerCase() == pair.key.toLowerCase())
+                                    initialValue: widget.availableAttributes.any((a) => a.name.toLowerCase() == pair.key.toLowerCase())
                                         ? widget.availableAttributes.firstWhere((a) => a.name.toLowerCase() == pair.key.toLowerCase()).name
                                         : widget.availableAttributes.first.name,
                                     decoration: const InputDecoration(
@@ -319,7 +323,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                               );
                               if (matchedAttr.values.isNotEmpty) {
                                 return DropdownButtonFormField<String>(
-                                  value: matchedAttr.values.any((v) => v.value.toLowerCase() == pair.value.toLowerCase())
+                                  initialValue: matchedAttr.values.any((v) => v.value.toLowerCase() == pair.value.toLowerCase())
                                       ? matchedAttr.values.firstWhere((v) => v.value.toLowerCase() == pair.value.toLowerCase()).value
                                       : matchedAttr.values.first.value,
                                   decoration: const InputDecoration(
@@ -461,7 +465,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                       _isDefault = val;
                     });
                   },
-                  activeColor: AppColors.primaryGreen,
+                  activeThumbColor: AppColors.primaryGreen,
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 16),

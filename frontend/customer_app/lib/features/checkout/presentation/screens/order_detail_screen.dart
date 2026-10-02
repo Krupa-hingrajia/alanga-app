@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/order_model.dart';
+import '../../utils/customer_order_invoice_generator.dart';
 import '../bloc/order_detail_cubit.dart';
 import '../bloc/order_detail_state.dart';
 import '../widgets/order_status_badge.dart';
@@ -156,6 +159,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
           ),
           centerTitle: true,
+          actions: [
+            BlocBuilder<OrderDetailCubit, OrderDetailState>(
+              builder: (context, state) {
+                if (state is OrderDetailSuccess) {
+                  return IconButton(
+                    icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primaryGreen),
+                    tooltip: 'Download Tax Invoice',
+                    onPressed: () => CustomerOrderInvoiceGenerator.downloadInvoice(
+                      context: context,
+                      order: state.order,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
         ),
         body: BlocBuilder<OrderDetailCubit, OrderDetailState>(
           builder: (context, state) {
@@ -198,7 +218,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
             if (state is OrderDetailSuccess) {
               final order = state.order;
-              final isPending = order.status.toUpperCase() == 'PENDING';
               final isDelivered = order.status.toUpperCase() == 'DELIVERED';
 
             return SingleChildScrollView(
@@ -206,9 +225,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 0. CANCELLATION BANNER (If cancelled)
+                  if (order.isCancelled) ...[
+                    _buildCancelledBanner(order),
+                    const SizedBox(height: 16),
+                  ],
+
                   // 1. HEADER CARD (Order number & Date & Status)
                   _buildHeaderCard(order),
                   const SizedBox(height: 16),
+
+                  // 1.5 SHIPMENT & TRACKING CARD (If shipped or has tracking)
+                  if (order.hasTracking || order.isShipped) ...[
+                    _buildShipmentTrackingCard(order),
+                    const SizedBox(height: 16),
+                  ],
 
                   // 2. TIMELINE STATUS TRACKER (Amazon / Flipkart Style)
                   _buildTimelineCard(order),
@@ -228,10 +259,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                   // 6. PAYMENT INFO CARD
                   _buildPaymentInfoCard(order),
+                  const SizedBox(height: 16),
+
+                  // 6.5 INVOICE DOWNLOAD CARD
+                  _buildInvoiceDownloadCard(order),
                   const SizedBox(height: 20),
 
-                  // 7. ORDER ACTIONS (Pending: Cancel Order; Delivered: Buy Again)
-                  if (isPending) ...[
+                  // 7. ORDER ACTIONS (Pending/Confirmed: Cancel Order)
+                  if (order.canCancel) ...[
                     SizedBox(
                       width: double.infinity,
                       height: 48,
@@ -854,4 +889,293 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ],
     );
   }
+
+  // ==========================================
+  // 0. CANCELLATION BANNER
+  // ==========================================
+  Widget _buildCancelledBanner(OrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFECACA)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEE2E2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.cancel_rounded, color: AppColors.brandRed, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Order Cancelled',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF991B1B),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  order.cancelReason != null && order.cancelReason!.trim().isNotEmpty
+                      ? 'Reason: ${order.cancelReason}'
+                      : 'This order was cancelled. Any debited amount will be refunded to your original payment method.',
+                  style: const TextStyle(fontSize: 12.5, color: Color(0xFF7F1D1D), height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // 1.5 SHIPMENT & COURIER TRACKING CARD
+  // ==========================================
+  Widget _buildShipmentTrackingCard(OrderModel order) {
+    final courier = order.courierName ?? 'Standard Express';
+    final awb = order.trackingNumber ?? 'Pending assignment';
+    final hasAwb = order.hasTracking;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFC7E2D2)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreen.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.local_shipping_rounded, color: AppColors.primaryGreen, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Courier & Shipment Details',
+                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                    ),
+                    Text(
+                      order.shippedAt != null
+                          ? 'Dispatched on ${_formatDateTime(order.shippedAt!)}'
+                          : 'Package in transit with courier',
+                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF5A7265)),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  order.status,
+                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 22, color: Color(0xFFEEF3F0)),
+
+          // Courier Partner
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Courier Partner', style: TextStyle(fontSize: 12.5, color: Color(0xFF5A7265))),
+              Text(
+                courier,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // AWB Tracking number with Copy button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('AWB / Tracking Number', style: TextStyle(fontSize: 12.5, color: Color(0xFF5A7265))),
+              Row(
+                children: [
+                  Text(
+                    awb,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'monospace',
+                      color: hasAwb ? const Color(0xFF11261B) : Colors.grey,
+                    ),
+                  ),
+                  if (hasAwb) ...[
+                    const SizedBox(width: 4),
+                    InkWell(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: awb));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Tracking number $awb copied!'),
+                            backgroundColor: AppColors.primaryGreen,
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(4),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.copy_rounded, size: 15, color: AppColors.primaryGreen),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+
+          if (hasAwb) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: ElevatedButton.icon(
+                onPressed: () => _openTrackingUrl(order),
+                icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                label: Text('Track Package on $courier'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openTrackingUrl(OrderModel order) async {
+    final trackUrl = order.trackingUrl;
+    Uri? uri;
+    if (trackUrl != null && trackUrl.trim().isNotEmpty && trackUrl.startsWith('http')) {
+      uri = Uri.tryParse(trackUrl.trim());
+    } else {
+      final query = '${order.courierName ?? ""} tracking ${order.trackingNumber ?? ""}';
+      uri = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(query)}');
+    }
+
+    if (uri != null) {
+      try {
+        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open tracking URL')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error opening tracking: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  // ==========================================
+  // INVOICE DOWNLOAD CARD
+  // ==========================================
+  Widget _buildInvoiceDownloadCard(OrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2EBE6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primaryGreen.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.receipt_long_rounded, color: AppColors.primaryGreen, size: 22),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tax Invoice & Receipt',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Download official GST invoice PDF',
+                  style: TextStyle(fontSize: 11.5, color: Color(0xFF5A7265)),
+                ),
+              ],
+            ),
+          ),
+          OutlinedButton.icon(
+            onPressed: () => CustomerOrderInvoiceGenerator.downloadInvoice(context: context, order: order),
+            icon: const Icon(Icons.download_rounded, size: 16, color: AppColors.primaryGreen),
+            label: const Text(
+              'Download',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

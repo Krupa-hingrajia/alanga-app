@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_image_view.dart';
+import '../../../products/data/models/brand_model.dart';
 
 class TopBrandsSection extends StatelessWidget {
-  const TopBrandsSection({super.key});
+  final List<BrandModel> brands;
+
+  const TopBrandsSection({
+    super.key,
+    required this.brands,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> brands = [
-      {'name': 'Samsung', 'icon': Icons.phone_android_rounded, 'color': const Color(0xFF1E3A8A)},
-      {'name': 'Apple', 'icon': Icons.apple_rounded, 'color': const Color(0xFF1F2937)},
-      {'name': 'Lakmé', 'icon': Icons.brush_rounded, 'color': const Color(0xFF991B1B)},
-      {'name': 'Nike', 'icon': Icons.sports_tennis_rounded, 'color': const Color(0xFF047857)},
-      {'name': 'Zara', 'icon': Icons.checkroom_rounded, 'color': const Color(0xFF4C1D95)},
-      {'name': 'Dell', 'icon': Icons.laptop_mac_rounded, 'color': const Color(0xFF0284C7)},
+    if (brands.isEmpty) {
+      return const SizedBox();
+    }
+
+    final brandColors = [
+      const Color(0xFF1E3A8A),
+      const Color(0xFF047857),
+      const Color(0xFF991B1B),
+      const Color(0xFF4C1D95),
+      const Color(0xFFD97706),
+      const Color(0xFF0284C7),
+      const Color(0xFFBE185D),
     ];
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
         Padding(
@@ -43,15 +57,7 @@ class TopBrandsSection extends StatelessWidget {
                 ],
               ),
               TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Exploring all Brands'),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
+                onPressed: () => context.push('/products'),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
@@ -80,59 +86,85 @@ class TopBrandsSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Brand Avatars List
+        // Dynamic Brand Avatars List
         SizedBox(
-          height: 90,
+          height: 96,
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             scrollDirection: Axis.horizontal,
             itemCount: brands.length,
             itemBuilder: (context, index) {
               final brand = brands[index];
-              return Container(
-                width: 76,
-                margin: const EdgeInsets.symmetric(horizontal: 6),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        border: Border.all(
-                          color: (brand['color'] as Color).withValues(alpha: 0.3),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (brand['color'] as Color).withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
+              final themeColor = brandColors[index % brandColors.length];
+              final initial = brand.name.isNotEmpty ? brand.name[0].toUpperCase() : 'B';
+
+              return InkWell(
+                onTap: () {
+                  context.push('/products', extra: brand.name);
+                },
+                borderRadius: BorderRadius.circular(30),
+                child: Container(
+                  width: 78,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          border: Border.all(
+                            color: themeColor.withValues(alpha: 0.25),
+                            width: 1.5,
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          brand['icon'] as IconData,
-                          color: brand['color'] as Color,
-                          size: 26,
+                          boxShadow: [
+                            BoxShadow(
+                              color: themeColor.withValues(alpha: 0.12),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: (brand.image != null && brand.image!.trim().isNotEmpty)
+                              ? CustomImageView(
+                                  imageUrl: brand.image,
+                                  width: 54,
+                                  height: 54,
+                                  fit: BoxFit.cover,
+                                  placeholderIcon: Icons.storefront_rounded,
+                                )
+                              : Container(
+                                  color: themeColor.withValues(alpha: 0.12),
+                                  child: Center(
+                                    child: Text(
+                                      initial,
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: themeColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      brand['name'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF11261B),
+                      const SizedBox(height: 6),
+                      Text(
+                        brand.name,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF11261B),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

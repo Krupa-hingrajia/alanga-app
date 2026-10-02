@@ -11,7 +11,9 @@ import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
 class BrandListScreen extends StatefulWidget {
-  const BrandListScreen({super.key});
+  final String? initialStatus;
+
+  const BrandListScreen({super.key, this.initialStatus});
 
   @override
   State<BrandListScreen> createState() => _BrandListScreenState();
@@ -20,8 +22,14 @@ class BrandListScreen extends StatefulWidget {
 class _BrandListScreenState extends State<BrandListScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedStatus = 'All';
+  late String _selectedStatus;
   List<BrandModel> _cachedBrands = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.initialStatus ?? 'All';
+  }
 
   @override
   void dispose() {

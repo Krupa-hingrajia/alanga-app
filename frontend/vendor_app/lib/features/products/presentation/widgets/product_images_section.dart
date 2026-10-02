@@ -53,9 +53,12 @@ class ProductImagesSection extends StatefulWidget {
   final Function(LocalOrRemoteImage item) onSetPrimary;
   final Function(List<LocalOrRemoteImage> reorderedList) onReorderImages;
 
+  final String stepNumber;
+
   const ProductImagesSection({
     super.key,
     this.productId,
+    this.stepNumber = '5',
     required this.uploadedImages,
     required this.pendingLocalPaths,
     this.isUploading = false,
@@ -453,9 +456,9 @@ class _ProductImagesSectionState extends State<ProductImagesSection> {
                             color: AppColors.primaryGreen.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
-                            'STEP 4',
-                            style: TextStyle(
+                          child: Text(
+                            'STEP ${widget.stepNumber}',
+                            style: const TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w800,
                               color: AppColors.primaryGreen,

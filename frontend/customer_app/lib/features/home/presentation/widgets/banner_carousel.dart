@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class BannerCarousel extends StatefulWidget {
@@ -19,9 +20,10 @@ class _BannerCarouselState extends State<BannerCarousel> {
       'title': 'FASHION GRAND SALE',
       'subtitle': 'Up to 70% OFF on Top Clothing & Footwear',
       'badge': 'LIMITED TIME',
-      'gradient': const [Color(0xFF059669), Color(0xFF10B981)],
+      'gradient': const [Color(0xFF065F46), Color(0xFF059669)],
       'accentColor': AppColors.brandYellow,
       'icon': Icons.checkroom_rounded,
+      'query': 'Fashion',
     },
     {
       'title': 'ELECTRONICS FESTIVAL',
@@ -30,22 +32,25 @@ class _BannerCarouselState extends State<BannerCarousel> {
       'gradient': const [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
       'accentColor': AppColors.brandOrange,
       'icon': Icons.devices_other_rounded,
+      'query': 'Electronics',
     },
     {
-      'title': 'NYKAA BEAUTY SPECIALS',
+      'title': 'BEAUTY & CARE SPECIALS',
       'subtitle': 'Buy 1 Get 1 Free on Premium Skincare',
       'badge': 'EXCLUSIVE',
-      'gradient': const [Color(0xFFBE185D), Color(0xFFEC4899)],
+      'gradient': const [Color(0xFF831843), Color(0xFFDB2777)],
       'accentColor': Colors.white,
       'icon': Icons.face_retouching_natural_rounded,
+      'query': 'Beauty',
     },
     {
-      'title': 'HDFC BANK OFFERS',
-      'subtitle': 'Flat ₹500 Cashback on Orders Above ₹2,499',
-      'badge': 'BANK OFFER',
-      'gradient': const [Color(0xFF047857), Color(0xFF065F46)],
+      'title': 'MEGA SUPER SAVINGS',
+      'subtitle': 'Flat ₹500 Cashback on Orders Above ₹1,999',
+      'badge': 'BEST VALUE',
+      'gradient': const [Color(0xFF14532D), Color(0xFF16A34A)],
       'accentColor': AppColors.brandYellow,
-      'icon': Icons.credit_card_rounded,
+      'icon': Icons.local_offer_rounded,
+      'query': 'Deal',
     },
   ];
 
@@ -91,8 +96,15 @@ class _BannerCarouselState extends State<BannerCarousel> {
             itemCount: _banners.length,
             itemBuilder: (context, index) {
               final banner = _banners[index];
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+              return GestureDetector(
+                onTap: () {
+                  final q = banner['query'] as String?;
+                  if (q != null && q.isNotEmpty) {
+                    context.push('/products', extra: q);
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
@@ -206,8 +218,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     ],
                   ),
                 ),
-              );
-            },
+              ),
+            );
+          },
           ),
         ),
         const SizedBox(height: 10),

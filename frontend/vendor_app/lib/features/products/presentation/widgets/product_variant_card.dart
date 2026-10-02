@@ -372,7 +372,7 @@ class _ProductVariantCardState extends State<ProductVariantCard> {
                                     widget.onSetDefault!();
                                   }
                                 },
-                          activeColor: AppColors.primaryGreen,
+                          activeThumbColor: AppColors.primaryGreen,
                         ),
                       ],
                     ),

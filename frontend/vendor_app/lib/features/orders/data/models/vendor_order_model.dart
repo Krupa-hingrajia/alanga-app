@@ -84,6 +84,21 @@ class VendorAddressModel {
     ];
     return parts.where((p) => p != null && p.isNotEmpty).join(', ');
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'fullName': fullName,
+    'mobileNumber': mobileNumber,
+    'alternateMobile': alternateMobile,
+    'addressLine1': addressLine1,
+    'addressLine2': addressLine2,
+    'landmark': landmark,
+    'city': city,
+    'state': state,
+    'country': country,
+    'postalCode': postalCode,
+    'addressType': addressType,
+  };
 }
 
 class VendorOrderItemModel {
@@ -101,6 +116,12 @@ class VendorOrderItemModel {
   final double totalPrice;
   final String status;
   final String? productImage;
+  final String? courierName;
+  final String? trackingNumber;
+  final String? trackingUrl;
+  final String? cancelReason;
+  final DateTime? shippedAt;
+  final DateTime? deliveredAt;
 
   const VendorOrderItemModel({
     required this.id,
@@ -117,6 +138,12 @@ class VendorOrderItemModel {
     required this.totalPrice,
     required this.status,
     this.productImage,
+    this.courierName,
+    this.trackingNumber,
+    this.trackingUrl,
+    this.cancelReason,
+    this.shippedAt,
+    this.deliveredAt,
   });
 
   factory VendorOrderItemModel.fromJson(Map<String, dynamic> json) {
@@ -125,7 +152,6 @@ class VendorOrderItemModel {
         ? Map<String, dynamic>.from(json['product'] as Map)
         : null;
 
-    // 1. Variant image takes highest priority when available
     final variantMap = json['productVariant'] is Map
         ? Map<String, dynamic>.from(json['productVariant'] as Map)
         : null;
@@ -151,7 +177,6 @@ class VendorOrderItemModel {
       }
     }
 
-    // 2. Fall back to product image if variant has no specific image
     if (img == null || img.isEmpty) {
       if (productMap != null) {
         if (productMap['image'] != null && productMap['image'].toString().trim().isNotEmpty) {
@@ -205,6 +230,12 @@ class VendorOrderItemModel {
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
       status: json['status']?.toString().toUpperCase() ?? 'PENDING',
       productImage: img,
+      courierName: json['courierName']?.toString(),
+      trackingNumber: json['trackingNumber']?.toString(),
+      trackingUrl: json['trackingUrl']?.toString(),
+      cancelReason: json['cancelReason']?.toString(),
+      shippedAt: json['shippedAt'] != null ? DateTime.tryParse(json['shippedAt'].toString()) : null,
+      deliveredAt: json['deliveredAt'] != null ? DateTime.tryParse(json['deliveredAt'].toString()) : null,
     );
   }
 }
@@ -221,7 +252,12 @@ class VendorOrderModel {
   final String paymentMethod;
   final String paymentStatus;
   final String status;
+  final String? courierName;
+  final String? trackingNumber;
+  final String? trackingUrl;
   final String? cancelReason;
+  final DateTime? shippedAt;
+  final DateTime? deliveredAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final VendorCustomerModel? customer;
@@ -240,7 +276,12 @@ class VendorOrderModel {
     required this.paymentMethod,
     required this.paymentStatus,
     required this.status,
+    this.courierName,
+    this.trackingNumber,
+    this.trackingUrl,
     this.cancelReason,
+    this.shippedAt,
+    this.deliveredAt,
     required this.createdAt,
     required this.updatedAt,
     this.customer,
@@ -249,7 +290,6 @@ class VendorOrderModel {
   });
 
   factory VendorOrderModel.fromJson(Map<String, dynamic> json) {
-    // Address may be in json['address'] or json['shippingAddressSnapshot']
     VendorAddressModel? addressModel;
     if (json['address'] is Map) {
       addressModel = VendorAddressModel.fromJson(Map<String, dynamic>.from(json['address'] as Map));
@@ -273,7 +313,6 @@ class VendorOrderModel {
     final sTotal = ((json['shippingTotal'] ?? json['shippingCharge']) as num?)?.toDouble() ?? 0.0;
     final gTotal = ((json['grandTotal'] ?? json['totalAmount']) as num?)?.toDouble() ?? 0.0;
 
-    // Resolve status: if all items for this vendor share the same status, use it
     String resolvedStatus = json['status']?.toString().toUpperCase() ?? 'PENDING';
     if (items.isNotEmpty) {
       final itemStatuses = items.map((e) => e.status.toUpperCase()).toSet();
@@ -281,6 +320,22 @@ class VendorOrderModel {
         resolvedStatus = itemStatuses.first;
       }
     }
+
+    final courier = json['courierName']?.toString() ??
+        (items.isNotEmpty ? items.first.courierName : null);
+    final tracking = json['trackingNumber']?.toString() ??
+        (items.isNotEmpty ? items.first.trackingNumber : null);
+    final trackUrl = json['trackingUrl']?.toString() ??
+        (items.isNotEmpty ? items.first.trackingUrl : null);
+    final cancel = json['cancelReason']?.toString() ??
+        (items.isNotEmpty ? items.first.cancelReason : null);
+
+    final shipped = json['shippedAt'] != null
+        ? DateTime.tryParse(json['shippedAt'].toString())
+        : (items.isNotEmpty ? items.first.shippedAt : null);
+    final delivered = json['deliveredAt'] != null
+        ? DateTime.tryParse(json['deliveredAt'].toString())
+        : (items.isNotEmpty ? items.first.deliveredAt : null);
 
     return VendorOrderModel(
       id: json['id']?.toString() ?? '',
@@ -294,7 +349,12 @@ class VendorOrderModel {
       paymentMethod: json['paymentMethod']?.toString() ?? 'COD',
       paymentStatus: json['paymentStatus']?.toString() ?? 'PENDING',
       status: resolvedStatus,
-      cancelReason: json['cancelReason']?.toString(),
+      courierName: courier,
+      trackingNumber: tracking,
+      trackingUrl: trackUrl,
+      cancelReason: cancel,
+      shippedAt: shipped,
+      deliveredAt: delivered,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -309,28 +369,23 @@ class VendorOrderModel {
 
   // --- Computed Helpers for Vendor ---
 
-  /// Sum of items belonging to this vendor
   double get vendorItemsTotal {
     return orderItems.fold(0.0, (acc, item) => acc + (item.unitPrice * item.quantity));
   }
 
-  /// Sum of shipping charges for this vendor's items
   double get vendorShippingTotal {
     return orderItems.fold(0.0, (acc, item) => acc + item.shippingCharge);
   }
 
-  /// Vendor portion total
   double get vendorGrandTotal {
     final total = orderItems.fold(0.0, (acc, item) => acc + item.totalPrice);
     return total > 0 ? total : grandTotal;
   }
 
-  /// Total quantity of vendor items
   int get vendorTotalQuantity {
     return orderItems.fold(0, (acc, item) => acc + item.quantity);
   }
 
-  /// First product thumbnail image
   String? get firstProductThumbnail {
     for (final item in orderItems) {
       if (item.productImage != null && item.productImage!.isNotEmpty) {
@@ -340,19 +395,16 @@ class VendorOrderModel {
     return null;
   }
 
-  /// First product name for overview
   String get firstProductName {
     if (orderItems.isEmpty) return 'Order #$orderNumber';
     return orderItems.first.productName;
   }
 
-  /// First product variant name if any
   String? get firstVariantName {
     if (orderItems.isEmpty) return null;
     return orderItems.first.variantName;
   }
 
-  /// Next valid status for vendor progression
   /// PENDING -> CONFIRMED -> PROCESSING -> PACKED -> SHIPPED -> DELIVERED
   String? get nextValidStatus {
     switch (status.toUpperCase()) {
@@ -372,7 +424,6 @@ class VendorOrderModel {
     }
   }
 
-  /// Action button label for the next status
   String? get nextStatusActionLabel {
     switch (nextValidStatus) {
       case 'CONFIRMED':
@@ -390,6 +441,14 @@ class VendorOrderModel {
     }
   }
 
-  /// Whether the vendor can advance the order status
   bool get canAdvanceStatus => nextValidStatus != null;
+
+  bool get canCancelOrder =>
+      ['PENDING', 'CONFIRMED', 'PROCESSING', 'PACKED'].contains(status.toUpperCase());
+
+  bool get isShipped =>
+      ['SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].contains(status.toUpperCase());
+
+  bool get hasTracking =>
+      trackingNumber != null && trackingNumber!.trim().isNotEmpty;
 }

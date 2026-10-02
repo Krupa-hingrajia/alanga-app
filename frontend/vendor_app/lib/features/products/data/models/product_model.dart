@@ -30,6 +30,7 @@ class ProductModel extends Equatable {
 
   final String? categoryName;
   final String? subCategoryName;
+  final String? brandName;
 
   const ProductModel({
     required this.id,
@@ -42,6 +43,7 @@ class ProductModel extends Equatable {
     required this.brandId,
     this.categoryName,
     this.subCategoryName,
+    this.brandName,
     required this.sellingPrice,
     required this.mrp,
     this.taxPercentage,
@@ -113,6 +115,26 @@ class ProductModel extends Equatable {
       subCatName = json['subCategoryName'] as String;
     }
 
+    String? bName;
+    if (json['brand'] != null && json['brand'] is Map && json['brand']['name'] != null) {
+      bName = json['brand']['name'] as String;
+    } else if (json['brandName'] != null) {
+      bName = json['brandName'] as String;
+    }
+
+    // Specifications (weight & dimensions) with fallback to shipping record
+    double? w = json['weight'] != null ? (json['weight'] as num).toDouble() : null;
+    double? l = json['length'] != null ? (json['length'] as num).toDouble() : null;
+    double? wi = json['width'] != null ? (json['width'] as num).toDouble() : null;
+    double? h = json['height'] != null ? (json['height'] as num).toDouble() : null;
+    if (json['shipping'] != null && json['shipping'] is Map) {
+      final s = json['shipping'] as Map;
+      if (w == null && s['weight'] != null) w = (s['weight'] as num).toDouble();
+      if (l == null && s['length'] != null) l = (s['length'] as num).toDouble();
+      if (wi == null && s['width'] != null) wi = (s['width'] as num).toDouble();
+      if (h == null && s['height'] != null) h = (s['height'] as num).toDouble();
+    }
+
     return ProductModel(
       id: json['id'] as String,
       sku: json['sku'] as String? ?? '',
@@ -124,14 +146,15 @@ class ProductModel extends Equatable {
       brandId: json['brandId'] as String,
       categoryName: catName,
       subCategoryName: subCatName,
+      brandName: bName,
       sellingPrice: (json['sellingPrice'] as num).toDouble(),
       mrp: (json['mrp'] as num).toDouble(),
       taxPercentage: json['taxPercentage'] != null ? (json['taxPercentage'] as num).toDouble() : null,
       stock: json['stock'] as int?,
-      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null,
-      length: json['length'] != null ? (json['length'] as num).toDouble() : null,
-      width: json['width'] != null ? (json['width'] as num).toDouble() : null,
-      height: json['height'] != null ? (json['height'] as num).toDouble() : null,
+      weight: w,
+      length: l,
+      width: wi,
+      height: h,
       status: json['status'] as String? ?? 'DRAFT',
       image: json['image'] as String?,
       rejectedReason: json['rejectedReason'] as String?,
@@ -159,6 +182,7 @@ class ProductModel extends Equatable {
       'brandId': brandId,
       if (categoryName != null) 'categoryName': categoryName,
       if (subCategoryName != null) 'subCategoryName': subCategoryName,
+      if (brandName != null) 'brandName': brandName,
       'sellingPrice': sellingPrice,
       'mrp': mrp,
       if (taxPercentage != null) 'taxPercentage': taxPercentage,
@@ -178,6 +202,66 @@ class ProductModel extends Equatable {
     };
   }
 
+  ProductModel copyWith({
+    String? id,
+    String? sku,
+    String? name,
+    String? description,
+    String? shortDescription,
+    String? categoryId,
+    String? subCategoryId,
+    String? brandId,
+    String? categoryName,
+    String? subCategoryName,
+    String? brandName,
+    double? sellingPrice,
+    double? mrp,
+    double? taxPercentage,
+    int? stock,
+    double? weight,
+    double? length,
+    double? width,
+    double? height,
+    String? status,
+    String? image,
+    String? rejectedReason,
+    String? createdByVendorId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<ProductImageModel>? images,
+    List<ProductVariantModel>? variants,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      sku: sku ?? this.sku,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      shortDescription: shortDescription ?? this.shortDescription,
+      categoryId: categoryId ?? this.categoryId,
+      subCategoryId: subCategoryId ?? this.subCategoryId,
+      brandId: brandId ?? this.brandId,
+      categoryName: categoryName ?? this.categoryName,
+      subCategoryName: subCategoryName ?? this.subCategoryName,
+      brandName: brandName ?? this.brandName,
+      sellingPrice: sellingPrice ?? this.sellingPrice,
+      mrp: mrp ?? this.mrp,
+      taxPercentage: taxPercentage ?? this.taxPercentage,
+      stock: stock ?? this.stock,
+      weight: weight ?? this.weight,
+      length: length ?? this.length,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      status: status ?? this.status,
+      image: image ?? this.image,
+      rejectedReason: rejectedReason ?? this.rejectedReason,
+      createdByVendorId: createdByVendorId ?? this.createdByVendorId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      images: images ?? this.images,
+      variants: variants ?? this.variants,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,
@@ -190,6 +274,7 @@ class ProductModel extends Equatable {
         brandId,
         categoryName,
         subCategoryName,
+        brandName,
         sellingPrice,
         mrp,
         taxPercentage,

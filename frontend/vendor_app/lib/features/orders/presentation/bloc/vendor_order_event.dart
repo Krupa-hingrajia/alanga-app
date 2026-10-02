@@ -47,12 +47,27 @@ class SearchOrdersEvent extends VendorOrderEvent {
 class UpdateOrderStatusEvent extends VendorOrderEvent {
   final String orderId;
   final String newStatus;
+  final String? courierName;
+  final String? trackingNumber;
+  final String? trackingUrl;
+  final String? cancelReason;
 
   const UpdateOrderStatusEvent({
     required this.orderId,
     required this.newStatus,
+    this.courierName,
+    this.trackingNumber,
+    this.trackingUrl,
+    this.cancelReason,
   });
 
   @override
-  List<Object?> get props => [orderId, newStatus];
+  List<Object?> get props => [
+        orderId,
+        newStatus,
+        courierName,
+        trackingNumber,
+        trackingUrl,
+        cancelReason,
+      ];
 }

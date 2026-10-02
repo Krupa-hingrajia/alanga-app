@@ -6,6 +6,10 @@ abstract class VendorOrderRemoteDataSource {
   Future<VendorOrderModel> updateOrderStatus({
     required String orderId,
     required String status,
+    String? courierName,
+    String? trackingNumber,
+    String? trackingUrl,
+    String? cancelReason,
   });
 }
 
@@ -32,10 +36,28 @@ class VendorOrderRemoteDataSourceImpl implements VendorOrderRemoteDataSource {
   Future<VendorOrderModel> updateOrderStatus({
     required String orderId,
     required String status,
+    String? courierName,
+    String? trackingNumber,
+    String? trackingUrl,
+    String? cancelReason,
   }) async {
+    final payload = <String, dynamic>{'status': status};
+    if (courierName != null && courierName.trim().isNotEmpty) {
+      payload['courierName'] = courierName.trim();
+    }
+    if (trackingNumber != null && trackingNumber.trim().isNotEmpty) {
+      payload['trackingNumber'] = trackingNumber.trim();
+    }
+    if (trackingUrl != null && trackingUrl.trim().isNotEmpty) {
+      payload['trackingUrl'] = trackingUrl.trim();
+    }
+    if (cancelReason != null && cancelReason.trim().isNotEmpty) {
+      payload['cancelReason'] = cancelReason.trim();
+    }
+
     final response = await _apiService.put(
       '/vendor/orders/$orderId/status',
-      data: {'status': status},
+      data: payload,
     );
     final data = response.data['data'];
     return VendorOrderModel.fromJson(Map<String, dynamic>.from(data as Map));

@@ -22,6 +22,7 @@ import '../features/products/presentation/screens/product_detail_screen.dart';
 
 // Inventory imports
 import '../features/inventory/presentation/screens/product_inventory_screen.dart';
+import '../features/inventory/presentation/screens/global_inventory_screen.dart';
 
 // Shipping imports
 import '../features/shipping/presentation/screens/product_shipping_screen.dart';
@@ -30,6 +31,24 @@ import '../features/shipping/presentation/screens/product_shipping_screen.dart';
 import '../features/orders/data/models/vendor_order_model.dart';
 import '../features/orders/presentation/screens/vendor_order_list_screen.dart';
 import '../features/orders/presentation/screens/vendor_order_detail_screen.dart';
+
+// Categories imports
+import '../features/categories/data/models/category_model.dart';
+import '../features/categories/presentation/screens/category_list_screen.dart';
+import '../features/categories/presentation/screens/add_edit_category_screen.dart';
+import '../features/categories/presentation/screens/category_detail_screen.dart';
+
+// Sub Categories imports
+import '../features/sub_categories/data/models/sub_category_model.dart';
+import '../features/sub_categories/presentation/screens/sub_category_list_screen.dart';
+import '../features/sub_categories/presentation/screens/add_edit_sub_category_screen.dart';
+import '../features/sub_categories/presentation/screens/sub_category_detail_screen.dart';
+
+// Brands imports
+import '../features/brands/data/models/brand_model.dart';
+import '../features/brands/presentation/screens/brand_list_screen.dart';
+import '../features/brands/presentation/screens/add_edit_brand_screen.dart';
+import '../features/brands/presentation/screens/brand_detail_screen.dart';
 
 import '../core/dependency_injection/injection.dart';
 import '../core/storage/secure_storage_service.dart';
@@ -119,7 +138,15 @@ class AppRouter {
       // Products routes
       GoRoute(
         path: '/products',
-        builder: (context, state) => const ProductListScreen(),
+        builder: (context, state) {
+          String? initialStatus;
+          if (state.extra is Map<String, dynamic>) {
+            initialStatus = (state.extra as Map<String, dynamic>)['initialStatus'] as String?;
+          } else if (state.extra is String) {
+            initialStatus = state.extra as String;
+          }
+          return ProductListScreen(initialStatus: initialStatus);
+        },
       ),
       GoRoute(
         path: '/products/add',
@@ -136,6 +163,10 @@ class AppRouter {
         builder: (context, state) => ProductDetailScreen(
           product: state.extra as ProductModel,
         ),
+      ),
+      GoRoute(
+        path: '/inventory',
+        builder: (context, state) => const GlobalInventoryScreen(),
       ),
       GoRoute(
         path: '/products/inventory',
@@ -191,6 +222,108 @@ class AppRouter {
           final order = state.extra as VendorOrderModel;
           return VendorOrderDetailScreen(order: order);
         },
+      ),
+
+      // Categories routes
+      GoRoute(
+        path: '/categories',
+        builder: (context, state) {
+          String? initialStatus;
+          if (state.extra is Map<String, dynamic>) {
+            initialStatus = (state.extra as Map<String, dynamic>)['initialStatus'] as String?;
+          } else if (state.extra is String) {
+            initialStatus = state.extra as String;
+          }
+          return CategoryListScreen(initialStatus: initialStatus);
+        },
+      ),
+      GoRoute(
+        path: '/categories/add',
+        builder: (context, state) => const AddEditCategoryScreen(),
+      ),
+      GoRoute(
+        path: '/categories/edit',
+        builder: (context, state) => AddEditCategoryScreen(
+          category: state.extra as CategoryModel?,
+        ),
+      ),
+      GoRoute(
+        path: '/categories/details',
+        builder: (context, state) => CategoryDetailScreen(
+          category: state.extra as CategoryModel,
+        ),
+      ),
+
+      // Sub Categories routes
+      GoRoute(
+        path: '/sub-categories',
+        builder: (context, state) {
+          String? initialStatus;
+          if (state.extra is Map<String, dynamic>) {
+            initialStatus = (state.extra as Map<String, dynamic>)['initialStatus'] as String?;
+          } else if (state.extra is String) {
+            initialStatus = state.extra as String;
+          }
+          return SubCategoryListScreen(initialStatus: initialStatus);
+        },
+      ),
+      GoRoute(
+        path: '/sub-categories/add',
+        builder: (context, state) => const AddEditSubCategoryScreen(),
+      ),
+      GoRoute(
+        path: '/sub-categories/edit',
+        builder: (context, state) => AddEditSubCategoryScreen(
+          subCategory: state.extra as SubCategoryModel?,
+        ),
+      ),
+      GoRoute(
+        path: '/sub-categories/details',
+        builder: (context, state) {
+          if (state.extra is Map<String, dynamic>) {
+            final map = state.extra as Map<String, dynamic>;
+            return SubCategoryDetailScreen(
+              subCategory: map['subCategory'] as SubCategoryModel,
+              categoryName: map['categoryName'] as String? ?? '',
+            );
+          } else if (state.extra is SubCategoryModel) {
+            return SubCategoryDetailScreen(
+              subCategory: state.extra as SubCategoryModel,
+              categoryName: '',
+            );
+          }
+          throw Exception('Invalid extra for /sub-categories/details');
+        },
+      ),
+
+      // Brands routes
+      GoRoute(
+        path: '/brands',
+        builder: (context, state) {
+          String? initialStatus;
+          if (state.extra is Map<String, dynamic>) {
+            initialStatus = (state.extra as Map<String, dynamic>)['initialStatus'] as String?;
+          } else if (state.extra is String) {
+            initialStatus = state.extra as String;
+          }
+          return BrandListScreen(initialStatus: initialStatus);
+        },
+      ),
+      GoRoute(
+        path: '/brands/add',
+        builder: (context, state) => const AddEditBrandScreen(),
+      ),
+      GoRoute(
+        path: '/brands/edit',
+        builder: (context, state) => AddEditBrandScreen(
+          brand: state.extra as BrandModel?,
+        ),
+      ),
+      GoRoute(
+        path: '/brands/details',
+        builder: (context, state) => BrandDetailScreen(
+          brand: state.extra as BrandModel,
+        ),
       ),
     ],
   );

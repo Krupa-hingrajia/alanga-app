@@ -278,9 +278,17 @@ export class OrderService {
           }
         }
 
+        const itemUpdateData: any = { status: dto.status };
+        if (dto.courierName !== undefined) itemUpdateData.courierName = dto.courierName;
+        if (dto.trackingNumber !== undefined) itemUpdateData.trackingNumber = dto.trackingNumber;
+        if (dto.trackingUrl !== undefined) itemUpdateData.trackingUrl = dto.trackingUrl;
+        if (dto.cancelReason !== undefined) itemUpdateData.cancelReason = dto.cancelReason;
+        if (dto.status === 'SHIPPED') itemUpdateData.shippedAt = new Date();
+        if (dto.status === 'DELIVERED') itemUpdateData.deliveredAt = new Date();
+
         await tx.orderItem.update({
           where: { id: item.id },
-          data: { status: dto.status },
+          data: itemUpdateData,
         });
       }
 
@@ -316,12 +324,18 @@ export class OrderService {
           newOrderStatus = 'CONFIRMED';
         }
 
-        if (newOrderStatus !== updatedOrder.status) {
-          await tx.order.update({
-            where: { id: orderId },
-            data: { status: newOrderStatus },
-          });
-        }
+        const orderUpdateData: any = { status: newOrderStatus };
+        if (dto.courierName !== undefined) orderUpdateData.courierName = dto.courierName;
+        if (dto.trackingNumber !== undefined) orderUpdateData.trackingNumber = dto.trackingNumber;
+        if (dto.trackingUrl !== undefined) orderUpdateData.trackingUrl = dto.trackingUrl;
+        if (dto.cancelReason !== undefined) orderUpdateData.cancelReason = dto.cancelReason;
+        if (dto.status === 'SHIPPED') orderUpdateData.shippedAt = new Date();
+        if (dto.status === 'DELIVERED') orderUpdateData.deliveredAt = new Date();
+
+        await tx.order.update({
+          where: { id: orderId },
+          data: orderUpdateData,
+        });
       }
     });
 

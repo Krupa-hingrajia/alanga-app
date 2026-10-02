@@ -605,8 +605,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                             child: TextFormField(
                                               controller: _stockController,
                                               keyboardType: TextInputType.number,
-                                              textInputAction: TextInputAction.done,
-                                              onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                                              textInputAction: TextInputAction.next,
                                               decoration: _inputDecoration('Initial Stock', Icons.storage_outlined),
                                             ),
                                           ),
@@ -616,8 +615,58 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                   ),
                                   const SizedBox(height: 16),
 
-                                  // STEP 4: Product Media & Gallery
+                                  // STEP 4: Product Specifications & Packaging
+                                  _buildSectionCard(
+                                    step: '4',
+                                    title: 'Product Specifications',
+                                    subtitle: 'Weight & dimensions for delivery & customer display',
+                                    icon: Icons.straighten_rounded,
+                                    children: [
+                                      TextFormField(
+                                        controller: _weightController,
+                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                        textInputAction: TextInputAction.next,
+                                        decoration: _inputDecoration('Product Weight (kg)', Icons.scale_outlined),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextFormField(
+                                              controller: _lengthController,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.next,
+                                              decoration: _inputDecoration('Length (cm)', Icons.straighten_outlined),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: TextFormField(
+                                              controller: _widthController,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.next,
+                                              decoration: _inputDecoration('Width (cm)', Icons.square_foot_outlined),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: TextFormField(
+                                              controller: _heightController,
+                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              textInputAction: TextInputAction.done,
+                                              onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                                              decoration: _inputDecoration('Height (cm)', Icons.height_outlined),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // STEP 5: Product Media & Gallery
                                   ProductImagesSection(
+                                    stepNumber: '5',
                                     productId: widget.product?.id,
                                     uploadedImages: _uploadedImages,
                                     pendingLocalPaths: _pendingLocalPaths,
@@ -676,7 +725,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                         context.read<ProductBloc>().add(
                                               CreateProductVariantEvent(
                                                 productId: widget.product!.id,
-                                                data: newVariant.toJson(),
+                                                data: newVariant.toCreateJson(),
                                                 pendingImagePaths: newVariant.pendingLocalPaths,
                                               ),
                                             );
@@ -698,7 +747,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                                 UpdateProductVariantEvent(
                                                   productId: widget.product!.id,
                                                   variantId: updatedVariant.id,
-                                                  data: updatedVariant.toJson(),
+                                                  data: updatedVariant.toCreateJson(),
                                                 ),
                                               );
                                         }

@@ -5,5 +5,9 @@ abstract class VendorOrderRepository {
   Future<VendorOrderModel> updateOrderStatus({
     required String orderId,
     required String status,
+    String? courierName,
+    String? trackingNumber,
+    String? trackingUrl,
+    String? cancelReason,
   });
 }

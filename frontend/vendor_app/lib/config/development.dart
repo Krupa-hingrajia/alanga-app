@@ -16,11 +16,6 @@ class DevelopmentConfig {
       return 'http://$localIp:3000/api/v1';
     }
 
-    // Android emulator accesses host machine via 10.0.2.2
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api/v1';
-    }
-
     // Default to live Vercel backend server
     return 'https://alanga-app.vercel.app/api/v1';
   }

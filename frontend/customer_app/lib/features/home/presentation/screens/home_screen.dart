@@ -5,18 +5,18 @@ import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/home_header.dart';
-import '../widgets/home_search_bar.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/category_horizontal_list.dart';
 import '../widgets/flash_deals_section.dart';
 import '../widgets/top_brands_section.dart';
-import '../widgets/today_offers_section.dart';
+import '../widgets/coupons_offers_section.dart';
 import '../../../products/data/models/product_model.dart';
 import '../../../products/presentation/widgets/customer_product_card.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 
 import '../../../wishlist/presentation/bloc/wishlist_bloc.dart';
 import '../../../wishlist/presentation/bloc/wishlist_event.dart';
@@ -31,6 +31,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _customerName = 'Customer';
   final _searchController = TextEditingController();
+  String? _selectedCategoryFilter; // null means 'All Items'
 
   @override
   void initState() {
@@ -71,22 +72,24 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFFF3F6F4),
         body: Column(
           children: [
-            // 1. Top Fixed Header (Does NOT Scroll, Edge-to-Edge Status Bar)
+            // 1. Top Fixed Header with Integrated Search (Blinkit / Zepto Style)
             HomeHeader(
               customerName: _customerName,
               deliveryAddress: 'Navi Mumbai, 400706',
               notificationCount: 3,
               cartCount: 2,
               onNotificationTap: () {},
-              onCartTap: () {},
+              onCartTap: () => context.push('/cart'),
+              searchController: _searchController,
+              onSearchSubmitted: _onSearchSubmitted,
             ),
 
-            // 2. Scrollable Content (Starting from Search Bar)
+            // 2. Scrollable Content
             Expanded(
               child: BlocBuilder<HomeBloc, HomeState>(
                 builder: (context, state) {
                   if (state is HomeLoading) {
-                    return _buildSkeletonLoader();
+                    return _buildShimmerLoader();
                   } else if (state is HomeError) {
                     return EmptyStateWidget(
                       icon: Icons.wifi_off_rounded,
@@ -100,12 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else if (state is HomeLoaded) {
                     final allProducts = state.products;
 
-                    // Section filters
+                    // Genuine Flash Deals (only products where MRP > sellingPrice)
                     final flashDealProducts = allProducts.where((p) => p.mrp > p.sellingPrice).toList();
-                    final newlyAddedProducts = List<ProductModel>.from(allProducts)
-                      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-                    final recommendedProducts = allProducts.take(8).toList();
-                    final trendingProducts = List<ProductModel>.from(allProducts)..shuffle();
+
+                    // Filtered products for the Zepto-style category tabs section
+                    final filteredProducts = _selectedCategoryFilter == null
+                        ? allProducts
+                        : allProducts.where((p) => p.categoryId == _selectedCategoryFilter).toList();
 
                     return RefreshIndicator(
                       color: AppColors.primaryGreen,
@@ -120,88 +124,125 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             const SizedBox(height: 14),
 
-                            // Search Bar
-                            HomeSearchBar(
-                              controller: _searchController,
-                              onSubmitted: _onSearchSubmitted,
-                            ),
-                            const SizedBox(height: 18),
-
-                            // Banner Carousel
+                            // 1. Banner Carousel
                             const BannerCarousel(),
                             const SizedBox(height: 22),
 
-                            // Today's Offers & Coupons
-                            const TodayOffersSection(),
+                            // 2. Zepto-Style Coupons & Offers
+                            const CouponsOffersSection(),
                             const SizedBox(height: 24),
 
-                            // Shop by Category
+                            // 3. Shop by Category (Horizontal circles)
                             CategoryHorizontalList(
                               categories: state.categories,
-                              onViewAllTap: () {},
+                              onViewAllTap: () => context.push('/products'),
                             ),
                             const SizedBox(height: 24),
 
-                            // Flash Deals
+                            // 4. Flash Deals (Only if discounted products actually exist)
                             if (flashDealProducts.isNotEmpty) ...[
                               FlashDealsSection(products: flashDealProducts),
                               const SizedBox(height: 24),
                             ],
 
-                            // Recommended for You
+                            // 5. Zepto "Buy Again & Curated Picks" with Interactive Category Tabs
                             _buildSectionHeader(
-                              icon: Icons.thumb_up_alt_rounded,
-                              iconColor: AppColors.brandOrange,
-                              title: 'Recommended for You',
+                              icon: Icons.auto_awesome_rounded,
+                              iconColor: AppColors.primaryGreen,
+                              title: 'Top Picks For You',
                               onViewAll: () => context.push('/products'),
                             ),
-                            const SizedBox(height: 12),
-                            _buildHorizontalProductList(recommendedProducts),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 10),
 
-                            // Top Brands
-                            const TopBrandsSection(),
-                            const SizedBox(height: 24),
-
-                            // Newly Added Products
-                            if (newlyAddedProducts.isNotEmpty) ...[
-                              _buildSectionHeader(
-                                icon: Icons.new_releases_rounded,
-                                iconColor: AppColors.brandRed,
-                                title: 'Newly Added',
-                                onViewAll: () => context.push('/products'),
+                            // Category Filter Chips (Zepto Style)
+                            SizedBox(
+                              height: 38,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                children: [
+                                  _buildCategoryFilterChip(
+                                    label: 'All Items',
+                                    isSelected: _selectedCategoryFilter == null,
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCategoryFilter = null;
+                                      });
+                                    },
+                                  ),
+                                  ...state.categories.map((cat) {
+                                    final isSelected = _selectedCategoryFilter == cat.id;
+                                    return _buildCategoryFilterChip(
+                                      label: cat.name,
+                                      isSelected: isSelected,
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategoryFilter = isSelected ? null : cat.id;
+                                        });
+                                      },
+                                    );
+                                  }),
+                                ],
                               ),
-                              const SizedBox(height: 12),
-                              _buildHorizontalProductList(newlyAddedProducts.take(8).toList()),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Products for Selected Tab
+                            if (filteredProducts.isNotEmpty)
+                              _buildHorizontalProductList(filteredProducts)
+                            else
+                              Container(
+                                height: 120,
+                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: const Color(0xFFE5EDE8)),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.inventory_2_outlined,
+                                        size: 32,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'No items in this category yet',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 24),
+
+                            // 6. Top Brands (Dynamic from Admin)
+                            if (state.brands.isNotEmpty) ...[
+                              TopBrandsSection(brands: state.brands),
                               const SizedBox(height: 24),
                             ],
 
-                            // Trending Products
-                            if (trendingProducts.isNotEmpty) ...[
+                            // 7. Recently Added (only if more than 3 products to avoid repeating same items)
+                            if (allProducts.length > 3) ...[
                               _buildSectionHeader(
                                 icon: Icons.trending_up_rounded,
-                                iconColor: AppColors.primaryGreen,
-                                title: 'Trending Products',
+                                iconColor: AppColors.brandOrange,
+                                title: 'Trending This Week',
                                 onViewAll: () => context.push('/products'),
                               ),
                               const SizedBox(height: 12),
-                              _buildHorizontalProductList(trendingProducts.take(8).toList()),
+                              _buildHorizontalProductList(allProducts.reversed.take(6).toList()),
                               const SizedBox(height: 24),
                             ],
 
-                            // Continue Shopping (Recently Viewed)
-                            if (allProducts.length > 2) ...[
-                              _buildSectionHeader(
-                                icon: Icons.history_rounded,
-                                iconColor: const Color(0xFF6B7280),
-                                title: 'Continue Shopping',
-                              ),
-                              const SizedBox(height: 12),
-                              _buildHorizontalProductList(allProducts.skip(2).take(6).toList()),
-                              const SizedBox(height: 24),
-                            ],
-
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 40),
                           ],
                         ),
                       ),
@@ -213,6 +254,51 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryFilterChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryGreen : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.primaryGreen : const Color(0xFFD6E2DA),
+              width: 1.2,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.28),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? Colors.white : const Color(0xFF284835),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -294,37 +380,106 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSkeletonLoader() {
+  Widget _buildShimmerLoader() {
     return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 14, bottom: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            height: 120,
-            color: AppColors.darkGreen,
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
+          // 1. Banner Carousel Shimmer
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: ShimmerEffect.rectangular(
+              height: 155,
+              borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
           ),
-          const SizedBox(height: 16),
-          Container(
-            height: 140,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(20),
+          const SizedBox(height: 22),
+
+          // 3. Category Circles Shimmer
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ShimmerEffect.rectangular(width: 130, height: 16, borderRadius: BorderRadius.all(Radius.circular(6))),
+                ShimmerEffect.rectangular(width: 55, height: 14, borderRadius: BorderRadius.all(Radius.circular(6))),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 90,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    children: [
+                      ShimmerEffect.circular(width: 60, height: 60),
+                      SizedBox(height: 6),
+                      ShimmerEffect.rectangular(width: 50, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // 4. Products Section Shimmer
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ShimmerEffect.rectangular(width: 160, height: 18, borderRadius: BorderRadius.all(Radius.circular(6))),
+                ShimmerEffect.rectangular(width: 55, height: 14, borderRadius: BorderRadius.all(Radius.circular(6))),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 230,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 165,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE5EDE8)),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerEffect.rectangular(height: 120, borderRadius: BorderRadius.all(Radius.circular(12))),
+                      SizedBox(height: 8),
+                      ShimmerEffect.rectangular(width: 60, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                      SizedBox(height: 6),
+                      ShimmerEffect.rectangular(width: 130, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                      Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ShimmerEffect.rectangular(width: 60, height: 16, borderRadius: BorderRadius.all(Radius.circular(4))),
+                          ShimmerEffect.rectangular(width: 48, height: 26, borderRadius: BorderRadius.all(Radius.circular(8))),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),

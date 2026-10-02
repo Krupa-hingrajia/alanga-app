@@ -53,6 +53,19 @@ export class ProductShippingRepository implements IProductShippingRepository {
         codAvailable: data.codAvailable ?? true,
       },
     });
+
+    if (data.weight !== undefined || data.length !== undefined || data.width !== undefined || data.height !== undefined) {
+      await this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          ...(data.weight !== undefined ? { weight: data.weight } : {}),
+          ...(data.length !== undefined ? { length: data.length } : {}),
+          ...(data.width !== undefined ? { width: data.width } : {}),
+          ...(data.height !== undefined ? { height: data.height } : {}),
+        },
+      });
+    }
+
     return this.mapToEntity(shipping);
   }
 
@@ -75,6 +88,19 @@ export class ProductShippingRepository implements IProductShippingRepository {
       where: { productId },
       data: updatePayload,
     });
+
+    if (data.weight !== undefined || data.length !== undefined || data.width !== undefined || data.height !== undefined) {
+      await this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          ...(data.weight !== undefined ? { weight: data.weight } : {}),
+          ...(data.length !== undefined ? { length: data.length } : {}),
+          ...(data.width !== undefined ? { width: data.width } : {}),
+          ...(data.height !== undefined ? { height: data.height } : {}),
+        },
+      });
+    }
+
     return this.mapToEntity(shipping);
   }
 
@@ -102,6 +128,19 @@ export class ProductShippingRepository implements IProductShippingRepository {
       },
       update: payload,
     });
+
+    if (data.weight !== undefined || data.length !== undefined || data.width !== undefined || data.height !== undefined) {
+      await this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          ...(data.weight !== undefined ? { weight: data.weight } : {}),
+          ...(data.length !== undefined ? { length: data.length } : {}),
+          ...(data.width !== undefined ? { width: data.width } : {}),
+          ...(data.height !== undefined ? { height: data.height } : {}),
+        },
+      });
+    }
+
     return this.mapToEntity(shipping);
   }
 }

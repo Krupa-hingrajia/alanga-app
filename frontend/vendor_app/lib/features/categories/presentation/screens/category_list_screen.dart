@@ -11,7 +11,9 @@ import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
 class CategoryListScreen extends StatefulWidget {
-  const CategoryListScreen({super.key});
+  final String? initialStatus;
+
+  const CategoryListScreen({super.key, this.initialStatus});
 
   @override
   State<CategoryListScreen> createState() => _CategoryListScreenState();
@@ -20,8 +22,14 @@ class CategoryListScreen extends StatefulWidget {
 class _CategoryListScreenState extends State<CategoryListScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedStatus = 'All';
+  late String _selectedStatus;
   List<CategoryModel> _cachedCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.initialStatus ?? 'All';
+  }
 
   @override
   void dispose() {

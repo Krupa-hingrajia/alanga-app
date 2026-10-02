@@ -3,6 +3,7 @@ import 'home_event.dart';
 import 'home_state.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../products/domain/repositories/product_repository.dart';
+import '../../../products/data/models/brand_model.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/category_cache.dart';
 
@@ -30,10 +31,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final results = await Future.wait([
         _categoryRepository.getCategories(),
         _productRepository.getProducts(),
+        _productRepository.getBrands().catchError((_) => <BrandModel>[]),
       ]);
 
       final categories = results[0] as List<dynamic>;
       final products = results[1] as List<dynamic>;
+      final brands = results[2] as List<dynamic>;
 
       // Populate Cache
       CategoryCache.addAll(categories);
@@ -42,6 +45,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(HomeLoaded(
         categories: categories.cast(),
         products: products.cast(),
+        brands: brands.cast(),
       ));
     } catch (e) {
       String message = 'An error occurred';

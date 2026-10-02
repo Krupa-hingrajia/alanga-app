@@ -21,11 +21,19 @@ class VendorOrderRepositoryImpl implements VendorOrderRepository {
   Future<VendorOrderModel> updateOrderStatus({
     required String orderId,
     required String status,
+    String? courierName,
+    String? trackingNumber,
+    String? trackingUrl,
+    String? cancelReason,
   }) async {
     try {
       return await _remoteDataSource.updateOrderStatus(
         orderId: orderId,
         status: status,
+        courierName: courierName,
+        trackingNumber: trackingNumber,
+        trackingUrl: trackingUrl,
+        cancelReason: cancelReason,
       );
     } catch (e) {
       throw Exception(e.toString().replaceAll('Exception: ', ''));

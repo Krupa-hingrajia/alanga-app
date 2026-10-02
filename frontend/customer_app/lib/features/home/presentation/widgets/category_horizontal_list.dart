@@ -145,41 +145,47 @@ class CategoryHorizontalList extends StatelessWidget {
                 return Container(
                   width: 72,
                   margin: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 62,
-                        height: 62,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: item['color'] as Color,
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 6,
-                            ),
-                          ],
+                  child: InkWell(
+                    onTap: () {
+                      context.push('/products', extra: item['name'] as String);
+                    },
+                    borderRadius: BorderRadius.circular(36),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 62,
+                          height: 62,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: item['color'] as Color,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            item['icon'] as IconData,
+                            color: AppColors.darkGreen,
+                            size: 26,
+                          ),
                         ),
-                        child: Icon(
-                          item['icon'] as IconData,
-                          color: AppColors.darkGreen,
-                          size: 26,
+                        const SizedBox(height: 6),
+                        Text(
+                          item['name'] as String,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF11261B),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item['name'] as String,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF11261B),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }

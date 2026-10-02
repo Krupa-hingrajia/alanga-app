@@ -12,8 +12,9 @@ import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
 class ProductListScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
+  final String? initialStatus;
 
-  const ProductListScreen({super.key, this.onBackToDashboard});
+  const ProductListScreen({super.key, this.onBackToDashboard, this.initialStatus});
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -38,10 +39,30 @@ class _ProductListScreenState extends State<ProductListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this, initialIndex: 0);
+    int initialIdx = 0;
+    if (widget.initialStatus != null) {
+      final found = _tabs.indexWhere(
+        (t) => t.status.toUpperCase() == widget.initialStatus!.toUpperCase(),
+      );
+      if (found != -1) initialIdx = found;
+    }
+    _tabController = TabController(length: _tabs.length, vsync: this, initialIndex: initialIdx);
     _searchCtrl.addListener(() {
       setState(() => _searchQuery = _searchCtrl.text.trim().toLowerCase());
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialStatus != null && widget.initialStatus != oldWidget.initialStatus) {
+      final found = _tabs.indexWhere(
+        (t) => t.status.toUpperCase() == widget.initialStatus!.toUpperCase(),
+      );
+      if (found != -1 && _tabController.index != found) {
+        _tabController.animateTo(found);
+      }
+    }
   }
 
   @override
@@ -456,7 +477,12 @@ class _ProductListScreenState extends State<ProductListScreen>
                 final product = list[index];
                 return ProductCard(
                   product: product,
-                  onTap: () => context.push('/products/details', extra: product),
+                  onTap: () async {
+                    await context.push('/products/details', extra: product);
+                    if (context.mounted) {
+                      context.read<ProductBloc>().add(const FetchProductsEvent(isRefresh: true));
+                    }
+                  },
                   onManageInventory: () => context.push('/products/inventory', extra: product),
                   onManageShipping: () => context.push('/products/shipping', extra: product),
                   onEdit: () async {

@@ -41,9 +41,179 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
+      body: BlocBuilder<CartCubit, CartState>(
+        builder: (context, cartState) {
+          int cartCount = 0;
+          double subtotal = 0.0;
+          if (cartState is CartLoaded) {
+            cartCount = cartState.summary.totalItems;
+            subtotal = cartState.summary.subtotal;
+          }
+
+          const freeDeliveryThreshold = 499.0;
+          final isFreeDelivery = subtotal >= freeDeliveryThreshold;
+          final remainingAmount = (freeDeliveryThreshold - subtotal).clamp(0.0, freeDeliveryThreshold);
+
+          return Stack(
+            children: [
+              IndexedStack(
+                index: _selectedIndex,
+                children: _screens,
+              ),
+              // Floating Zepto Bottom Cart Pill (visible when cart has items and not on cart tab)
+              if (cartCount > 0 && _selectedIndex != 3)
+                Positioned(
+                  left: 14,
+                  right: 14,
+                  bottom: 12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Left: Free Delivery Progress Bar (Dark themed like Zepto)
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF1E293B),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                bottomLeft: Radius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: isFreeDelivery
+                                        ? const Color(0xFF10B981)
+                                        : Colors.white.withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isFreeDelivery
+                                        ? Icons.check_circle_rounded
+                                        : Icons.two_wheeler_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        isFreeDelivery
+                                            ? 'Free delivery unlocked! 🎉'
+                                            : 'Unlock free delivery',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        isFreeDelivery
+                                            ? 'No shipping fee on this order'
+                                            : 'Shop for ₹${remainingAmount.toStringAsFixed(0)} more',
+                                        style: TextStyle(
+                                          color: isFreeDelivery
+                                              ? const Color(0xFF6EE7B7)
+                                              : Colors.white.withValues(alpha: 0.7),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Right: Cart Button (Vibrant Zepto/Blinkit Pink CTA)
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 3;
+                            });
+                          },
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFFF007A), Color(0xFFE60067)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.shopping_cart_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Cart',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$cartCount ${cartCount == 1 ? 'item' : 'items'}',
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: BlocBuilder<WishlistBloc, WishlistState>(
         bloc: sl<WishlistBloc>(),

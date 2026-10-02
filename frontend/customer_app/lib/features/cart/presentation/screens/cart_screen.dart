@@ -147,6 +147,32 @@ class _CartScreenState extends State<CartScreen> {
               },
               child: Column(
                 children: [
+                  if (state.summary.shippingCharge <= 0)
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFBBF7D0)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.local_shipping_rounded, color: AppColors.primaryGreen, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Yay! Your order is eligible for FREE Delivery',
+                              style: TextStyle(
+                                color: Color(0xFF166534),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),

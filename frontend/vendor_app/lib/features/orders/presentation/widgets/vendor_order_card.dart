@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../data/models/vendor_order_model.dart';
 import 'vendor_order_status_badge.dart';
+import 'order_documents_bottom_sheet.dart';
 
 class VendorOrderCard extends StatelessWidget {
   final VendorOrderModel order;
@@ -261,6 +262,31 @@ class VendorOrderCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Row(
                       children: [
+                        if (['CONFIRMED', 'PROCESSING', 'PACKED', 'SHIPPED', 'DELIVERED'].contains(order.status.toUpperCase()))
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Tooltip(
+                              message: 'Print Shipping Label & Invoice',
+                              child: InkWell(
+                                onTap: () => OrderDocumentsBottomSheet.show(context, order),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF3F7F4),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: const Color(0xFFE2EBE5)),
+                                  ),
+                                  child: const Icon(
+                                    Icons.print_outlined,
+                                    size: 18,
+                                    color: Color(0xFF1A3827),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         if (order.canAdvanceStatus && onQuickAdvanceStatus != null)
                           ElevatedButton.icon(
                             onPressed: isUpdating ? null : onQuickAdvanceStatus,

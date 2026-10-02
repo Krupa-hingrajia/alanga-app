@@ -43,6 +43,9 @@ dependencies:
   geolocator: ^13.0.1
   geocoding: ^3.0.0
   image_picker: ^1.2.3
+  url_launcher: ^6.3.2
+  pdf: ^3.12.0
+  printing: ^5.14.3
 
 dev_dependencies:
   flutter_test:

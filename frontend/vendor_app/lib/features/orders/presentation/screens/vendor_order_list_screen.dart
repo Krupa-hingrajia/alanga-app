@@ -9,6 +9,8 @@ import '../bloc/vendor_order_bloc.dart';
 import '../bloc/vendor_order_event.dart';
 import '../bloc/vendor_order_state.dart';
 import '../widgets/vendor_order_card.dart';
+import '../widgets/ship_order_bottom_sheet.dart';
+import '../widgets/pack_order_bottom_sheet.dart';
 
 class VendorOrderListScreen extends StatefulWidget {
   final VoidCallback? onBackToDashboard;
@@ -57,6 +59,33 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
     final nextStatus = order.nextValidStatus;
     final actionLabel = order.nextStatusActionLabel;
     if (nextStatus == null || actionLabel == null) return;
+
+    if (nextStatus == 'PACKED') {
+      PackOrderBottomSheet.show(context, order).then((confirmed) {
+        if (confirmed == true) {
+          bloc.add(UpdateOrderStatusEvent(
+            orderId: order.id,
+            newStatus: 'PACKED',
+          ));
+        }
+      });
+      return;
+    }
+
+    if (nextStatus == 'SHIPPED') {
+      ShipOrderBottomSheet.show(context, order.orderNumber).then((data) {
+        if (data != null) {
+          bloc.add(UpdateOrderStatusEvent(
+            orderId: order.id,
+            newStatus: 'SHIPPED',
+            courierName: data['courierName'],
+            trackingNumber: data['trackingNumber'],
+            trackingUrl: data['trackingUrl'],
+          ));
+        }
+      });
+      return;
+    }
 
     showDialog(
       context: context,

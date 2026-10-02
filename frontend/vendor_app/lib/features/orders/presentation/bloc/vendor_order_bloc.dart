@@ -140,6 +140,10 @@ class VendorOrderBloc extends Bloc<VendorOrderEvent, VendorOrderState> {
       final updatedOrder = await _repository.updateOrderStatus(
         orderId: event.orderId,
         status: event.newStatus,
+        courierName: event.courierName,
+        trackingNumber: event.trackingNumber,
+        trackingUrl: event.trackingUrl,
+        cancelReason: event.cancelReason,
       );
 
       // Update in cached list

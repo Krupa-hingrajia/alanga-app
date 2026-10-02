@@ -174,8 +174,26 @@ class ProductRepositoryImpl implements ProductRepository {
   String _getErrorMessage(DioException e) {
     if (e.response != null && e.response?.data != null) {
       final responseData = e.response?.data;
-      if (responseData is Map && responseData.containsKey('message')) {
-        return responseData['message'] as String;
+      if (responseData is Map) {
+        if (responseData.containsKey('errors') &&
+            responseData['errors'] is List &&
+            (responseData['errors'] as List).isNotEmpty) {
+          final errList = responseData['errors'] as List;
+          final details = errList.map((err) {
+            if (err is Map) {
+              final field = err['field'] ?? '';
+              final msgs = err['messages'] is List
+                  ? (err['messages'] as List).join(', ')
+                  : err['message'] ?? '';
+              return field.isNotEmpty ? '$field: $msgs' : msgs.toString();
+            }
+            return err.toString();
+          }).join('; ');
+          if (details.isNotEmpty) return details;
+        }
+        if (responseData.containsKey('message') && responseData['message'] != null) {
+          return responseData['message'].toString();
+        }
       }
     }
     return e.message ?? 'Unknown connection error';

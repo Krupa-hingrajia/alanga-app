@@ -16,6 +16,12 @@ class OrderItemModel {
   final double totalPrice;
   final String status;
   final String? imageUrl;
+  final String? courierName;
+  final String? trackingNumber;
+  final String? trackingUrl;
+  final String? cancelReason;
+  final DateTime? shippedAt;
+  final DateTime? deliveredAt;
 
   OrderItemModel({
     required this.id,
@@ -33,6 +39,12 @@ class OrderItemModel {
     required this.totalPrice,
     required this.status,
     this.imageUrl,
+    this.courierName,
+    this.trackingNumber,
+    this.trackingUrl,
+    this.cancelReason,
+    this.shippedAt,
+    this.deliveredAt,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
@@ -67,6 +79,12 @@ class OrderItemModel {
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'PENDING',
       imageUrl: img,
+      courierName: json['courierName']?.toString(),
+      trackingNumber: json['trackingNumber']?.toString(),
+      trackingUrl: json['trackingUrl']?.toString(),
+      cancelReason: json['cancelReason']?.toString(),
+      shippedAt: json['shippedAt'] != null ? DateTime.tryParse(json['shippedAt'].toString()) : null,
+      deliveredAt: json['deliveredAt'] != null ? DateTime.tryParse(json['deliveredAt'].toString()) : null,
     );
   }
 }
@@ -85,6 +103,12 @@ class OrderModel {
   final String paymentStatus;
   final String status;
   final String? notes;
+  final String? courierName;
+  final String? trackingNumber;
+  final String? trackingUrl;
+  final String? cancelReason;
+  final DateTime? shippedAt;
+  final DateTime? deliveredAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<OrderItemModel> orderItems;
@@ -103,6 +127,12 @@ class OrderModel {
     required this.paymentStatus,
     required this.status,
     this.notes,
+    this.courierName,
+    this.trackingNumber,
+    this.trackingUrl,
+    this.cancelReason,
+    this.shippedAt,
+    this.deliveredAt,
     required this.createdAt,
     required this.updatedAt,
     required this.orderItems,
@@ -113,6 +143,21 @@ class OrderModel {
     final itemsList = rawItems
         .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
         .toList();
+
+    final courier = json['courierName']?.toString() ??
+        (itemsList.isNotEmpty ? itemsList.first.courierName : null);
+    final tracking = json['trackingNumber']?.toString() ??
+        (itemsList.isNotEmpty ? itemsList.first.trackingNumber : null);
+    final trackUrl = json['trackingUrl']?.toString() ??
+        (itemsList.isNotEmpty ? itemsList.first.trackingUrl : null);
+    final cancel = json['cancelReason']?.toString() ??
+        (itemsList.isNotEmpty ? itemsList.first.cancelReason : null);
+    final shipped = json['shippedAt'] != null
+        ? DateTime.tryParse(json['shippedAt'].toString())
+        : (itemsList.isNotEmpty ? itemsList.first.shippedAt : null);
+    final delivered = json['deliveredAt'] != null
+        ? DateTime.tryParse(json['deliveredAt'].toString())
+        : (itemsList.isNotEmpty ? itemsList.first.deliveredAt : null);
 
     return OrderModel(
       id: json['id'] as String? ?? '',
@@ -132,6 +177,12 @@ class OrderModel {
       paymentStatus: json['paymentStatus'] as String? ?? 'PENDING',
       status: json['status'] as String? ?? 'PENDING',
       notes: json['notes'] as String?,
+      courierName: courier,
+      trackingNumber: tracking,
+      trackingUrl: trackUrl,
+      cancelReason: cancel,
+      shippedAt: shipped,
+      deliveredAt: delivered,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -141,4 +192,10 @@ class OrderModel {
       orderItems: itemsList,
     );
   }
+
+  bool get hasTracking => trackingNumber != null && trackingNumber!.trim().isNotEmpty;
+  bool get isShipped => ['SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].contains(status.toUpperCase());
+  bool get isDelivered => status.toUpperCase() == 'DELIVERED';
+  bool get isCancelled => status.toUpperCase() == 'CANCELLED';
+  bool get canCancel => ['PENDING', 'CONFIRMED'].contains(status.toUpperCase());
 }

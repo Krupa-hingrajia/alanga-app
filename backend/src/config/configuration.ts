@@ -22,7 +22,7 @@ export default () => {
     isProduction,
     port: parseInt(process.env.PORT || '3000', 10),
     apiPrefix: process.env.API_PREFIX || 'api/v1',
-    corsOrigin: process.env.CORS_ORIGIN || (isProduction ? '' : '*'),
+    corsOrigin: process.env.CORS_ORIGIN || '*',
     database: {
       url: databaseUrl,
       directUrl: process.env.DIRECT_URL || databaseUrl,

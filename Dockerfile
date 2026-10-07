@@ -1,45 +1,35 @@
-# Build stage
-FROM node:20-slim AS builder
+FROM node:20-slim
 
 WORKDIR /app
 
-# Install openssl for Prisma
-RUN apt-get update -y && apt-get install -y openssl
-
-# Copy backend configuration and source
-COPY backend/package*.json ./
-COPY backend/prisma ./prisma/
-
-RUN npm install
-
-COPY backend/tsconfig*.json ./
-COPY backend/nest-cli.json ./
-COPY backend/src ./src/
-
-RUN npx prisma generate
-RUN npm run build
-
-# Production stage
-FROM node:20-slim AS runner
-
-WORKDIR /app
-
+# Set default production environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV DATABASE_URL="postgresql://postgres:Sachit%402026@34.21.175.107:5432/postgres?sslmode=disable"
+ENV DIRECT_URL="postgresql://postgres:Sachit%402026@34.21.175.107:5432/postgres?sslmode=disable"
+ENV JWT_ACCESS_SECRET="super-secret-access-token-key-change-in-production"
+ENV JWT_REFRESH_SECRET="super-secret-refresh-token-key-change-in-production"
 
 # Install openssl for Prisma runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Copy package and prisma files to install production dependencies and generate client
+# Copy backend dependencies and schema
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
-RUN npm install --omit=dev
+# Install dependencies
+RUN npm install
+
+# Copy source code and config
+COPY backend/tsconfig*.json ./
+COPY backend/nest-cli.json ./
+COPY backend/src ./src/
+
+# Generate Prisma client and build NestJS
 RUN npx prisma generate
+RUN npm run build
 
-# Copy compiled backend dist
-COPY --from=builder /app/dist ./dist
-
+# Create necessary directories
 RUN mkdir -p uploads logs
 
 EXPOSE 8080

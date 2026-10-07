@@ -5,7 +5,7 @@ import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { UserEntity } from '../../users/entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Role, AccountStatus, KYCStatus } from '@prisma/client';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../auth/authStore';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://alanga-app.vercel.app/api/v1';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://alanga-backend-807103326316.asia-southeast1.run.app/api/v1';
 
 export const client = axios.create({
   baseURL: BASE_URL,

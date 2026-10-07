@@ -4,9 +4,8 @@ import 'package:flutter/foundation.dart';
 enum AppEnvironment { development, production }
 
 class EnvironmentConfig {
-  /// Production API base URL.
-  /// ⚠️  Update this before releasing to Google Play.
-  static const String _prodUrl = 'https://alanga-app.vercel.app/api/v1';
+  /// Production API base URL (Google Cloud Run Singapore - High Performance).
+  static const String _prodUrl = 'https://alanga-backend-807103326316.asia-southeast1.run.app/api/v1';
 
   static String _getDevUrl() {
     // Override at build time for physical device testing:

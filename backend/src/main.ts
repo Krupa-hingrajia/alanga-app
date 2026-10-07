@@ -16,11 +16,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   const app = await NestFactory.create(AppModule, {
-    // Disable verbose NestJS logs in production
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn']
-        : ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: ['error', 'warn', 'log'],
   });
 
   app.use(json({ limit: '50mb' }));
@@ -110,4 +106,7 @@ async function bootstrap() {
     logger.log(`Application is running on port ${port} [production]`);
   }
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('FATAL APPLICATION BOOTSTRAP ERROR:', err);
+  process.exit(1);
+});

@@ -1,34 +1,39 @@
-# Stage 1: Build NestJS backend
-FROM node:20-alpine AS builder
+# Build stage
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Copy package and schema from backend directory
+# Install openssl for Prisma
+RUN apt-get update -y && apt-get install -y openssl
+
+# Copy backend configuration and source
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
 RUN npm ci
 
-# Copy backend source and build
 COPY backend/tsconfig*.json ./
 COPY backend/nest-cli.json ./
 COPY backend/src ./src/
 
 RUN npx prisma generate
 RUN npm run build
+RUN npm prune --production
 
-# Stage 2: Production Runner
-FROM node:20-alpine AS runner
+# Production stage
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY backend/package*.json ./
-COPY backend/prisma ./prisma/
+# Install openssl for Prisma runtime
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-RUN npm ci --only=production && npx prisma generate
-
+# Copy production artifacts from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
 
 RUN mkdir -p uploads logs

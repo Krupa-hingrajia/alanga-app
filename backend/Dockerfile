@@ -1,39 +1,39 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
+# Build stage
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Install dependencies needed for build
+# Install openssl for Prisma
+RUN apt-get update -y && apt-get install -y openssl
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
 RUN npm ci
 
-# Copy source files and build
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src/
 
 RUN npx prisma generate
 RUN npm run build
+RUN npm prune --production
 
-# Stage 2: Production Runner
-FROM node:20-alpine AS runner
+# Production stage
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy package files and install only production dependencies
-COPY package*.json ./
-COPY prisma ./prisma/
+# Install openssl for Prisma runtime
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-RUN npm ci --only=production && npx prisma generate
-
-# Copy built application from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
 
-# Create uploads directory
 RUN mkdir -p uploads logs
 
 EXPOSE 8080

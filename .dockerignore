@@ -1,0 +1,9 @@
+frontend
+.git
+.idea
+.DS_Store
+backend/node_modules
+backend/dist
+backend/logs
+backend/.env
+backend/.env.*

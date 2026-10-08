@@ -90,6 +90,7 @@ class _ProductListScreenState extends State<ProductListScreen>
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
+      toolbarHeight: 46,
       automaticallyImplyLeading: false,
       leading: Padding(
         padding: const EdgeInsets.only(left: 12),
@@ -97,8 +98,8 @@ class _ProductListScreenState extends State<ProductListScreen>
           child: GestureDetector(
             onTap: () => _handleBack(context),
             child: Container(
-              width: 36,
-              height: 36,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
@@ -106,14 +107,14 @@ class _ProductListScreenState extends State<ProductListScreen>
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: const Icon(
                 Icons.arrow_back,
-                size: 18,
+                size: 17,
                 color: Color(0xFF1A3827),
               ),
             ),
@@ -123,7 +124,7 @@ class _ProductListScreenState extends State<ProductListScreen>
       title: Text(
         context.tr('my_products'),
         style: const TextStyle(
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: FontWeight.bold,
           color: Color(0xFF11261B),
         ),
@@ -138,8 +139,8 @@ class _ProductListScreenState extends State<ProductListScreen>
                   btnCtx.read<ProductBloc>().add(const FetchProductsEvent(isRefresh: true));
                 },
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
@@ -147,14 +148,14 @@ class _ProductListScreenState extends State<ProductListScreen>
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: const Icon(
                     Icons.refresh_rounded,
-                    size: 18,
+                    size: 17,
                     color: Color(0xFF1A3827),
                   ),
                 ),
@@ -169,7 +170,7 @@ class _ProductListScreenState extends State<ProductListScreen>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<ProductBloc>()..add(const FetchProductsEvent()),
+      create: (_) => sl<ProductBloc>()...add(const FetchProductsEvent()),
       child: Builder(
         builder: (context) {
           return PopScope(
@@ -223,8 +224,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                   absorbing: isActionLoading,
                   child: Column(
                     children: [
-                      // ── Fixed header (AppBar + search + stats) ────────────
-                      // This block does NOT scroll. It stays pinned at the top.
+                      // ── Fixed header (Search Bar + Counter) ───────────────
                       if (isActionLoading)
                         const LinearProgressIndicator(
                           color: AppColors.brandOrange,
@@ -242,32 +242,34 @@ class _ProductListScreenState extends State<ProductListScreen>
                           labelColor: AppColors.primaryGreen,
                           unselectedLabelColor: const Color(0xFF5A7265),
                           indicatorColor: AppColors.primaryGreen,
-                          indicatorWeight: 3.0,
+                          indicatorWeight: 2.5,
                           indicatorSize: TabBarIndicatorSize.label,
                           dividerColor: const Color(0xFFE8EFE9),
+                          labelPadding: const EdgeInsets.symmetric(horizontal: 14),
                           labelStyle: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13.5),
+                              fontWeight: FontWeight.bold, fontSize: 13),
                           unselectedLabelStyle: const TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 13),
                           tabs: _tabs
                               .map((t) => Tab(
+                                    height: 42,
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(t.icon, size: 16),
-                                        const SizedBox(width: 6),
+                                        Icon(t.icon, size: 15),
+                                        const SizedBox(width: 5),
                                         Text(context.tr(t.label)),
                                         if (countMap[t.status] != null &&
                                             countMap[t.status]! > 0) ...[
-                                          const SizedBox(width: 6),
+                                          const SizedBox(width: 5),
                                           Container(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 7, vertical: 2),
+                                                horizontal: 6, vertical: 1.5),
                                             decoration: BoxDecoration(
                                               color: t.color
                                                   .withValues(alpha: 0.12),
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Text(
                                               '${countMap[t.status]}',
@@ -336,200 +338,108 @@ class _ProductListScreenState extends State<ProductListScreen>
 
   Widget _buildHeader(
       BuildContext context, ProductState state, Map<String, int> countMap) {
-    final activeIndex = _tabController.index;
     final totalCount = countMap.values.fold<int>(0, (sum, count) => sum + count);
 
     return Container(
       color: const Color(0xFFF6F8F6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 10),
+      child: Row(
         children: [
-          // Search bar + Total products counter
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2ECE5), width: 1.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF1A3827).withValues(alpha: 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF11261B),
-                      ),
-                      decoration: InputDecoration(
-                        hintText: context.tr('search_products_hint'),
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: Color(0xFF1A3827),
-                          size: 22,
-                        ),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  _searchCtrl.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                                child: const Icon(
-                                  Icons.close_rounded,
-                                  color: Color(0xFF6B7280),
-                                  size: 18,
-                                ),
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 13,
-                        ),
-                      ),
-                    ),
+          Expanded(
+            child: Container(
+              height: 42,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFE2ECE5), width: 1.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1A3827).withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchCtrl,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF11261B),
+                ),
+                decoration: InputDecoration(
+                  hintText: context.tr('search_products_hint'),
+                  hintStyle: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF1A3827),
+                    size: 20,
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? GestureDetector(
+                          onTap: () {
+                            _searchCtrl.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: Color(0xFF6B7280),
+                            size: 18,
+                          ),
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
                   ),
                 ),
-                if (state is ProductListLoaded) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A3827),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF1A3827).withValues(alpha: 0.15),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+              ),
+            ),
+          ),
+          if (state is ProductListLoaded) ...[
+            const SizedBox(width: 8),
+            Container(
+              height: 42,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A3827),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1A3827).withValues(alpha: 0.15),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'ALL: ',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: Color(0xFF85D6A4),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'ALL: ',
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                            color: Color(0xFF85D6A4),
-                          ),
-                        ),
-                        Text(
-                          '$totalCount',
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                  ),
+                  Text(
+                    '$totalCount',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
                     ),
                   ),
                 ],
-              ],
-            ),
-          ),
-
-          // Compact Sleek Status KPI Filter Pills
-          if (state is ProductListLoaded) ...[
-            const SizedBox(height: 2),
-            SizedBox(
-              height: 34,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: _tabs.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 6),
-                itemBuilder: (_, i) {
-                  final t = _tabs[i];
-                  final count = countMap[t.status] ?? 0;
-                  final isSelected = activeIndex == i;
-
-                  return GestureDetector(
-                    onTap: () {
-                      _tabController.animateTo(i);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isSelected ? t.color : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? t.color : const Color(0xFFE2ECE5),
-                          width: 1.0,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isSelected
-                                ? t.color.withValues(alpha: 0.22)
-                                : Colors.black.withValues(alpha: 0.02),
-                            blurRadius: isSelected ? 4 : 2,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            t.icon,
-                            size: 13,
-                            color: isSelected ? Colors.white : t.color,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            context.tr(t.label),
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                              color: isSelected ? Colors.white : const Color(0xFF374151),
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white.withValues(alpha: 0.25)
-                                  : t.color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                color: isSelected ? Colors.white : t.color,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
-            const SizedBox(height: 6),
           ],
         ],
       ),

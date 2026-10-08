@@ -742,7 +742,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                       }
                                     },
                                     onUpdateVariant: (updatedVariant) {
-                                      final index = _productVariants.indexWhere((v) => v.id == updatedVariant.id || v.sku == updatedVariant.sku);
+                                      final index = _productVariants.indexWhere((v) =>
+                                          (updatedVariant.id.isNotEmpty && v.id.isNotEmpty)
+                                              ? v.id == updatedVariant.id
+                                              : v.sku == updatedVariant.sku);
                                       if (index != -1) {
                                         setState(() {
                                           if (updatedVariant.isDefault) {

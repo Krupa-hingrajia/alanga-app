@@ -47,7 +47,7 @@ class ProductVariantsSection extends StatelessWidget {
 
   void _openEditVariantSheet(BuildContext context, ProductVariantModel variant) {
     final existingSkus = variants
-        .where((v) => v.id != variant.id)
+        .where((v) => (variant.id.isNotEmpty ? v.id != variant.id : v.sku != variant.sku))
         .map((v) => v.sku.toUpperCase())
         .toList();
 

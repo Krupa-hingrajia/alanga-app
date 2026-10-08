@@ -196,10 +196,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         },
       );
 
-      final variants = await _productRepository.getProductVariants(event.productId);
-      emit(ProductVariantsLoadedState(variants: variants));
+      final product = await _productRepository.getProductById(event.productId);
+      final commonImages = product.images.where((img) => img.productVariantId == null || img.productVariantId!.isEmpty).toList();
+      emit(ProductVariantsLoadedState(variants: product.variants));
       emit(ProductImageActionSuccess(
-        images: images,
+        images: commonImages,
         message: '${images.length} image(s) uploaded successfully.',
         productVariantId: event.productVariantId,
       ));
@@ -208,7 +209,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (e is ServerFailure) {
         message = e.message;
       }
-      emit(ProductActionError(message: message));
+      emit(ProductImageActionError(message: message));
     }
   }
 
@@ -223,17 +224,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         productVariantId: event.productVariantId,
       );
       final product = await _productRepository.getProductById(event.productId);
+      final commonImages = product.images.where((img) => img.productVariantId == null || img.productVariantId!.isEmpty).toList();
       emit(ProductVariantsLoadedState(variants: product.variants));
-      emit(ProductActionSuccess(
-        product: product,
+      emit(ProductImageActionSuccess(
+        images: commonImages,
         message: 'Primary image updated.',
+        productVariantId: event.productVariantId,
       ));
     } catch (e) {
       String message = 'Failed to set primary image';
       if (e is ServerFailure) {
         message = e.message;
       }
-      emit(ProductActionError(message: message));
+      emit(ProductImageActionError(message: message));
     }
   }
 
@@ -244,17 +247,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       await _productRepository.deleteProductImage(event.productId, event.imageId);
       final product = await _productRepository.getProductById(event.productId);
+      final commonImages = product.images.where((img) => img.productVariantId == null || img.productVariantId!.isEmpty).toList();
       emit(ProductVariantsLoadedState(variants: product.variants));
-      emit(ProductActionSuccess(
-        product: product,
+      emit(ProductImageActionSuccess(
+        images: commonImages,
         message: 'Image deleted.',
+        productVariantId: event.productVariantId,
       ));
     } catch (e) {
       String message = 'Failed to delete image';
       if (e is ServerFailure) {
         message = e.message;
       }
-      emit(ProductActionError(message: message));
+      emit(ProductImageActionError(message: message));
     }
   }
 
@@ -265,8 +270,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       await _productRepository.reorderProductImages(event.productId, event.orders);
       final product = await _productRepository.getProductById(event.productId);
-      emit(ProductActionSuccess(
-        product: product,
+      final commonImages = product.images.where((img) => img.productVariantId == null || img.productVariantId!.isEmpty).toList();
+      emit(ProductImageActionSuccess(
+        images: commonImages,
         message: 'Image display order updated.',
       ));
     } catch (e) {
@@ -274,7 +280,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (e is ServerFailure) {
         message = e.message;
       }
-      emit(ProductActionError(message: message));
+      emit(ProductImageActionError(message: message));
     }
   }
 

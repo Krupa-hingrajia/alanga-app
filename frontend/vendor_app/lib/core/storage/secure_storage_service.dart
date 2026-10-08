@@ -9,6 +9,15 @@ class SecureStorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userDataKey = 'user_data';
+  static const String _languageCodeKey = 'app_language_code';
+
+  Future<void> saveLanguageCode(String languageCode) async {
+    await _storage.write(key: _languageCodeKey, value: languageCode);
+  }
+
+  Future<String?> getLanguageCode() async {
+    return await _storage.read(key: _languageCodeKey);
+  }
 
   Future<void> saveAccessToken(String token) async {
     await _storage.write(key: _accessTokenKey, value: token);

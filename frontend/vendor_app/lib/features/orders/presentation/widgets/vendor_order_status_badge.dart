@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class VendorOrderStatusBadge extends StatelessWidget {
   final String status;
@@ -30,7 +31,7 @@ class VendorOrderStatusBadge extends StatelessWidget {
           Icon(meta.icon, size: isCompact ? 12 : 14, color: meta.textColor),
           const SizedBox(width: 4),
           Text(
-            meta.label,
+            context.tr(meta.label),
             style: TextStyle(
               color: meta.textColor,
               fontSize: isCompact ? 11 : 12,

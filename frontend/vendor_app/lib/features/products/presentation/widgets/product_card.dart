@@ -3,6 +3,7 @@ import '../../data/models/product_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/widgets/status_badge.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -122,7 +123,7 @@ class ProductCard extends StatelessWidget {
                                         width: 0.8),
                                   ),
                                   child: Text(
-                                    'Stock: ${product.stock}',
+                                    '${context.tr('stock')}: ${product.stock}',
                                     style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
@@ -132,7 +133,7 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ],
                               const Spacer(),
-                              _build3DotsMenu(isDraft: isDraft),
+                              _build3DotsMenu(context, isDraft: isDraft),
                             ],
                           ),
                           const SizedBox(height: 7),
@@ -177,9 +178,9 @@ class ProductCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Selling Price',
-                          style: TextStyle(
+                        Text(
+                          context.tr('selling_price'),
+                          style: const TextStyle(
                               fontSize: 10, color: Color(0xFF7A9A86)),
                         ),
                         const SizedBox(height: 2),
@@ -198,9 +199,9 @@ class ProductCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'MRP',
-                            style: TextStyle(
+                          Text(
+                            context.tr('mrp'),
+                            style: const TextStyle(
                                 fontSize: 10, color: Color(0xFF7A9A86)),
                           ),
                           const SizedBox(height: 2),
@@ -226,7 +227,7 @@ class ProductCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Save $discount%',
+                          '${context.tr('save')} $discount%',
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -240,41 +241,41 @@ class ProductCard extends StatelessWidget {
               const SizedBox(height: 10),
               Padding(
                 padding:
-                    const EdgeInsets.only(left: 14, right: 14, bottom: 12),
+                    const EdgeInsets.only(left: 12, right: 12, bottom: 12),
                 child: Row(
                   children: [
                     // Manage Inventory Button
                     if (onManageInventory != null) ...[
                       Expanded(
                         child: _ActionBtn(
-                          label: 'Inventory',
+                          label: context.tr('inventory'),
                           icon: Icons.inventory_2_outlined,
                           color: AppColors.primaryGreen,
                           bgColor: AppColors.primaryGreen.withValues(alpha: 0.09),
                           onTap: onManageInventory!,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                     ],
 
                     // Shipping Button
                     if (onManageShipping != null) ...[
                       Expanded(
                         child: _ActionBtn(
-                          label: 'Shipping',
+                          label: context.tr('shipping'),
                           icon: Icons.local_shipping_outlined,
                           color: const Color(0xFF2563EB),
                           bgColor: const Color(0xFF2563EB).withValues(alpha: 0.09),
                           onTap: onManageShipping!,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                     ],
 
                     if (onEdit != null) ...[
                       Expanded(
                         child: _ActionBtn(
-                          label: 'Edit',
+                          label: context.tr('edit'),
                           icon: Icons.edit_rounded,
                           color: const Color(0xFFF99F1B),
                           bgColor: const Color(0xFFF99F1B).withValues(alpha: 0.09),
@@ -282,13 +283,13 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       if (onDelete != null || (isDraft && onSubmit != null))
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                     ],
 
                     if (onDelete != null) ...[
                       Expanded(
                         child: _ActionBtn(
-                          label: 'Delete',
+                          label: context.tr('delete'),
                           icon: Icons.delete_outline_rounded,
                           color: const Color(0xFFE6222B),
                           bgColor: const Color(0xFFE6222B).withValues(alpha: 0.07),
@@ -296,13 +297,13 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       if (isDraft && onSubmit != null)
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                     ],
 
                     if (isDraft && onSubmit != null)
                       Expanded(
                         child: _ActionBtn(
-                          label: 'Submit',
+                          label: context.tr('submit'),
                           icon: Icons.rocket_launch_rounded,
                           color: const Color(0xFF1A8C4E),
                           bgColor: const Color(0xFF1A8C4E).withValues(alpha: 0.09),
@@ -319,7 +320,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _build3DotsMenu({required bool isDraft}) {
+  Widget _build3DotsMenu(BuildContext context, {required bool isDraft}) {
     return Container(
       width: 32,
       height: 32,
@@ -350,15 +351,15 @@ class ProductCard extends StatelessWidget {
         },
         itemBuilder: (context) => [
           if (onManageInventory != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'inventory',
               child: Row(
                 children: [
-                  Icon(Icons.inventory_2_outlined, size: 18, color: AppColors.primaryGreen),
-                  SizedBox(width: 10),
+                  const Icon(Icons.inventory_2_outlined, size: 18, color: AppColors.primaryGreen),
+                  const SizedBox(width: 10),
                   Text(
-                    'Manage Inventory',
-                    style: TextStyle(
+                    context.tr('manage_inventory'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryGreen,
@@ -368,15 +369,15 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           if (onManageShipping != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'shipping',
               child: Row(
                 children: [
-                  Icon(Icons.local_shipping_outlined, size: 18, color: Color(0xFF2563EB)),
-                  SizedBox(width: 10),
+                  const Icon(Icons.local_shipping_outlined, size: 18, color: Color(0xFF2563EB)),
+                  const SizedBox(width: 10),
                   Text(
-                    'Shipping Config',
-                    style: TextStyle(
+                    context.tr('shipping_config'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2563EB),
@@ -386,15 +387,15 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           if (isDraft && onSubmit != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'submit',
               child: Row(
                 children: [
-                  Icon(Icons.rocket_launch_rounded, size: 18, color: AppColors.primaryGreen),
-                  SizedBox(width: 10),
+                  const Icon(Icons.rocket_launch_rounded, size: 18, color: AppColors.primaryGreen),
+                  const SizedBox(width: 10),
                   Text(
-                    'Submit',
-                    style: TextStyle(
+                    context.tr('submit'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primaryGreen,
@@ -404,15 +405,15 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           if (onEdit != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'edit',
               child: Row(
                 children: [
-                  Icon(Icons.edit_outlined, size: 18, color: AppColors.brandOrange),
-                  SizedBox(width: 10),
+                  const Icon(Icons.edit_outlined, size: 18, color: AppColors.brandOrange),
+                  const SizedBox(width: 10),
                   Text(
-                    'Edit',
-                    style: TextStyle(
+                    context.tr('edit'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
@@ -422,15 +423,15 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           if (onDelete != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.brandRed),
-                  SizedBox(width: 10),
+                  const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.brandRed),
+                  const SizedBox(width: 10),
                   Text(
-                    'Delete',
-                    style: TextStyle(
+                    context.tr('delete'),
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.brandRed,
@@ -465,22 +466,27 @@ class _ActionBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: color,
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ),
           ],

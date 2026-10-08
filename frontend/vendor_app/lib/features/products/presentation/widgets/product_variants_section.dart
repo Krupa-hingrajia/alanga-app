@@ -100,7 +100,11 @@ class ProductVariantsSection extends StatelessWidget {
             pendingLocalPaths: localPaths,
           );
 
-          if (variant.id.isNotEmpty) {
+          final effectiveProductId = variant.productId.isNotEmpty
+              ? variant.productId
+              : (productId ?? '');
+
+          if (variant.id.isNotEmpty && effectiveProductId.isNotEmpty) {
             // Find deleted remote images and dispatch delete event
             final deletedRemoteImages = filteredImages.where((oldImg) =>
                 !updatedImages.any((newImg) => newImg.isUploaded && newImg.id == oldImg.id)).toList();
@@ -109,7 +113,7 @@ class ProductVariantsSection extends StatelessWidget {
               if (oldImg.id.isNotEmpty) {
                 context.read<ProductBloc>().add(
                       DeleteProductImageEvent(
-                        productId: variant.productId,
+                        productId: effectiveProductId,
                         imageId: oldImg.id,
                         productVariantId: variant.id,
                       ),
@@ -126,8 +130,9 @@ class ProductVariantsSection extends StatelessWidget {
             if (newPrimary.isUploaded && newPrimary.id != null && newPrimary.id != oldPrimary.id) {
               context.read<ProductBloc>().add(
                     SetPrimaryProductImageEvent(
-                      productId: variant.productId,
+                      productId: effectiveProductId,
                       imageId: newPrimary.id!,
+                      productVariantId: variant.id,
                     ),
                   );
             }
@@ -136,7 +141,7 @@ class ProductVariantsSection extends StatelessWidget {
             if (localPaths.isNotEmpty) {
               context.read<ProductBloc>().add(
                     UploadProductImagesEvent(
-                      productId: variant.productId,
+                      productId: effectiveProductId,
                       filePaths: localPaths,
                       productVariantId: variant.id,
                     ),

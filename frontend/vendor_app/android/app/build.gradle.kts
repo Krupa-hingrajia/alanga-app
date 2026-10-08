@@ -46,9 +46,8 @@ android {
         applicationId = "com.alanga.vendor_app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        // Increment versionCode by 1 for each Play Store upload
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {

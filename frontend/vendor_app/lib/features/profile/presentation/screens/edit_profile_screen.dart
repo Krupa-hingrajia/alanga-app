@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
@@ -226,9 +227,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
           ),
         ),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
+        title: Text(
+          context.tr('edit_profile'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Color(0xFF11261B),

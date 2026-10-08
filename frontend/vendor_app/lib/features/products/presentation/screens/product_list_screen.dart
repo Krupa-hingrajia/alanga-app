@@ -8,6 +8,7 @@ import '../widgets/product_card.dart';
 import '../../data/models/product_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -116,9 +117,9 @@ class _ProductListScreenState extends State<ProductListScreen>
           ),
         ),
       ),
-      title: const Text(
-        'My Products',
-        style: TextStyle(
+      title: Text(
+        context.tr('my_products'),
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Color(0xFF11261B),
@@ -252,7 +253,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                                       children: [
                                         Icon(t.icon, size: 16),
                                         const SizedBox(width: 6),
-                                        Text(t.label),
+                                        Text(context.tr(t.label)),
                                         if (countMap[t.status] != null &&
                                             countMap[t.status]! > 0) ...[
                                           const SizedBox(width: 6),
@@ -314,9 +315,9 @@ class _ProductListScreenState extends State<ProductListScreen>
           backgroundColor: const Color(0xFF1A3827),
           elevation: 4,
           icon: const Icon(Icons.add_rounded, color: Colors.white),
-          label: const Text(
-            'Add Product',
-            style: TextStyle(
+          label: Text(
+            context.tr('add_product'),
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,
@@ -360,7 +361,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                 style: const TextStyle(
                     fontSize: 13, color: Color(0xFF11261B)),
                 decoration: InputDecoration(
-                  hintText: 'Search products by name or SKU...',
+                  hintText: context.tr('search_products_hint'),
                   hintStyle: const TextStyle(
                       fontSize: 13, color: Color(0xFF9CA3AF)),
                   prefixIcon: const Icon(Icons.search_rounded,
@@ -414,7 +415,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                               Icon(t.icon, size: 12, color: t.color),
                               const SizedBox(width: 4),
                               Text(
-                                t.label,
+                                context.tr(t.label),
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -502,8 +503,8 @@ class _ProductListScreenState extends State<ProductListScreen>
   void _confirmDelete(BuildContext context, String id) async {
     final confirmed = await showDeleteConfirmationDialog(
       context: context,
-      title: 'Delete Product',
-      message: 'Are you sure you want to delete this product?',
+      title: context.tr('delete_product'),
+      message: context.tr('delete_product_confirm'),
     );
     if (confirmed == true && context.mounted) {
       context.read<ProductBloc>().add(DeleteProductSubmittedEvent(id: id));
@@ -515,29 +516,29 @@ class _ProductListScreenState extends State<ProductListScreen>
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.rocket_launch_rounded,
+            const Icon(Icons.rocket_launch_rounded,
                 color: Color(0xFF1A8C4E), size: 22),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
-              'Submit for Approval',
-              style: TextStyle(
+              context.tr('submit_for_approval'),
+              style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF11261B)),
             ),
           ],
         ),
-        content: const Text(
-          'Submit this product to administrative review? It will enter PENDING status and become read-only until reviewed.',
-          style: TextStyle(color: Color(0xFF4C6656), fontSize: 14),
+        content: Text(
+          context.tr('submit_approval_confirm_desc'),
+          style: const TextStyle(color: Color(0xFF4C6656), fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF4C6656))),
+            child: Text(context.tr('cancel'),
+                style: const TextStyle(color: Color(0xFF4C6656))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -553,8 +554,8 @@ class _ProductListScreenState extends State<ProductListScreen>
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text('Submit',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(context.tr('submit'),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -588,8 +589,8 @@ class _ProductListScreenState extends State<ProductListScreen>
               const SizedBox(height: 18),
               Text(
                 _searchQuery.isNotEmpty
-                    ? 'No results found'
-                    : 'No ${tab.label} Products',
+                    ? context.tr('no_results_found')
+                    : '${context.tr('no_products_found')} (${context.tr(tab.label)})',
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -599,8 +600,8 @@ class _ProductListScreenState extends State<ProductListScreen>
               const SizedBox(height: 6),
               Text(
                 _searchQuery.isNotEmpty
-                    ? 'Try a different search term'
-                    : 'Pull down to refresh or add a new product',
+                    ? context.tr('try_diff_search_term')
+                    : context.tr('pull_to_refresh_add_product'),
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF7A9A86),
@@ -632,9 +633,9 @@ class _ProductListScreenState extends State<ProductListScreen>
                   color: Color(0xFFE6222B), size: 36),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Something went wrong',
-              style: TextStyle(
+            Text(
+              context.tr('something_went_wrong'),
+              style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF11261B)),
@@ -660,8 +661,8 @@ class _ProductListScreenState extends State<ProductListScreen>
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Retry',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              label: Text(context.tr('retry'),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class AlertItem {
-  final String title;
-  final String message;
+  final String titleKey;
+  final String messageKey;
   final DateTime time;
   final IconData icon;
   final Color color;
 
   const AlertItem({
-    required this.title,
-    required this.message,
+    required this.titleKey,
+    required this.messageKey,
     required this.time,
     required this.icon,
     required this.color,
@@ -20,14 +21,16 @@ class AlertItem {
 class DashboardAlertsTab extends StatelessWidget {
   const DashboardAlertsTab({super.key});
 
-  String _formatTime(DateTime time) {
+  String _formatTime(BuildContext context, DateTime time) {
     final diff = DateTime.now().difference(time);
-    if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m ago';
+    if (diff.inMinutes < 1) {
+      return context.tr('just_now');
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes} ${context.tr('m_ago')}';
     } else if (diff.inHours < 24) {
-      return '${diff.inHours}h ago';
+      return '${diff.inHours} ${context.tr('h_ago')}';
     } else {
-      return '${diff.inDays}d ago';
+      return '${diff.inDays} ${context.tr('d_ago')}';
     }
   }
 
@@ -35,29 +38,29 @@ class DashboardAlertsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final alertItems = [
       AlertItem(
-        title: 'Inventory Sync Complete',
-        message: 'Your multi-variant warehouse stocks are updated across customer shopping channels.',
+        titleKey: 'alert_inventory_sync_title',
+        messageKey: 'alert_inventory_sync_msg',
         time: DateTime.now().subtract(const Duration(minutes: 25)),
         icon: Icons.inventory_2_outlined,
         color: AppColors.primaryGreen,
       ),
       AlertItem(
-        title: 'Category Approval Successful',
-        message: 'Your category submission "Fashion Wear" has been reviewed and approved by administrator.',
+        titleKey: 'alert_category_approved_title',
+        messageKey: 'alert_category_approved_msg',
         time: DateTime.now().subtract(const Duration(hours: 1)),
         icon: Icons.check_circle_outline,
         color: AppColors.primaryGreen,
       ),
       AlertItem(
-        title: 'New Brand Request Reviewing',
-        message: 'Your registration request for brand "Alanga Apparel" is under priority verification.',
+        titleKey: 'alert_brand_reviewing_title',
+        messageKey: 'alert_brand_reviewing_msg',
         time: DateTime.now().subtract(const Duration(hours: 4)),
         icon: Icons.hourglass_top,
         color: AppColors.brandOrange,
       ),
       AlertItem(
-        title: 'Seller Panel Welcome',
-        message: 'Welcome to Alanga Seller Central Panel! Let\'s catalog products to drive shop orders.',
+        titleKey: 'alert_welcome_title',
+        messageKey: 'alert_welcome_msg',
         time: DateTime.now().subtract(const Duration(days: 1)),
         icon: Icons.verified_user_outlined,
         color: Colors.blue,
@@ -104,7 +107,7 @@ class DashboardAlertsTab extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            alert.title,
+                            context.tr(alert.titleKey),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -113,14 +116,14 @@ class DashboardAlertsTab extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          _formatTime(alert.time),
+                          _formatTime(context, alert.time),
                           style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryDark),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      alert.message,
+                      context.tr(alert.messageKey),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondaryLight,
@@ -137,3 +140,4 @@ class DashboardAlertsTab extends StatelessWidget {
     );
   }
 }
+

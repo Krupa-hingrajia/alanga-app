@@ -7,6 +7,7 @@ import '../bloc/category_state.dart';
 import '../widgets/category_card.dart';
 import '../../data/models/category_model.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
@@ -46,9 +47,9 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            'Categories',
-            style: TextStyle(
+          title: Text(
+            context.tr('categories'),
+            style: const TextStyle(
               color: Color(0xFF11261B),
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -81,7 +82,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             } else if (state is CategoryActionError) {
               showValidationErrorDialog(
                 context: context,
-                title: 'Delete Category',
+                title: context.tr('delete_category'),
                 message: state.message,
               );
             }

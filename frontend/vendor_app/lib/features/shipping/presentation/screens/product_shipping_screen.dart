@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../bloc/shipping_bloc.dart';
 import '../bloc/shipping_event.dart';
@@ -53,9 +54,9 @@ class _ProductShippingScreenState extends State<ProductShippingScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            'Shipping Management',
-            style: TextStyle(
+          title: Text(
+            context.tr('shipping_management'),
+            style: const TextStyle(
               color: Color(0xFF11261B),
               fontWeight: FontWeight.bold,
               fontSize: 18,

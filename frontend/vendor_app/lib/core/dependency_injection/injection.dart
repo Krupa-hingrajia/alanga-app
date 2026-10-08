@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../storage/secure_storage_service.dart';
+import '../localization/bloc/language_bloc.dart';
+import '../localization/bloc/language_event.dart';
 import '../network/dio_client.dart';
 import '../network/api_service.dart';
 import '../../features/auth/data/datasource/auth_remote_datasource.dart';
@@ -64,6 +66,7 @@ final sl = GetIt.instance;
 
 Future<void> init() async {
   // Blocs
+  sl.registerLazySingleton(() => LanguageBloc(storageService: sl())..add(const LoadSavedLanguageEvent()));
   sl.registerFactory(() => LoginBloc(loginUseCase: sl()));
   sl.registerFactory(() => RegisterBloc(registerUseCase: sl()));
   sl.registerFactory(() => ForgotPasswordBloc(authRepository: sl()));

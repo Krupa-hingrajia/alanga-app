@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../products/data/models/product_model.dart';
@@ -133,9 +134,9 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
               child: const Icon(Icons.inventory_2_outlined, color: AppColors.primaryGreen, size: 20),
             ),
             const SizedBox(width: 10),
-            const Text(
-              'Set Exact Stock',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+            Text(
+              context.tr('set_exact_stock'),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
             ),
           ],
         ),
@@ -160,7 +161,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
               autofocus: true,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Available Units in Warehouse',
+                labelText: context.tr('available_units_warehouse'),
                 labelStyle: const TextStyle(fontSize: 12),
                 prefixIcon: const Icon(Icons.numbers, size: 18),
                 filled: true,
@@ -199,7 +200,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text(context.tr('cancel'), style: const TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -215,7 +216,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             ),
-            child: const Text('Save Stock', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(context.tr('save'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -271,9 +272,9 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
             }
           },
         ),
-        title: const Text(
-          'Inventory & Stock Manager',
-          style: TextStyle(
+        title: Text(
+          context.tr('inventory_stock_manager'),
+          style: const TextStyle(
             color: Color(0xFF11261B),
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -282,7 +283,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.primaryGreen),
-            tooltip: 'Refresh Inventory',
+            tooltip: context.tr('refresh_inventory'),
             onPressed: _loadProducts,
           ),
         ],
@@ -314,7 +315,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Products (${filtered.length})',
+                            '${context.tr('products')} (${filtered.length})',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -348,7 +349,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
       children: [
         Expanded(
           child: _buildMetricTile(
-            title: 'Out of Stock',
+            title: context.tr('out_of_stock'),
             count: _outOfStockCount,
             icon: Icons.cancel_outlined,
             color: const Color(0xFFDC2626),
@@ -360,7 +361,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildMetricTile(
-            title: 'Low Stock (≤5)',
+            title: '${context.tr('low_stock')} (≤5)',
             count: _lowStockCount,
             icon: Icons.warning_amber_rounded,
             color: const Color(0xFFD97706),
@@ -372,7 +373,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildMetricTile(
-            title: 'Healthy Stock',
+            title: context.tr('in_stock'),
             count: _inStockCount,
             icon: Icons.check_circle_outline,
             color: const Color(0xFF16A34A),
@@ -469,7 +470,7 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
         controller: _searchController,
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
-          hintText: 'Search product by name or SKU...',
+          hintText: context.tr('search_products_hint'),
           hintStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
           prefixIcon: const Icon(Icons.search, color: AppColors.primaryGreen, size: 20),
           suffixIcon: _searchController.text.isNotEmpty
@@ -490,10 +491,10 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
 
   Widget _buildFilterChips() {
     final filters = [
-      {'label': 'All (${_products.length})', 'filter': InventoryFilter.all},
-      {'label': 'Low Stock ($_lowStockCount)', 'filter': InventoryFilter.lowStock},
-      {'label': 'Out of Stock ($_outOfStockCount)', 'filter': InventoryFilter.outOfStock},
-      {'label': 'In Stock ($_inStockCount)', 'filter': InventoryFilter.inStock},
+      {'label': '${context.tr('all')} (${_products.length})', 'filter': InventoryFilter.all},
+      {'label': '${context.tr('low_stock')} ($_lowStockCount)', 'filter': InventoryFilter.lowStock},
+      {'label': '${context.tr('out_of_stock')} ($_outOfStockCount)', 'filter': InventoryFilter.outOfStock},
+      {'label': '${context.tr('in_stock')} ($_inStockCount)', 'filter': InventoryFilter.inStock},
     ];
 
     return SingleChildScrollView(

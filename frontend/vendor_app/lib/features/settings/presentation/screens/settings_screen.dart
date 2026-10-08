@@ -1,8 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/localization/bloc/language_bloc.dart';
+import '../../../../core/localization/bloc/language_state.dart';
+import '../../../../core/localization/widgets/language_selection_bottom_sheet.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../widgets/delete_account_dialog.dart';
@@ -56,10 +61,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
@@ -69,8 +74,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 SizedBox(width: 16),
                 Text(
-                  'Logging out...',
-                  style: TextStyle(
+                  context.tr('logging_out'),
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF11261B),
@@ -108,13 +113,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: Colors.white,
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.logout_rounded, color: AppColors.brandRed, size: 22),
-            SizedBox(width: 8),
+            const Icon(Icons.logout_rounded, color: AppColors.brandRed, size: 22),
+            const SizedBox(width: 8),
             Text(
-              'Confirm Logout',
-              style: TextStyle(
+              ctx.tr('confirm_logout_title'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF11261B),
@@ -122,17 +127,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Are you sure you want to log out of your ALANGA Vendor account?',
-          style: TextStyle(fontSize: 14, color: Color(0xFF4C6656)),
+        content: Text(
+          ctx.tr('confirm_logout_msg'),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF4C6656)),
         ),
         actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Color(0xFF4C6656), fontWeight: FontWeight.w600),
+            child: Text(
+              ctx.tr('cancel'),
+              style: const TextStyle(color: Color(0xFF4C6656), fontWeight: FontWeight.w600),
             ),
           ),
           ElevatedButton(
@@ -146,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(ctx.tr('logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -202,9 +207,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        title: const Text(
-          'Store Settings',
-          style: TextStyle(
+        title: Text(
+          context.tr('store_settings'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Color(0xFF11261B),
@@ -271,20 +276,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         minimumSize: Size.zero,
                       ),
-                      child: const Text('Edit', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      child: Text(context.tr('edit'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
 
+              // Language & Preferences Section
+              _buildSectionHeader(context.tr('language')),
+              _buildSettingsCard([
+                BlocBuilder<LanguageBloc, LanguageState>(
+                  builder: (context, state) {
+                    final code = state.locale.languageCode;
+                    final flag = code == 'ar'
+                        ? '🇸🇦'
+                        : code == 'hi'
+                            ? '🇮🇳'
+                            : '🇬🇧';
+                    final langName = code == 'ar'
+                        ? 'العربية (Arabic)'
+                        : code == 'hi'
+                            ? 'हिंदी (Hindi)'
+                            : 'English';
+                    return _buildSettingsTile(
+                      icon: Icons.translate_rounded,
+                      title: context.tr('language'),
+                      subtitle: '$flag $langName',
+                      onTap: () => LanguageSelectionBottomSheet.show(context),
+                    );
+                  },
+                ),
+              ]),
+              const SizedBox(height: 20),
+
               // Account & Security Section
-              _buildSectionHeader('Account & Security'),
+              _buildSectionHeader(context.tr('account_security')),
               _buildSettingsCard([
                 _buildSettingsTile(
                   icon: Icons.person_outline,
-                  title: 'Edit Profile & Store Details',
-                  subtitle: 'Update business name, phone, address',
+                  title: context.tr('edit_profile'),
+                  subtitle: context.tr('edit_profile_sub'),
                   onTap: () async {
                     await context.push('/profile/edit');
                     await _loadUser();
@@ -294,52 +326,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
                 _buildSettingsTile(
                   icon: Icons.lock_outline,
-                  title: 'Change Password',
-                  subtitle: 'Update your account login password',
+                  title: context.tr('change_password'),
+                  subtitle: context.tr('change_password_sub'),
                   onTap: () => context.push('/settings/change-password'),
                 ),
               ]),
               const SizedBox(height: 20),
 
               // Support & Help
-              _buildSectionHeader('Support & Help'),
+              _buildSectionHeader(context.tr('support_help')),
               _buildSettingsCard([
                 _buildSettingsTile(
                   icon: Icons.headset_mic_outlined,
-                  title: 'Seller Support',
-                  subtitle: 'Help center, queries, and helpline',
+                  title: context.tr('seller_support'),
+                  subtitle: context.tr('seller_support_sub'),
                   onTap: () => context.push('/settings/support'),
                 ),
               ]),
               const SizedBox(height: 20),
 
               // Legal & Policies
-              _buildSectionHeader('Legal & Compliance'),
+              _buildSectionHeader(context.tr('legal_compliance')),
               _buildSettingsCard([
                 _buildSettingsTile(
                   icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
-                  subtitle: 'Data usage & privacy protection guidelines',
+                  title: context.tr('privacy_policy'),
+                  subtitle: context.tr('privacy_policy_sub'),
                   onTap: () => context.push('/settings/privacy-policy'),
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
                 _buildSettingsTile(
                   icon: Icons.description_outlined,
-                  title: 'Terms & Conditions',
-                  subtitle: 'Merchant service terms & responsibilities',
+                  title: context.tr('terms_conditions'),
+                  subtitle: context.tr('terms_conditions_sub'),
                   onTap: () => context.push('/settings/terms'),
                 ),
               ]),
               const SizedBox(height: 20),
 
               // Danger Zone / Account Deletion
-              _buildSectionHeader('Account Actions'),
+              _buildSectionHeader(context.tr('account_actions')),
               _buildSettingsCard([
                 _buildSettingsTile(
                   icon: Icons.delete_forever_outlined,
                   iconColor: AppColors.brandRed,
-                  title: 'Delete Account',
-                  subtitle: 'Permanently delete your vendor store and data',
+                  title: context.tr('delete_account'),
+                  subtitle: context.tr('delete_account_sub'),
                   titleColor: AppColors.brandRed,
                   onTap: () => DeleteAccountDialog.show(context),
                 ),
@@ -347,8 +379,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingsTile(
                   icon: Icons.logout_rounded,
                   iconColor: const Color(0xFF4C6656),
-                  title: 'Logout',
-                  subtitle: 'Sign out of this device',
+                  title: context.tr('logout'),
+                  subtitle: context.tr('logout_sub'),
                   onTap: _showLogoutDialog,
                 ),
               ]),

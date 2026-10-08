@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../data/models/vendor_order_model.dart';
 import 'vendor_order_status_badge.dart';
 import 'order_documents_bottom_sheet.dart';
@@ -99,7 +100,7 @@ class VendorOrderCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              order.customer?.fullName ?? 'Valued Customer',
+                              order.customer?.fullName ?? context.tr('valued_customer'),
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -172,7 +173,7 @@ class VendorOrderCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             if (firstItem.variantName != null && firstItem.variantName!.isNotEmpty)
                               Text(
-                                'Variant: ${firstItem.variantName}',
+                                '${context.tr('variant')}: ${firstItem.variantName}',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF6B7280),
@@ -182,7 +183,7 @@ class VendorOrderCard extends StatelessWidget {
                               ),
                             if (firstItem.sku != null && firstItem.sku!.isNotEmpty)
                               Text(
-                                'SKU: ${firstItem.sku}',
+                                '${context.tr('sku')}: ${firstItem.sku}',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   fontFamily: 'monospace',
@@ -199,7 +200,7 @@ class VendorOrderCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'Qty: ${firstItem.quantity}',
+                                    '${context.tr('qty')}: ${firstItem.quantity}',
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -210,7 +211,7 @@ class VendorOrderCard extends StatelessWidget {
                                 if (order.orderItems.length > 1) ...[
                                   const SizedBox(width: 6),
                                   Text(
-                                    '+${order.orderItems.length - 1} more item${order.orderItems.length > 2 ? 's' : ''}',
+                                    '+${order.orderItems.length - 1} ${context.tr('more_items')}',
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -240,7 +241,7 @@ class VendorOrderCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Total ($totalQty item${totalQty > 1 ? 's' : ''})',
+                            '${context.tr('total')} ($totalQty ${context.tr(totalQty > 1 ? 'items' : 'item')})',
                             style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF8B9E94),
@@ -266,7 +267,7 @@ class VendorOrderCard extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: Tooltip(
-                              message: 'Print Shipping Label & Invoice',
+                              message: context.tr('print_shipping_label_invoice'),
                               child: InkWell(
                                 onTap: () => OrderDocumentsBottomSheet.show(context, order),
                                 borderRadius: BorderRadius.circular(10),
@@ -298,7 +299,7 @@ class VendorOrderCard extends StatelessWidget {
                                   )
                                 : const Icon(Icons.arrow_forward_rounded, size: 14),
                             label: Text(
-                              order.nextStatusActionLabel ?? 'Update',
+                              context.tr(order.nextStatusActionLabel ?? 'Update'),
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(

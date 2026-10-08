@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../data/models/vendor_order_model.dart';
 import '../bloc/vendor_order_bloc.dart';
 import '../bloc/vendor_order_event.dart';
@@ -99,13 +100,13 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                 color: AppColors.primaryGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.sync_alt_rounded, color: AppColors.primaryGreen, size: 22),
+              child: const Icon(Icons.sync_alt_rounded, color: AppColors.primaryGreen, size: 22),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Update Status',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                context.tr('update_status'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -115,7 +116,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Advance order #${order.orderNumber} to:',
+              '${context.tr('advance_order')} #${order.orderNumber} ${context.tr('to')}:',
               style: const TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
             ),
             const SizedBox(height: 10),
@@ -128,7 +129,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
               child: Row(
                 children: [
                   Text(
-                    order.status,
+                    context.tr(order.status),
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   const Padding(
@@ -136,7 +137,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                     child: Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.grey),
                   ),
                   Text(
-                    nextStatus,
+                    context.tr(nextStatus),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -147,16 +148,16 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Are you sure you want to proceed?',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+            Text(
+              context.tr('are_you_sure_proceed'),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFF6B7280))),
+            child: Text(context.tr('cancel'), style: const TextStyle(color: Color(0xFF6B7280))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -171,7 +172,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text(actionLabel),
+            child: Text(context.tr(actionLabel)),
           ),
         ],
       ),
@@ -227,9 +228,9 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                     ),
                   ),
                 ),
-                title: const Text(
-                  'Order Management',
-                  style: TextStyle(
+                title: Text(
+                  context.tr('order_management'),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF11261B),
@@ -326,7 +327,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                         bloc.add(SearchOrdersEvent(query: val));
                       },
                       decoration: InputDecoration(
-                        hintText: 'Search order #, customer, product...',
+                        hintText: context.tr('search_hint'),
                         hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
                         prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF1A3827), size: 22),
                         suffixIcon: _searchCtrl.text.isNotEmpty
@@ -374,7 +375,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(f.label),
+                            Text(context.tr(f.label)),
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -457,7 +458,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
               ElevatedButton.icon(
                 onPressed: () => bloc.add(const FetchVendorOrdersEvent(isRefresh: true)),
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try Again'),
+                label: Text(context.tr('try_again')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1A3827),
                   foregroundColor: Colors.white,
@@ -502,10 +503,10 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                     const SizedBox(height: 16),
                     Text(
                       state.searchQuery.isNotEmpty
-                          ? 'No matching orders found'
+                          ? context.tr('no_matching_orders')
                           : state.selectedStatus != null
-                              ? 'No ${state.selectedStatus!.toLowerCase()} orders'
-                              : 'No orders received yet',
+                              ? '${context.tr('no_matching_orders')} (${context.tr(state.selectedStatus!)})'
+                              : context.tr('no_orders_received'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -517,8 +518,8 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Text(
                         state.searchQuery.isNotEmpty
-                            ? 'Try searching with a different order number or customer name.'
-                            : 'Orders containing your products will appear here when placed by customers.',
+                            ? context.tr('try_diff_search_order')
+                            : context.tr('orders_appear_here'),
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                       ),
@@ -532,7 +533,7 @@ class _VendorOrderListScreenState extends State<VendorOrderListScreen> {
                           bloc.add(const FilterOrdersByStatusEvent(status: null));
                         },
                         icon: const Icon(Icons.filter_alt_off_rounded, size: 18),
-                        label: const Text('Clear All Filters'),
+                        label: Text(context.tr('clear_all_filters')),
                         style: TextButton.styleFrom(
                           foregroundColor: const Color(0xFF1A3827),
                         ),

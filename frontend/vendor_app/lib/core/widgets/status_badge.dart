@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 
 class StatusBadge extends StatelessWidget {
   final String status;
@@ -72,7 +73,7 @@ class StatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            label,
+            context.tr(label),
             style: TextStyle(
               color: fgColor,
               fontSize: 11,

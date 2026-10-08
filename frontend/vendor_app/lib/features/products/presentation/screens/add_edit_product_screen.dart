@@ -394,6 +394,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     } else if (state is ProductImageActionSuccess) {
                       setState(() {
                         _isUploading = false;
+                        _pendingLocalPaths.clear();
                         if (state.productVariantId == null || state.productVariantId!.isEmpty) {
                           _uploadedImages = state.images;
                         }
@@ -673,9 +674,18 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                     isUploading: _isUploading,
                                     uploadProgress: _uploadProgress,
                                     onAddLocalImages: (newPaths) {
-                                      setState(() {
-                                        _pendingLocalPaths = [..._pendingLocalPaths, ...newPaths];
-                                      });
+                                      if (isEdit && widget.product != null) {
+                                        context.read<ProductBloc>().add(
+                                              UploadProductImagesEvent(
+                                                productId: widget.product!.id,
+                                                filePaths: newPaths,
+                                              ),
+                                            );
+                                      } else {
+                                        setState(() {
+                                          _pendingLocalPaths = [..._pendingLocalPaths, ...newPaths];
+                                        });
+                                      }
                                     },
                                     onDeleteImage: (item) {
                                       if (item.isUploaded && item.id != null) {

@@ -12,6 +12,7 @@ import '../../data/models/attribute_model.dart';
 import '../../data/models/attribute_value_model.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../widgets/add_edit_variant_bottom_sheet.dart';
@@ -241,9 +242,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
           ),
-          title: const Text(
-            'Product Details',
-            style: TextStyle(
+          title: Text(
+            context.tr('product_details'),
+            style: const TextStyle(
               color: Color(0xFF11261B),
               fontWeight: FontWeight.w700,
               fontSize: 18,
@@ -253,7 +254,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.inventory_2_outlined, color: AppColors.primaryGreen),
-              tooltip: 'Manage Inventory',
+              tooltip: context.tr('inventory'),
               onPressed: () async {
                 await context.push('/products/inventory', extra: _product);
                 _refreshProduct();
@@ -261,7 +262,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.local_shipping_outlined, color: Color(0xFF2563EB)),
-              tooltip: 'Configure Shipping',
+              tooltip: context.tr('configure_shipping'),
               onPressed: () async {
                 await context.push('/products/shipping', extra: _product);
                 _refreshProduct();
@@ -271,7 +272,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Builder(
                 builder: (blocContext) => IconButton(
                   icon: const Icon(Icons.edit_outlined, color: AppColors.brandOrange),
-                  tooltip: 'Edit Product',
+                  tooltip: context.tr('edit_product'),
                   onPressed: () async {
                     await context.push('/products/edit', extra: _product);
                     if (context.mounted) {

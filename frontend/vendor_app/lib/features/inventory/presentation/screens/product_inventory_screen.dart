@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../bloc/inventory_bloc.dart';
 import '../bloc/inventory_event.dart';
@@ -139,9 +140,9 @@ class _ProductInventoryScreenState extends State<ProductInventoryScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            'Inventory Management',
-            style: TextStyle(
+          title: Text(
+            context.tr('inventory_management'),
+            style: const TextStyle(
               color: Color(0xFF11261B),
               fontWeight: FontWeight.bold,
               fontSize: 18,

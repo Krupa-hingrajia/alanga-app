@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/localization/bloc/language_bloc.dart';
+import '../../../../core/localization/bloc/language_state.dart';
+import '../../../../core/localization/widgets/language_selection_bottom_sheet.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../settings/presentation/widgets/delete_account_dialog.dart';
 
@@ -134,7 +139,7 @@ class DashboardProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -187,7 +192,7 @@ class DashboardProfileTab extends StatelessWidget {
                     await onRefreshUser();
                   },
                   icon: const Icon(Icons.edit_outlined, color: Color(0xFF1A3827), size: 20),
-                  tooltip: 'Edit Profile',
+                  tooltip: context.tr('edit_profile'),
                 ),
               ],
             ),
@@ -195,9 +200,9 @@ class DashboardProfileTab extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Business Details
-          const Text(
-            'Business Profile Details',
-            style: TextStyle(
+          Text(
+            context.tr('details'),
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -210,7 +215,7 @@ class DashboardProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -218,11 +223,11 @@ class DashboardProfileTab extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildProfileDetailRow(Icons.email_outlined, 'Registered Email', email),
+                _buildProfileDetailRow(Icons.email_outlined, context.tr('email'), email),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
-                _buildProfileDetailRow(Icons.phone_outlined, 'Contact Mobile', formattedMobile),
+                _buildProfileDetailRow(Icons.phone_outlined, context.tr('phone_number'), formattedMobile),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
-                _buildProfileDetailRow(Icons.badge_outlined, 'Seller Status', 'Verified Marketplace Partner'),
+                _buildProfileDetailRow(Icons.badge_outlined, context.tr('status'), 'Verified Marketplace Partner'),
               ],
             ),
           ),
@@ -235,7 +240,7 @@ class DashboardProfileTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -243,17 +248,70 @@ class DashboardProfileTab extends StatelessWidget {
             ),
             child: Column(
               children: [
+                // Language Selection Option
+                BlocBuilder<LanguageBloc, LanguageState>(
+                  builder: (context, state) {
+                    final code = state.locale.languageCode;
+                    final flag = code == 'ar'
+                        ? '🇸🇦'
+                        : code == 'hi'
+                            ? '🇮🇳'
+                            : '🇬🇧';
+                    final langName = code == 'ar'
+                        ? 'العربية (Arabic)'
+                        : code == 'hi'
+                            ? 'हिंदी (Hindi)'
+                            : 'English';
+                    return ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A3827).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.translate_rounded, color: Color(0xFF1A3827), size: 20),
+                      ),
+                      title: Text(
+                        context.tr('language'),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B)),
+                      ),
+                      subtitle: Text(
+                        '$flag $langName',
+                        style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondaryLight),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
+                      onTap: () => LanguageSelectionBottomSheet.show(context),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.inventory_2_outlined, color: Color(0xFF0284C7)),
-                  title: const Text('Global Inventory & Stock Management', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Live warehouse stock, reorder alerts', style: TextStyle(fontSize: 11, color: AppColors.textSecondaryLight)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF0284C7), size: 20),
+                  ),
+                  title: Text(context.tr('manage_inventory'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B))),
+                  subtitle: const Text('Live warehouse stock, reorder alerts', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondaryLight)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
                   onTap: () => context.push('/inventory'),
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.verified_user_outlined, color: Color(0xFF1A3827)),
-                  title: const Text('Store KYC & Bank Details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A3827).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.verified_user_outlined, color: Color(0xFF1A3827), size: 20),
+                  ),
+                  title: Text(context.tr('kyc_verification'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B))),
                   subtitle: Text(
                     kycStatus == 'VERIFIED'
                         ? 'Verified Partner ✓'
@@ -261,7 +319,7 @@ class DashboardProfileTab extends StatelessWidget {
                             ? 'Verification In Review ⏳'
                             : 'Action Required • Incomplete ⚠️',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                       color: kycStatus == 'VERIFIED'
                           ? AppColors.primaryGreen
@@ -277,9 +335,17 @@ class DashboardProfileTab extends StatelessWidget {
                   },
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.settings_outlined, color: Color(0xFF4C6656)),
-                  title: const Text('Store Settings', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4C6656).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.settings_outlined, color: Color(0xFF4C6656), size: 20),
+                  ),
+                  title: Text(context.tr('store_settings'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B))),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
                   onTap: () async {
                     await context.push('/settings');
@@ -287,23 +353,47 @@ class DashboardProfileTab extends StatelessWidget {
                   },
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.headset_mic_outlined, color: Color(0xFF4C6656)),
-                  title: const Text('Alanga Seller Support', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4C6656).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.headset_mic_outlined, color: Color(0xFF4C6656), size: 20),
+                  ),
+                  title: Text(context.tr('seller_support'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B))),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
                   onTap: () => context.push('/settings/support'),
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined, color: Color(0xFF4C6656)),
-                  title: const Text('Privacy Policy & Legal', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4C6656).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.privacy_tip_outlined, color: Color(0xFF4C6656), size: 20),
+                  ),
+                  title: Text(context.tr('privacy_policy'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF11261B))),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
                   onTap: () => context.push('/settings/privacy-policy'),
                 ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
+
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: AppColors.brandRed),
-                  title: const Text('Delete Account', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandRed)),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandRed.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.delete_outline, color: AppColors.brandRed, size: 20),
+                  ),
+                  title: Text(context.tr('delete_account'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.brandRed)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFD1DDD6)),
                   onTap: () => DeleteAccountDialog.show(context),
                 ),
@@ -316,9 +406,9 @@ class DashboardProfileTab extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onLogout,
             icon: const Icon(Icons.logout_outlined, size: 16),
-            label: const Text(
-              'LOGOUT FROM CENTRAL',
-              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+            label: Text(
+              context.tr('logout').toUpperCase(),
+              style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.brandRed,

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/vendor_order_model.dart';
@@ -148,10 +149,10 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               child: const Icon(Icons.sync_alt_rounded, color: AppColors.primaryGreen, size: 22),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Advance Order Status',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                context.tr('advance_order'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -161,7 +162,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Advance order #${_currentOrder.orderNumber} to:',
+              '${context.tr('advance_order')} #${_currentOrder.orderNumber} ${context.tr('to')}:',
               style: const TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
             ),
             const SizedBox(height: 12),
@@ -194,16 +195,16 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            const Text(
-              'Once updated, the order moves to the next fulfillment stage. Are you sure you want to proceed?',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280), height: 1.4),
+            Text(
+              context.tr('are_you_sure_proceed'),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280), height: 1.4),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('Cancel', style: TextStyle(color: Color(0xFF6B7280))),
+            child: Text(context.tr('cancel'), style: const TextStyle(color: Color(0xFF6B7280))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -218,7 +219,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text(actionLabel),
+            child: Text(context.tr(actionLabel)),
           ),
         ],
       ),
@@ -413,10 +414,10 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
             children: [
               const Icon(Icons.print_outlined, size: 16, color: Color(0xFF4C6656)),
               const SizedBox(width: 6),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Order Documents & Printables',
-                  style: TextStyle(
+                  context.tr('order_documents_printables'),
+                  style: const TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF11261B),
@@ -425,9 +426,9 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               ),
               InkWell(
                 onTap: () => OrderDocumentsBottomSheet.show(context, _currentOrder),
-                child: const Text(
-                  'All Documents',
-                  style: TextStyle(
+                child: Text(
+                  context.tr('all_documents'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryGreen,
@@ -448,7 +449,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     order: _currentOrder,
                   ),
                   icon: const Icon(Icons.receipt_long_rounded, size: 15),
-                  label: const Text('Print Label', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  label: Text(context.tr('shipping_label'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1A3827),
                     foregroundColor: Colors.white,
@@ -466,7 +467,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     order: _currentOrder,
                   ),
                   icon: const Icon(Icons.share_outlined, size: 14, color: Color(0xFF1A3827)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF1A3827))),
+                  label: Text(context.tr('share'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF1A3827))),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF1A3827)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -488,7 +489,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     order: _currentOrder,
                   ),
                   icon: const Icon(Icons.description_outlined, size: 15),
-                  label: const Text('Tax Invoice', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  label: Text(context.tr('invoice'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1565C0),
                     foregroundColor: Colors.white,
@@ -506,7 +507,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     order: _currentOrder,
                   ),
                   icon: const Icon(Icons.share_outlined, size: 14, color: Color(0xFF1565C0)),
-                  label: const Text('Share', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+                  label: Text(context.tr('share'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF1565C0)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -555,10 +556,10 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                 child: const Icon(Icons.local_shipping_outlined, size: 20, color: Color(0xFF2563EB)),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Shipment & Tracking',
-                  style: TextStyle(
+                  context.tr('shipment_tracking'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF11261B),
@@ -585,7 +586,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
           const SizedBox(height: 14),
           _buildInfoRow(
             icon: Icons.business_outlined,
-            label: 'Courier',
+            label: context.tr('courier'),
             value: _currentOrder.courierName ?? 'Standard Delivery',
           ),
           const SizedBox(height: 10),
@@ -593,11 +594,11 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
             children: [
               const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF9CA3AF)),
               const SizedBox(width: 10),
-              const SizedBox(
+              SizedBox(
                 width: 70,
                 child: Text(
-                  'AWB / No.',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                  context.tr('awb_no'),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                 ),
               ),
               Expanded(
@@ -616,20 +617,20 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: _currentOrder.trackingNumber!));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('AWB copied to clipboard'), duration: Duration(seconds: 1)),
+                      SnackBar(content: Text(context.tr('copied')), duration: const Duration(seconds: 1)),
                     );
                   },
                   borderRadius: BorderRadius.circular(6),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.copy_rounded, size: 13, color: AppColors.primaryGreen),
-                        SizedBox(width: 4),
+                        const Icon(Icons.copy_rounded, size: 13, color: AppColors.primaryGreen),
+                        const SizedBox(width: 4),
                         Text(
-                          'Copy',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
+                          context.tr('copy'),
+                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primaryGreen),
                         ),
                       ],
                     ),
@@ -760,10 +761,10 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                 child: const Icon(Icons.person_rounded, size: 20, color: Color(0xFF1A3827)),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Customer Details',
-                  style: TextStyle(
+                  context.tr('customer_details'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF11261B),
@@ -775,7 +776,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
           const SizedBox(height: 14),
           _buildInfoRow(
             icon: Icons.account_circle_outlined,
-            label: 'Name',
+            label: context.tr('customer_name'),
             value: customer?.fullName ?? 'Customer',
           ),
           const SizedBox(height: 10),
@@ -785,11 +786,11 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               children: [
                 const Icon(Icons.phone_outlined, size: 16, color: Color(0xFF9CA3AF)),
                 const SizedBox(width: 10),
-                const SizedBox(
+                SizedBox(
                   width: 70,
                   child: Text(
-                    'Phone',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                    context.tr('customer_phone'),
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                   ),
                 ),
                 Expanded(
@@ -806,7 +807,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
           if (customer?.email != null && customer!.email.isNotEmpty)
             _buildInfoRow(
               icon: Icons.mail_outline_rounded,
-              label: 'Email',
+              label: context.tr('email'),
               value: customer.email,
             ),
         ],
@@ -848,9 +849,9 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     child: const Icon(Icons.location_on_outlined, size: 20, color: Color(0xFF1A3827)),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Delivery Address',
-                    style: TextStyle(
+                  Text(
+                    context.tr('shipping_address'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF11261B),
@@ -878,9 +879,9 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
           ),
           const SizedBox(height: 14),
           if (address == null)
-            const Text(
-              'No delivery address specified.',
-              style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+            Text(
+              context.tr('no_delivery_address'),
+              style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
             )
           else ...[
             Text(
@@ -949,7 +950,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                'Items (${_currentOrder.orderItems.length})',
+                '${context.tr('items')} (${_currentOrder.orderItems.length})',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1072,9 +1073,9 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                 child: const Icon(Icons.receipt_outlined, size: 20, color: Color(0xFF1A3827)),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Price Summary',
-                style: TextStyle(
+              Text(
+                context.tr('price_summary'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF11261B),
@@ -1083,14 +1084,14 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          _buildPriceRow('Items Total', '₹${_currentOrder.vendorItemsTotal.toStringAsFixed(0)}'),
+          _buildPriceRow(context.tr('items_total'), '₹${_currentOrder.vendorItemsTotal.toStringAsFixed(0)}'),
           const SizedBox(height: 8),
-          _buildPriceRow('Shipping Charges', '₹${_currentOrder.vendorShippingTotal.toStringAsFixed(0)}'),
+          _buildPriceRow(context.tr('shipping_charges'), '₹${_currentOrder.vendorShippingTotal.toStringAsFixed(0)}'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Divider(height: 1, color: Color(0xFFE8EFEA)),
           ),
-          _buildPriceRow('Grand Total', '₹${_currentOrder.vendorGrandTotal.toStringAsFixed(0)}', isHighlighted: true),
+          _buildPriceRow(context.tr('grand_total'), '₹${_currentOrder.vendorGrandTotal.toStringAsFixed(0)}', isHighlighted: true),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -1108,14 +1109,14 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: _currentOrder.paymentMethod.toUpperCase() == 'COD'
-                        ? const Color(0xFF92400E)
-                        : const Color(0xFF3730A3),
+                      ? const Color(0xFF92400E)
+                      : const Color(0xFF3730A3),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
-                'Payment Status: ${_currentOrder.paymentStatus.toUpperCase()}',
+                '${context.tr('payment_status')}: ${_currentOrder.paymentStatus.toUpperCase()}',
                 style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280), fontWeight: FontWeight.w500),
               ),
             ],
@@ -1133,26 +1134,26 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFBBF7D0)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 24),
-          SizedBox(width: 12),
+          const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 24),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Order Completed & Delivered',
-                  style: TextStyle(
+                  context.tr('order_fulfilled'),
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF166534),
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'This order has been fulfilled. No further status changes can be made.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF15803D)),
+                  context.tr('no_actions_available'),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF15803D)),
                 ),
               ],
             ),
@@ -1174,14 +1175,14 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.cancel_rounded, color: Color(0xFFDC2626), size: 24),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Order Cancelled',
-                  style: TextStyle(
+                Text(
+                  context.tr('order_cancelled'),
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF991B1B),
@@ -1191,7 +1192,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                 Text(
                   _currentOrder.cancelReason != null && _currentOrder.cancelReason!.isNotEmpty
                       ? 'Reason: ${_currentOrder.cancelReason}'
-                      : 'This order was cancelled and inventory was restored.',
+                      : context.tr('order_cancelled'),
                   style: const TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
                 ),
               ],
@@ -1279,7 +1280,7 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                   OutlinedButton.icon(
                     onPressed: !isUpdating ? () => _confirmCancelOrder(context) : null,
                     icon: const Icon(Icons.cancel_outlined, size: 16, color: AppColors.brandRed),
-                    label: const Text('Cancel', style: TextStyle(color: AppColors.brandRed, fontWeight: FontWeight.bold)),
+                    label: Text(context.tr('cancel'), style: const TextStyle(color: AppColors.brandRed, fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.brandRed),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
@@ -1325,12 +1326,12 @@ class _VendorOrderDetailScreenState extends State<VendorOrderDetailScreen> {
                               Flexible(
                                 child: Text(
                                   canAdvance
-                                      ? actionLabel!
+                                      ? context.tr(actionLabel!)
                                       : _currentOrder.status == 'DELIVERED'
-                                          ? 'Order Fulfilled'
+                                          ? context.tr('order_fulfilled')
                                           : _currentOrder.status == 'CANCELLED'
-                                              ? 'Order Cancelled'
-                                              : 'No Actions Available',
+                                              ? context.tr('order_cancelled')
+                                              : context.tr('no_actions_available'),
                                   style: const TextStyle(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.bold,

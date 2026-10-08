@@ -7,6 +7,7 @@ import '../bloc/brand_state.dart';
 import '../widgets/brand_card.dart';
 import '../../data/models/brand_model.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
 
@@ -40,8 +41,8 @@ class _BrandListScreenState extends State<BrandListScreen> {
   void _onConfirmDelete(BuildContext context, String brandId) async {
     final confirmed = await showDeleteConfirmationDialog(
       context: context,
-      title: 'Delete Brand',
-      message: 'Are you sure you want to delete this brand?',
+      title: context.tr('delete_brand'),
+      message: context.tr('delete_product_confirm'),
     );
     if (confirmed == true && context.mounted) {
       context.read<BrandBloc>().add(DeleteBrandEvent(id: brandId));
@@ -57,9 +58,9 @@ class _BrandListScreenState extends State<BrandListScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            'My Brands',
-            style: TextStyle(
+          title: Text(
+            context.tr('my_brands'),
+            style: const TextStyle(
               color: Color(0xFF11261B),
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -77,9 +78,9 @@ class _BrandListScreenState extends State<BrandListScreen> {
           },
           backgroundColor: AppColors.brandOrange,
           icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'Add Brand',
-            style: TextStyle(
+          label: Text(
+            context.tr('add_brand'),
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),

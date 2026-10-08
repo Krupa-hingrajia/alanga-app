@@ -7,6 +7,8 @@ import '../bloc/login/login_event.dart';
 import '../bloc/login/login_state.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/localization/widgets/language_selection_bottom_sheet.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,6 +86,41 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Top Row with Language Switcher
+                          Align(
+                            alignment: AlignmentDirectional.topEnd,
+                            child: InkWell(
+                              onTap: () => LanguageSelectionBottomSheet.show(context),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A3827).withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: const Color(0xFFD1DDD6)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.language, size: 14, color: Color(0xFF1A3827)),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      context.loc.currentLanguageName,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1A3827),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF1A3827)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
                           // Brand Logo Asset
                           Center(
                             child: ClipRRect(
@@ -97,9 +134,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'ALANGA VENDOR',
-                            style: TextStyle(
+                          Text(
+                            context.tr('app_name').toUpperCase(),
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF0F2016),
@@ -108,9 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Grow Your Business, Reach Millions',
-                            style: TextStyle(
+                          Text(
+                            context.tr('login_subtitle'),
+                            style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondaryLight,
                               fontWeight: FontWeight.w600,
@@ -124,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _identifierController,
                             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                             decoration: InputDecoration(
-                              labelText: 'Email or Mobile Number',
+                              labelText: context.tr('email_hint'),
                               labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
                               prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight, size: 20),
                               filled: true,
@@ -145,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your email or mobile';
+                                return context.tr('field_required');
                               }
                               return null;
                             },
@@ -158,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             obscureText: _obscurePassword,
                             style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
                             decoration: InputDecoration(
-                              labelText: 'Password',
+                              labelText: context.tr('password'),
                               labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
                               prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight, size: 20),
                               suffixIcon: IconButton(
@@ -191,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
+                                return context.tr('field_required');
                               }
                               return null;
                             },
@@ -226,9 +263,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               TextButton(
                                 onPressed: () => _showForgotPasswordSupportDialog(context),
-                                child: const Text(
-                                  'Forgot Password?',
-                                  style: TextStyle(color: AppColors.brandOrange, fontSize: 13, fontWeight: FontWeight.bold),
+                                child: Text(
+                                  context.tr('forgot_password'),
+                                  style: const TextStyle(color: AppColors.brandOrange, fontSize: 13, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -268,9 +305,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text(
-                                    'LOGIN',
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1),
+                                : Text(
+                                    context.tr('login').toUpperCase(),
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1),
                                   ),
                           ),
                           const SizedBox(height: 24),
@@ -278,16 +315,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                "Want to sell? ",
-                                style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+                              Text(
+                                context.tr('dont_have_account'),
+                                style: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
                               ),
+                              const SizedBox(width: 4),
                               TextButton(
                                 onPressed: () => context.go('/register'),
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                child: const Text(
-                                  'Register as Vendor',
-                                  style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold),
+                                child: Text(
+                                  context.tr('register'),
+                                  style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],

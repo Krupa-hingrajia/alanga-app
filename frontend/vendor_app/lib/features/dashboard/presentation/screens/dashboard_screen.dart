@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 // Category imports
 import '../../../categories/data/models/category_model.dart';
@@ -121,11 +122,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  String _getGreeting() {
+  String _getGreeting(BuildContext context) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return context.tr('good_morning');
+    if (hour < 17) return context.tr('good_afternoon');
+    return context.tr('good_evening');
   }
 
   String _formatTime(DateTime dateTime) {
@@ -304,37 +305,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
             unselectedItemColor: const Color(0xFF8B9E94),
             selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Dashboard',
+                icon: const Icon(Icons.dashboard_outlined),
+                activeIcon: const Icon(Icons.dashboard),
+                label: context.tr('dashboard'),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.receipt_long_outlined),
-                activeIcon: Icon(Icons.receipt_long),
-                label: 'Orders',
+                icon: const Icon(Icons.receipt_long_outlined),
+                activeIcon: const Icon(Icons.receipt_long),
+                label: context.tr('orders'),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_bag_outlined),
-                activeIcon: Icon(Icons.shopping_bag),
-                label: 'Products',
+                icon: const Icon(Icons.shopping_bag_outlined),
+                activeIcon: const Icon(Icons.shopping_bag),
+                label: context.tr('products'),
               ),
               BottomNavigationBarItem(
-                icon: Badge(
+                icon: const Badge(
                   label: Text('3'),
                   child: Icon(Icons.notifications_outlined),
                 ),
-                activeIcon: Badge(
+                activeIcon: const Badge(
                   label: Text('3'),
                   child: Icon(Icons.notifications),
                 ),
-                label: 'Alerts',
+                label: context.tr('alerts'),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profile',
+                icon: const Icon(Icons.person_outline),
+                activeIcon: const Icon(Icons.person),
+                label: context.tr('profile'),
               ),
             ],
           ),
@@ -362,7 +363,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   children: [
                     Text(
-                      _getGreeting(),
+                      _getGreeting(context),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.75),
@@ -376,14 +377,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.white.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified, color: Colors.greenAccent, size: 10),
-                          SizedBox(width: 2),
+                          const Icon(Icons.verified, color: Colors.greenAccent, size: 10),
+                          const SizedBox(width: 2),
                           Text(
-                            'Verified',
-                            style: TextStyle(
+                            context.tr('verified'),
+                            style: const TextStyle(
                               color: Colors.greenAccent,
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
@@ -541,9 +542,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      title: const Text(
-        'Business Alerts',
-        style: TextStyle(
+      title: Text(
+        context.tr('business_alerts'),
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Color(0xFF11261B),
@@ -586,9 +587,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      title: const Text(
-        'Seller Profile',
-        style: TextStyle(
+      title: Text(
+        context.tr('seller_profile'),
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Color(0xFF11261B),
@@ -685,18 +686,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Welcome Back',
-                  style: TextStyle(
+                Text(
+                  context.tr('welcome_back'),
+                  style: const TextStyle(
                     color: Color(0xFF11261B),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Manage your business catalogue and track pending marketplace approvals.',
-                  style: TextStyle(
+                Text(
+                  context.tr('hero_description'),
+                  style: const TextStyle(
                     color: AppColors.textSecondaryLight,
                     fontSize: 12,
                     height: 1.4,
@@ -706,9 +707,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ElevatedButton.icon(
                   onPressed: () => context.push('/products/add'),
                   icon: const Icon(Icons.add, size: 16, color: Colors.white),
-                  label: const Text(
-                    'Add Product',
-                    style: TextStyle(
+                  label: Text(
+                    context.tr('add_new_product'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
@@ -803,9 +804,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 16),
 
           // Business Overview Section
-          const Text(
-            'Business Overview',
-            style: TextStyle(
+          Text(
+            context.tr('business_overview'),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -821,28 +822,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: [
               _buildOverviewCard(
-                title: 'Total Products',
+                title: context.tr('total_products'),
                 value: '$totalProducts',
                 icon: Icons.shopping_bag_outlined,
                 color: Colors.blue,
                 onTap: () => context.push('/products', extra: {'initialStatus': 'ACTIVE'}),
               ),
               _buildOverviewCard(
-                title: 'Pending Products',
+                title: context.tr('pending_products'),
                 value: '$pendingProducts',
                 icon: Icons.pending_actions_outlined,
                 color: AppColors.brandOrange,
                 onTap: () => context.push('/products', extra: {'initialStatus': 'PENDING'}),
               ),
               _buildOverviewCard(
-                title: 'Approved Products',
+                title: context.tr('approved_products'),
                 value: '$approvedProducts',
                 icon: Icons.check_circle_outline_rounded,
                 color: AppColors.primaryGreen,
                 onTap: () => context.push('/products', extra: {'initialStatus': 'ACTIVE'}),
               ),
               _buildOverviewCard(
-                title: 'Rejected Products',
+                title: context.tr('rejected_products'),
                 value: '$rejectedProducts',
                 icon: Icons.cancel_outlined,
                 color: AppColors.brandRed,
@@ -853,9 +854,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 24),
 
           // Quick Actions Reels Section
-          const Text(
-            'Quick Actions',
-            style: TextStyle(
+          Text(
+            context.tr('quick_actions'),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -870,9 +871,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 26),
 
           // Pending Approvals Section
-          const Text(
-            'Pending Approvals',
-            style: TextStyle(
+          Text(
+            context.tr('pending_approvals'),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -882,7 +883,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Column(
             children: [
               _buildPendingApprovalItem(
-                title: 'Pending Products',
+                title: context.tr('pending_products'),
                 count: pendingProductsCount,
                 icon: Icons.shopping_bag_outlined,
                 route: '/products',
@@ -891,7 +892,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 10),
               _buildPendingApprovalItem(
-                title: 'Pending Categories',
+                title: context.tr('pending_categories'),
                 count: pendingCategoriesCount,
                 icon: Icons.category_outlined,
                 route: '/categories',
@@ -900,7 +901,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 10),
               _buildPendingApprovalItem(
-                title: 'Pending Sub Categories',
+                title: context.tr('pending_sub_categories'),
                 count: pendingSubCategoriesCount,
                 icon: Icons.account_tree_outlined,
                 route: '/sub-categories',
@@ -909,7 +910,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 10),
               _buildPendingApprovalItem(
-                title: 'Pending Brands',
+                title: context.tr('pending_brands'),
                 count: pendingBrandsCount,
                 icon: Icons.branding_watermark_outlined,
                 route: '/brands',
@@ -921,9 +922,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 10),
 
           // Recent Activities Section
-          const Text(
-            'Recent Activities',
-            style: TextStyle(
+          Text(
+            context.tr('recent_activities'),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -934,9 +935,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 24),
 
           // Business Tips Section
-          const Text(
-            'Business Tips',
-            style: TextStyle(
+          Text(
+            context.tr('business_tips'),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Color(0xFF11261B),
@@ -1249,13 +1250,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.bolt, color: AppColors.primaryGreen, size: 15),
-                SizedBox(width: 4),
+                const Icon(Icons.bolt, color: AppColors.primaryGreen, size: 15),
+                const SizedBox(width: 4),
                 Text(
-                  'Orders & Sales Performance',
-                  style: TextStyle(
+                  context.tr('orders_sales_performance'),
+                  style: const TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF11261B),
@@ -1269,13 +1270,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: const Color(0xFFE8F4EC),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  CircleAvatar(radius: 2.5, backgroundColor: AppColors.primaryGreen),
-                  SizedBox(width: 4),
+                  const CircleAvatar(radius: 2.5, backgroundColor: AppColors.primaryGreen),
+                  const SizedBox(width: 4),
                   Text(
-                    'Live',
-                    style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF1A3827)),
+                    context.tr('live'),
+                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFF1A3827)),
                   ),
                 ],
               ),
@@ -1302,7 +1303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 1. Today Sales
               Expanded(
                 child: _buildCompactMetric(
-                  title: "Today's Sales",
+                  title: context.tr('todays_sales'),
                   value: '₹${todayRevenue.toStringAsFixed(todayRevenue.truncateToDouble() == todayRevenue ? 0 : 2)}',
                   icon: Icons.currency_rupee_rounded,
                   color: const Color(0xFF1A3827),
@@ -1313,7 +1314,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 2. Orders to Dispatch
               Expanded(
                 child: _buildCompactMetric(
-                  title: 'To Dispatch',
+                  title: context.tr('orders_to_dispatch'),
                   value: '$ordersToDispatch',
                   icon: Icons.local_shipping_outlined,
                   color: const Color(0xFFE65100),
@@ -1328,7 +1329,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 3. Today's Orders
               Expanded(
                 child: _buildCompactMetric(
-                  title: "Orders",
+                  title: context.tr('orders'),
                   value: '$todayOrders',
                   icon: Icons.shopping_cart_outlined,
                   color: const Color(0xFF1565C0),

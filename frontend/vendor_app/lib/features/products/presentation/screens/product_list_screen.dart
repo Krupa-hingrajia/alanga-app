@@ -404,36 +404,36 @@ class _ProductListScreenState extends State<ProductListScreen>
                   ),
                 ),
                 if (state is ProductListLoaded) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A3827),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1A3827).withValues(alpha: 0.2),
-                          blurRadius: 8,
+                          color: const Color(0xFF1A3827).withValues(alpha: 0.15),
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Column(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Text(
-                          'TOTAL',
+                          'ALL: ',
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
+                            letterSpacing: 0.5,
                             color: Color(0xFF85D6A4),
                           ),
                         ),
                         Text(
                           '$totalCount',
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                           ),
@@ -446,16 +446,16 @@ class _ProductListScreenState extends State<ProductListScreen>
             ),
           ),
 
-          // Interactive Status KPI Cards
+          // Compact Sleek Status KPI Filter Pills
           if (state is ProductListLoaded) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 2),
             SizedBox(
-              height: 84,
+              height: 34,
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: _tabs.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
                 itemBuilder: (_, i) {
                   final t = _tabs[i];
                   final count = countMap[t.status] ?? 0;
@@ -466,77 +466,60 @@ class _ProductListScreenState extends State<ProductListScreen>
                       _tabController.animateTo(i);
                     },
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
+                      duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOutCubic,
-                      width: 114,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        gradient: isSelected
-                            ? LinearGradient(
-                                colors: [
-                                  t.color.withValues(alpha: 0.16),
-                                  t.color.withValues(alpha: 0.06),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : const LinearGradient(
-                                colors: [Colors.white, Colors.white],
-                              ),
-                        color: isSelected ? null : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: isSelected ? t.color : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: isSelected ? t.color : const Color(0xFFE4ECE8),
-                          width: isSelected ? 1.8 : 1.0,
+                          color: isSelected ? t.color : const Color(0xFFE2ECE5),
+                          width: 1.0,
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: isSelected
-                                ? t.color.withValues(alpha: 0.15)
-                                : Colors.black.withValues(alpha: 0.03),
-                            blurRadius: isSelected ? 12 : 6,
-                            offset: isSelected ? const Offset(0, 4) : const Offset(0, 2),
+                                ? t.color.withValues(alpha: 0.22)
+                                : Colors.black.withValues(alpha: 0.02),
+                            blurRadius: isSelected ? 4 : 2,
+                            offset: const Offset(0, 1),
                           ),
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: t.color.withValues(alpha: isSelected ? 0.2 : 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  t.icon,
-                                  size: 14,
-                                  color: t.color,
-                                ),
-                              ),
-                              Text(
-                                '$count',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: isSelected ? t.color : const Color(0xFF11261B),
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
+                          Icon(
+                            t.icon,
+                            size: 13,
+                            color: isSelected ? Colors.white : t.color,
                           ),
+                          const SizedBox(width: 5),
                           Text(
                             context.tr(t.label),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 11.5,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? t.color : const Color(0xFF4A5568),
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                              color: isSelected ? Colors.white : const Color(0xFF374151),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white.withValues(alpha: 0.25)
+                                  : t.color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? Colors.white : t.color,
+                              ),
                             ),
                           ),
                         ],
@@ -546,7 +529,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                 },
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
           ],
         ],
       ),

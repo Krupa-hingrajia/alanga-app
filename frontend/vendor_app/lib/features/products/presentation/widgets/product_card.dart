@@ -35,43 +35,44 @@ class ProductCard extends StatelessWidget {
         : 0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE8EFEA), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1A3827).withValues(alpha: 0.07),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF1A3827).withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(14),
           onTap: onTap,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Stack(
                       children: [
                         Container(
-                          width: 76,
-                          height: 76,
+                          width: 68,
+                          height: 68,
                           decoration: BoxDecoration(
                             color: const Color(0xFFF0F5F2),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             child: CustomImageView(
                               imageUrl: product.primaryImageUrl ?? product.image,
                               placeholderIcon: Icons.shopping_bag_rounded,
@@ -80,20 +81,20 @@ class ProductCard extends StatelessWidget {
                         ),
                         if (hasDiscount)
                           Positioned(
-                            top: 4,
-                            left: 4,
+                            top: 3,
+                            left: 3,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 2),
+                                  horizontal: 4, vertical: 1.5),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE6222B),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                '$discount% off',
+                                '$discount%',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9,
+                                  fontSize: 8.5,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -101,7 +102,7 @@ class ProductCard extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,13 +112,13 @@ class ProductCard extends StatelessWidget {
                             children: [
                               StatusBadge(status: product.status),
                               if (product.stock != null) ...[
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 5),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3.5),
+                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF0F5F2),
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
                                         color: const Color(0xFFE4ECE8),
                                         width: 0.8),
@@ -125,7 +126,7 @@ class ProductCard extends StatelessWidget {
                                   child: Text(
                                     '${context.tr('stock')}: ${product.stock}',
                                     style: const TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 9.5,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF1A3827),
                                     ),
@@ -136,27 +137,27 @@ class ProductCard extends StatelessWidget {
                               _build3DotsMenu(context, isDraft: isDraft),
                             ],
                           ),
-                          const SizedBox(height: 7),
+                          const SizedBox(height: 5),
                           Text(
                             product.name,
                             style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
                               color: Color(0xFF11261B),
-                              letterSpacing: -0.2,
+                              letterSpacing: -0.1,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             product.sku.isNotEmpty
                                 ? 'SKU: ${product.sku}'
                                 : 'SKU: N/A',
                             style: const TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               color: Color(0xFF7A9A86),
-                              letterSpacing: 0.3,
+                              letterSpacing: 0.2,
                             ),
                           ),
                         ],
@@ -166,12 +167,12 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 14),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F8F5),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
@@ -181,20 +182,19 @@ class ProductCard extends StatelessWidget {
                         Text(
                           context.tr('selling_price'),
                           style: const TextStyle(
-                              fontSize: 10, color: Color(0xFF7A9A86)),
+                              fontSize: 9, color: Color(0xFF7A9A86)),
                         ),
-                        const SizedBox(height: 2),
                         Text(
                           '₹${product.sellingPrice.toStringAsFixed(0)}',
                           style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
                             color: Color(0xFF1A8C4E),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 14),
                     if (hasDiscount)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,13 +202,12 @@ class ProductCard extends StatelessWidget {
                           Text(
                             context.tr('mrp'),
                             style: const TextStyle(
-                                fontSize: 10, color: Color(0xFF7A9A86)),
+                                fontSize: 9, color: Color(0xFF7A9A86)),
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             '₹${product.mrp.toStringAsFixed(0)}',
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 12.5,
                               decoration: TextDecoration.lineThrough,
                               decorationColor: Color(0xFFAA7777),
                               color: Color(0xFFAA7777),
@@ -220,16 +219,16 @@ class ProductCard extends StatelessWidget {
                     if (hasDiscount)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 6, vertical: 2.5),
                         decoration: BoxDecoration(
                           color:
                               const Color(0xFFE6222B).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           '${context.tr('save')} $discount%',
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFFE6222B),
                           ),
@@ -238,10 +237,10 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Padding(
                 padding:
-                    const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                    const EdgeInsets.only(left: 10, right: 10, bottom: 8),
                 child: Row(
                   children: [
                     // Manage Inventory Button
@@ -255,7 +254,7 @@ class ProductCard extends StatelessWidget {
                           onTap: onManageInventory!,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                     ],
 
                     // Shipping Button
@@ -269,7 +268,7 @@ class ProductCard extends StatelessWidget {
                           onTap: onManageShipping!,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                     ],
 
                     if (onEdit != null) ...[
@@ -283,7 +282,7 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       if (onDelete != null || (isDraft && onSubmit != null))
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                     ],
 
                     if (onDelete != null) ...[
@@ -297,7 +296,7 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       if (isDraft && onSubmit != null)
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                     ],
 
                     if (isDraft && onSubmit != null)

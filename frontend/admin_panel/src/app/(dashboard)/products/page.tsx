@@ -23,6 +23,7 @@ import { MarketplaceTable, TableColumn } from '@/components/MarketplaceTable';
 import { MarketplacePagination } from '@/components/MarketplacePagination';
 import { MarketplaceDetailModal } from '@/components/MarketplaceDetailModal';
 import { StatusBadge } from '@/components/StatusBadge';
+import { getMediaUrl } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { RejectDialog } from '@/components/RejectDialog';
 import { Button } from '@/components/ui/button';
@@ -167,25 +168,32 @@ export default function ProductsPage() {
       key: 'name',
       header: 'Product Name',
       sortable: true,
-      render: (item) => (
-        <div className="flex items-center gap-3">
-          {item.image ? (
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-10 w-10 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
-            />
-          ) : (
-            <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-lg">
-              <ShoppingBag className="h-5 w-5" />
+      render: (item) => {
+        const rawImg = item.image || (item.images && item.images.length > 0 ? (typeof item.images[0] === 'string' ? item.images[0] : item.images[0]?.url) : '') || item.brand?.logo;
+        const imgUrl = getMediaUrl(rawImg);
+        return (
+          <div className="flex items-center gap-3">
+            {imgUrl ? (
+              <img
+                src={imgUrl}
+                alt={item.name}
+                className="h-10 w-10 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-lg">
+                <ShoppingBag className="h-5 w-5" />
+              </div>
+            )}
+            <div>
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100">{item.name}</p>
+              <p className="text-xs font-mono text-zinc-400">SKU: {item.sku}</p>
             </div>
-          )}
-          <div>
-            <p className="font-semibold text-zinc-900 dark:text-zinc-100">{item.name}</p>
-            <p className="text-xs font-mono text-zinc-400">SKU: {item.sku}</p>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'category',

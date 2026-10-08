@@ -26,6 +26,7 @@ import {
   rejectProduct,
   Product,
 } from '@/features/products/api';
+import { getMediaUrl } from '@/lib/utils';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -152,13 +153,16 @@ export default function ProductApprovalsPage() {
   };
 
   const getProductImage = (product: Product) => {
-    if (product.image) return product.image;
-    if (product.images && product.images.length > 0) {
+    let raw = '';
+    if (product.image) raw = product.image;
+    else if (product.images && product.images.length > 0) {
       const first = product.images[0];
-      if (typeof first === 'string') return first;
-      if (first && first.url) return first.url;
+      if (typeof first === 'string') raw = first;
+      else if (first && first.url) raw = first.url;
+    } else {
+      raw = product.brand?.logo || '';
     }
-    return product.brand?.logo || null;
+    return getMediaUrl(raw) || null;
   };
 
   return (

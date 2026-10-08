@@ -11,6 +11,7 @@ import {
 import { StatusBadge } from '@/components/StatusBadge';
 import { User, Calendar, Mail, Tag, FolderTree, GitBranch, ShoppingBag, ShieldCheck, FileText, CheckCircle2, XCircle, Grid, DollarSign, Layers } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { getMediaUrl } from '@/lib/utils';
 
 export interface DetailItem {
   id: string;
@@ -107,14 +108,16 @@ export function MarketplaceDetailModal({
 
   // Get main display image for the header (look for primary in images, or fallback to first image, or item.image/logo)
   const getHeaderImage = () => {
-    if (item.image && item.image.trim() !== '') return item.image;
-    if (item.images && item.images.length > 0) {
+    let raw = '';
+    if (item.image && item.image.trim() !== '') raw = item.image;
+    else if (item.images && item.images.length > 0) {
       const primary = item.images.find(img => img.isPrimary);
-      if (primary) return primary.imageUrl;
-      return item.images[0].imageUrl;
+      if (primary) raw = primary.imageUrl;
+      else raw = item.images[0].imageUrl;
+    } else if (item.logo && item.logo.trim() !== '') {
+      raw = item.logo;
     }
-    if (item.logo && item.logo.trim() !== '') return item.logo;
-    return null;
+    return getMediaUrl(raw) || null;
   };
   const headerImg = getHeaderImage();
 
@@ -167,7 +170,7 @@ export function MarketplaceDetailModal({
                   {commonImages.map((img) => (
                     <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 group">
                       <img
-                        src={img.imageUrl}
+                        src={getMediaUrl(img.imageUrl)}
                         alt="Product common"
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
@@ -258,7 +261,7 @@ export function MarketplaceDetailModal({
                                 {varImages.map((img) => (
                                   <div key={img.id} className="relative h-12 w-12 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 group">
                                     <img
-                                      src={img.imageUrl}
+                                      src={getMediaUrl(img.imageUrl)}
                                       alt="variant gallery"
                                       className="w-full h-full object-cover transition-transform group-hover:scale-110"
                                     />

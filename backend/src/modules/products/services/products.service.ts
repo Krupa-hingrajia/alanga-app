@@ -199,7 +199,12 @@ export class ProductsService {
     if (data.subCategoryId) await this.subCategoriesService.findOne(data.subCategoryId);
     if (data.brandId) await this.brandsService.validateActiveBrandForProduct(data.brandId);
 
-    return this.productsRepository.update(id, data, vendorId);
+    const updateData = {
+      ...data,
+      status: data.status === 'DRAFT' ? 'DRAFT' : 'PENDING',
+    };
+
+    return this.productsRepository.update(id, updateData, vendorId);
   }
 
   async removeByVendor(id: string, vendorId: string) {

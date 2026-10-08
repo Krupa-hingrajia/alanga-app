@@ -25,12 +25,16 @@ export interface Product {
   rejectedReason?: string;
   createdAt: string;
   updatedAt: string;
+  images?: any[];
   vendorName?: string;
   vendorEmail?: string;
   vendor?: {
     id: string;
-    name: string;
-    email: string;
+    name?: string;
+    fullName?: string;
+    email?: string;
+    phoneNumber?: string;
+    storeName?: string;
   };
 }
 

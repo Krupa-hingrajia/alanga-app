@@ -38,6 +38,7 @@ export class ProductEntity implements Product {
   brand?: any;
   category?: any;
   subCategory?: any;
+  vendor?: any;
   isWishlisted?: boolean;
 
   constructor(partial: Partial<ProductEntity>) {

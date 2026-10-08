@@ -38,8 +38,11 @@ export interface DetailItem {
   vendorEmail?: string;
   vendor?: {
     id: string;
-    name: string;
-    email: string;
+    name?: string;
+    fullName?: string;
+    email?: string;
+    phoneNumber?: string;
+    storeName?: string;
   };
   images?: Array<{
     id: string;

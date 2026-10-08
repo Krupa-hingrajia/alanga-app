@@ -151,6 +151,16 @@ export default function ProductApprovalsPage() {
     }
   };
 
+  const getProductImage = (product: Product) => {
+    if (product.image) return product.image;
+    if (product.images && product.images.length > 0) {
+      const first = product.images[0];
+      if (typeof first === 'string') return first;
+      if (first && first.url) return first.url;
+    }
+    return product.brand?.logo || null;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -175,7 +185,7 @@ export default function ProductApprovalsPage() {
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
           <Input
-            placeholder="Search by product name or SKU..."
+            placeholder="Search by product name, SKU, or vendor..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-9 rounded-xl border-zinc-200 dark:border-zinc-800 text-xs"
@@ -206,6 +216,7 @@ export default function ProductApprovalsPage() {
                     )}
                   </button>
                 </th>
+                <th className="p-4">Vendor Details</th>
                 <th className="p-4">Category & Brand</th>
                 <th className="p-4">
                   <button
@@ -241,14 +252,14 @@ export default function ProductApprovalsPage() {
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, idx) => (
                   <tr key={idx} className="animate-pulse">
-                    <td className="p-4" colSpan={6}>
+                    <td className="p-4" colSpan={7}>
                       <div className="h-7 bg-zinc-100 dark:bg-zinc-800 rounded-xl" />
                     </td>
                   </tr>
                 ))
               ) : sortedProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center">
+                  <td colSpan={7} className="p-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="p-3 bg-emerald-100 dark:bg-emerald-950/40 rounded-full text-emerald-600 dark:text-emerald-400">
                         <CheckCircle className="h-8 w-8" />
@@ -263,92 +274,111 @@ export default function ProductApprovalsPage() {
                   </td>
                 </tr>
               ) : (
-                sortedProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40 transition-colors"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        {product.image ? (
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="h-10 w-10 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800"
-                          />
-                        ) : (
-                          <div className="p-2.5 bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl">
-                            <ShoppingBag className="h-5 w-5" />
+                sortedProducts.map((product) => {
+                  const imgUrl = getProductImage(product);
+                  const storeName = product.vendor?.storeName || product.vendorName || 'Vendor Store';
+                  const vendorFullName = product.vendor?.fullName || product.vendor?.name || 'Verified Merchant';
+
+                  return (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40 transition-colors"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          {imgUrl ? (
+                            <img
+                              src={imgUrl}
+                              alt={product.name}
+                              className="h-11 w-11 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800 bg-white"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="p-2.5 bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl">
+                              <ShoppingBag className="h-5 w-5" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1 max-w-xs">{product.name}</p>
+                            <p className="text-xs text-zinc-400 font-mono">SKU: {product.sku}</p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-bold text-zinc-900 dark:text-zinc-100">{product.name}</p>
-                          <p className="text-xs text-zinc-400 font-mono">SKU: {product.sku}</p>
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-xs space-y-0.5">
-                      <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                        {product.category?.name || 'General'}
-                      </p>
-                      <p className="text-zinc-400">
-                        Brand: {product.brand?.name || 'Unbranded'}
-                      </p>
-                    </td>
-                    <td className="p-4 text-xs">
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                        {formatPrice(product.sellingPrice)}
-                      </p>
-                      <p className="text-[11px] text-zinc-400 line-through">
-                        MRP: {formatPrice(product.mrp)}
-                      </p>
-                    </td>
-                    <td className="p-4">
-                      <StatusBadge status="PENDING" />
-                    </td>
-                    <td className="p-4 text-xs text-zinc-500">
-                      {formatDate(product.createdAt)}
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          title="View Product Details"
-                          onClick={() => setViewingProduct(product)}
-                          className="h-8 px-2.5 rounded-xl border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 gap-1.5"
-                        >
-                          <Eye className="h-3.5 w-3.5 text-zinc-500" />
-                          View
-                        </Button>
+                      </td>
+                      <td className="p-4 text-xs space-y-0.5">
+                        <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100">
+                          <Store className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>{storeName}</span>
+                        </div>
+                        <p className="text-zinc-500 text-[11px]">{vendorFullName}</p>
+                        {product.vendor?.email && (
+                          <p className="text-zinc-400 text-[10px] font-mono">{product.vendor.email}</p>
+                        )}
+                      </td>
+                      <td className="p-4 text-xs space-y-0.5">
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {product.category?.name || 'General'}
+                        </p>
+                        <p className="text-zinc-400">
+                          Brand: {product.brand?.name || 'Unbranded'}
+                        </p>
+                      </td>
+                      <td className="p-4 text-xs">
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                          {formatPrice(product.sellingPrice)}
+                        </p>
+                        <p className="text-[11px] text-zinc-400 line-through">
+                          MRP: {formatPrice(product.mrp)}
+                        </p>
+                      </td>
+                      <td className="p-4">
+                        <StatusBadge status="PENDING" />
+                      </td>
+                      <td className="p-4 text-xs text-zinc-500">
+                        {formatDate(product.createdAt)}
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title="View Product Details"
+                            onClick={() => setViewingProduct(product)}
+                            className="h-8 px-2.5 rounded-xl border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 gap-1.5"
+                          >
+                            <Eye className="h-3.5 w-3.5 text-zinc-500" />
+                            View
+                          </Button>
 
-                        <Button
-                          size="sm"
-                          title="Approve Product"
-                          onClick={() => setApproveTarget(product)}
-                          className="h-8 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold gap-1.5"
-                        >
-                          <CheckCircle className="h-3.5 w-3.5" />
-                          Approve
-                        </Button>
+                          <Button
+                            size="sm"
+                            title="Approve Product"
+                            onClick={() => setApproveTarget(product)}
+                            className="h-8 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold gap-1.5"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Approve
+                          </Button>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          title="Reject Product"
-                          onClick={() => {
-                            setRejectTarget(product);
-                            setRejectReason('');
-                          }}
-                          className="h-8 px-2.5 rounded-xl border-rose-200 dark:border-rose-900/50 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
-                        >
-                          <XCircle className="h-3.5 w-3.5" />
-                          Reject
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title="Reject Product"
+                            onClick={() => {
+                              setRejectTarget(product);
+                              setRejectReason('');
+                            }}
+                            className="h-8 px-2.5 rounded-xl border-rose-200 dark:border-rose-900/50 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                            Reject
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -365,95 +395,134 @@ export default function ProductApprovalsPage() {
             </DialogTitle>
           </DialogHeader>
 
-          {viewingProduct && (
-            <div className="space-y-4 pt-2 text-xs">
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
-                {viewingProduct.image ? (
-                  <img
-                    src={viewingProduct.image}
-                    alt={viewingProduct.name}
-                    className="h-16 w-16 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800 bg-white"
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center shrink-0">
-                    <ShoppingBag className="h-8 w-8" />
+          {viewingProduct && (() => {
+            const imgUrl = getProductImage(viewingProduct);
+            const storeName = viewingProduct.vendor?.storeName || viewingProduct.vendorName || 'Alanga Superstore';
+            const vendorName = viewingProduct.vendor?.fullName || viewingProduct.vendor?.name || 'Verified Merchant';
+
+            return (
+              <div className="space-y-4 pt-2 text-xs">
+                {/* Product Header Card */}
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  {imgUrl ? (
+                    <img
+                      src={imgUrl}
+                      alt={viewingProduct.name}
+                      className="h-20 w-20 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800 bg-white shrink-0"
+                    />
+                  ) : (
+                    <div className="h-20 w-20 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center shrink-0">
+                      <ShoppingBag className="h-8 w-8" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                      {viewingProduct.name}
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-mono mt-0.5">SKU: {viewingProduct.sku}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <StatusBadge status="PENDING" />
+                      <span className="text-zinc-400 text-[11px]">
+                        Submitted {formatDate(viewingProduct.createdAt)}
+                      </span>
+                    </div>
                   </div>
-                )}
-                <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
-                    {viewingProduct.name}
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-mono mt-0.5">SKU: {viewingProduct.sku}</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <StatusBadge status="PENDING" />
-                    <span className="text-zinc-400 text-[11px]">
-                      Submitted {formatDate(viewingProduct.createdAt)}
+                </div>
+
+                {/* Vendor Details Card */}
+                <div className="p-3.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-2">
+                  <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
+                    <Store className="h-4 w-4" />
+                    <span>Vendor / Merchant Information</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-zinc-400 block text-[10px] uppercase font-bold">Store Name</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">{storeName}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 block text-[10px] uppercase font-bold">Vendor Name</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">{vendorName}</span>
+                    </div>
+                    {viewingProduct.vendor?.email && (
+                      <div>
+                        <span className="text-zinc-400 block text-[10px] uppercase font-bold">Email</span>
+                        <span className="font-mono text-[11px] text-zinc-600 dark:text-zinc-400">{viewingProduct.vendor.email}</span>
+                      </div>
+                    )}
+                    {viewingProduct.vendor?.phoneNumber && (
+                      <div>
+                        <span className="text-zinc-400 block text-[10px] uppercase font-bold">Phone Number</span>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">{viewingProduct.vendor.phoneNumber}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Classification & Pricing */}
+                <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div>
+                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Category</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                      {viewingProduct.category?.name || 'N/A'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Sub Category</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                      {viewingProduct.subCategory?.name || 'N/A'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Brand</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                      {viewingProduct.brand?.name || 'N/A'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Selling Price / MRP</span>
+                    <span className="font-semibold text-emerald-600">
+                      {formatPrice(viewingProduct.sellingPrice)}
+                    </span>
+                    <span className="text-zinc-400 text-[10px] ml-1">
+                      (MRP {formatPrice(viewingProduct.mrp)})
                     </span>
                   </div>
                 </div>
+
+                {/* Description */}
+                {(viewingProduct.shortDescription || viewingProduct.description) && (
+                  <div className="space-y-1">
+                    <span className="text-zinc-400 block text-[10px] uppercase font-bold">Description</span>
+                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-50 dark:bg-zinc-900 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 max-h-28 overflow-y-auto">
+                      {viewingProduct.shortDescription || viewingProduct.description}
+                    </p>
+                  </div>
+                )}
+
+                <DialogFooter className="pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setViewingProduct(null)}
+                    className="rounded-xl h-9 text-xs font-semibold"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const p = viewingProduct;
+                      setViewingProduct(null);
+                      setApproveTarget(p);
+                    }}
+                    className="rounded-xl h-9 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                    Approve Product
+                  </Button>
+                </DialogFooter>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase font-bold">Category</span>
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                    {viewingProduct.category?.name || 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase font-bold">Sub Category</span>
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                    {viewingProduct.subCategory?.name || 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase font-bold">Brand</span>
-                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                    {viewingProduct.brand?.name || 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase font-bold">Selling Price / MRP</span>
-                  <span className="font-semibold text-emerald-600">
-                    {formatPrice(viewingProduct.sellingPrice)}
-                  </span>
-                  <span className="text-zinc-400 text-[10px] ml-1">
-                    (MRP {formatPrice(viewingProduct.mrp)})
-                  </span>
-                </div>
-              </div>
-
-              {viewingProduct.description && (
-                <div className="space-y-1">
-                  <span className="text-zinc-400 block text-[10px] uppercase font-bold">Description</span>
-                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-50 dark:bg-zinc-900 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                    {viewingProduct.description}
-                  </p>
-                </div>
-              )}
-
-              <DialogFooter className="pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setViewingProduct(null)}
-                  className="rounded-xl h-9 text-xs font-semibold"
-                >
-                  Close
-                </Button>
-                <Button
-                  onClick={() => {
-                    const p = viewingProduct;
-                    setViewingProduct(null);
-                    setApproveTarget(p);
-                  }}
-                  className="rounded-xl h-9 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Approve Product
-                </Button>
-              </DialogFooter>
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

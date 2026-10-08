@@ -12,11 +12,16 @@ export class ProductsRepository implements IProductsRepository {
   private mapToEntity(product: any): ProductEntity {
     const rawImages = product.productImages || product.images || [];
     const images = rawImages.filter((img: any) => !img.productVariantId);
+    const primaryImg = images.find((img: any) => img.isPrimary)?.imageUrl || images.find((img: any) => img.isPrimary)?.url || images[0]?.imageUrl || images[0]?.url || (typeof rawImages[0] === 'string' ? rawImages[0] : null);
+    const displayImage = product.image || primaryImg || null;
 
     const variants = (product.productVariants || product.variants || []).map((v: any) => ({
       ...v,
       images: v.images || v.productImages || rawImages.filter((img: any) => img.productVariantId === v.id),
     }));
+
+    const vendorName = product.vendor ? product.vendor.fullName : null;
+    const vendorStoreName = product.vendor?.vendorProfile?.storeName || vendorName || 'Vendor Store';
 
     return new ProductEntity({
       id: product.id,
@@ -36,7 +41,7 @@ export class ProductsRepository implements IProductsRepository {
       height: product.height,
       sku: product.sku,
       status: product.status,
-      image: product.image,
+      image: displayImage,
       vendorId: product.vendorId,
       createdByVendorId: product.createdByVendorId || product.vendorId,
       createdAt: product.createdAt,
@@ -48,6 +53,16 @@ export class ProductsRepository implements IProductsRepository {
       brand: product.brand ? { id: product.brand.id, name: product.brand.name, logo: product.brand.logo } : null,
       category: product.category ? { id: product.category.id, name: product.category.name } : null,
       subCategory: product.subCategory ? { id: product.subCategory.id, name: product.subCategory.name } : null,
+      vendor: product.vendor
+        ? {
+            id: product.vendor.id,
+            name: vendorName,
+            fullName: vendorName,
+            email: product.vendor.email,
+            phoneNumber: product.vendor.phoneNumber,
+            storeName: vendorStoreName,
+          }
+        : null,
     });
   }
 
@@ -90,6 +105,15 @@ export class ProductsRepository implements IProductsRepository {
         brand: true,
         category: true,
         subCategory: true,
+        vendor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            vendorProfile: { select: { storeName: true, legalName: true } },
+          },
+        },
       },
     });
     return this.mapToEntity(product);
@@ -121,6 +145,15 @@ export class ProductsRepository implements IProductsRepository {
         brand: true,
         category: true,
         subCategory: true,
+        vendor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            vendorProfile: { select: { storeName: true, legalName: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -140,6 +173,15 @@ export class ProductsRepository implements IProductsRepository {
         brand: true,
         category: true,
         subCategory: true,
+        vendor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            vendorProfile: { select: { storeName: true, legalName: true } },
+          },
+        },
       },
     });
     return product ? this.mapToEntity(product) : null;
@@ -176,6 +218,15 @@ export class ProductsRepository implements IProductsRepository {
         brand: true,
         category: true,
         subCategory: true,
+        vendor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            vendorProfile: { select: { storeName: true, legalName: true } },
+          },
+        },
       },
     });
     return this.mapToEntity(product);
@@ -198,6 +249,15 @@ export class ProductsRepository implements IProductsRepository {
         brand: true,
         category: true,
         subCategory: true,
+        vendor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phoneNumber: true,
+            vendorProfile: { select: { storeName: true, legalName: true } },
+          },
+        },
       },
     });
     return this.mapToEntity(product);
@@ -277,7 +337,13 @@ export class ProductsRepository implements IProductsRepository {
             select: { id: true, name: true, logo: true },
           },
           vendor: {
-            select: { id: true, fullName: true, email: true },
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phoneNumber: true,
+              vendorProfile: { select: { storeName: true, legalName: true } },
+            },
           },
           productImages: { where: { deletedAt: null }, orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }] },
           productVariants: {
@@ -292,17 +358,24 @@ export class ProductsRepository implements IProductsRepository {
     ]);
 
     const items = products.map((product) => {
+      const rawImages = product.productImages || [];
+      const primaryImg = (rawImages.find((img: any) => img.isPrimary) as any)?.imageUrl || (rawImages[0] as any)?.imageUrl || (rawImages.find((img: any) => img.isPrimary) as any)?.url || (rawImages[0] as any)?.url;
+      const displayImage = product.image || primaryImg || null;
+
       const vendorName = product.vendor ? product.vendor.fullName : null;
-      const vendorEmail = product.vendor ? product.vendor.email : null;
+      const vendorStoreName = product.vendor?.vendorProfile?.storeName || vendorName || 'Vendor Store';
       const vendor = product.vendor
         ? {
             id: product.vendor.id,
             name: vendorName,
-            email: vendorEmail,
+            fullName: vendorName,
+            email: product.vendor.email,
+            phoneNumber: product.vendor.phoneNumber,
+            storeName: vendorStoreName,
           }
         : null;
 
-      const images = product.productImages || [];
+      const images = rawImages;
       const variants = (product.productVariants || []).map((v: any) => ({
         ...v,
         images: v.images || [],
@@ -310,12 +383,13 @@ export class ProductsRepository implements IProductsRepository {
 
       return {
         ...product,
+        image: displayImage,
         images,
         variants,
         shipping: product.shipping || null,
         vendorId: product.vendorId || null,
-        vendorName,
-        vendorEmail,
+        vendorName: vendorStoreName,
+        vendorEmail: product.vendor?.email || null,
         vendor,
       };
     });

@@ -170,7 +170,7 @@ class _ProductListScreenState extends State<ProductListScreen>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<ProductBloc>()...add(const FetchProductsEvent()),
+      create: (_) => sl<ProductBloc>()..add(const FetchProductsEvent()),
       child: Builder(
         builder: (context) {
           return PopScope(

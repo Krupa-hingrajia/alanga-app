@@ -132,6 +132,14 @@ export function MarketplaceDetailModal({
                   src={headerImg}
                   alt={item.name}
                   className="h-12 w-12 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800 bg-white"
+                  onError={(e) => {
+                    const fallback = item.brand?.logo || item.logo || '';
+                    if (fallback && e.currentTarget.src !== fallback) {
+                      e.currentTarget.src = fallback;
+                    } else {
+                      e.currentTarget.style.display = 'none';
+                    }
+                  }}
                 />
               ) : (
                 <div className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl">
@@ -173,6 +181,14 @@ export function MarketplaceDetailModal({
                         src={getMediaUrl(img.imageUrl)}
                         alt="Product common"
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          const fallback = item.brand?.logo || item.logo || '';
+                          if (fallback && e.currentTarget.src !== fallback) {
+                            e.currentTarget.src = fallback;
+                          } else {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=800&q=80';
+                          }
+                        }}
                       />
                       {img.isPrimary && (
                         <span className="absolute top-1 left-1 text-[8px] font-bold px-1.5 py-0.5 bg-emerald-500 text-white rounded-full uppercase tracking-wider">

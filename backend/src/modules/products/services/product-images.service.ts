@@ -90,8 +90,8 @@ export class ProductImagesService {
       let imageUrl = '';
 
       if (file.buffer) {
-        const isVercel = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
-        if (!isVercel) {
+        const isEphemeral = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME || !!process.env.K_SERVICE;
+        if (!isEphemeral) {
           try {
             const uploadPath = './uploads/products';
             if (!fs.existsSync(uploadPath)) {
@@ -107,7 +107,7 @@ export class ProductImagesService {
           }
         }
 
-        // If serverless (Vercel) or disk write failed, use Data URI
+        // If ephemeral (Cloud Run / Vercel / Lambda) or disk write failed, use Data URI for permanent storage in DB
         if (!imageUrl) {
           const mime = file.mimetype || 'image/jpeg';
           imageUrl = `data:${mime};base64,${file.buffer.toString('base64')}`;

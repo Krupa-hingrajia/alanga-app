@@ -510,7 +510,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         final targetVariant = selectedVariant ?? activeVariant ?? product.defaultVariant ?? (product.variants.isNotEmpty ? product.variants.first : null);
                                         final targetVariantId = targetVariant?.id;
 
-                                        if (targetVariantId == null || targetVariantId.isEmpty) {
+                                        if (product.variants.isNotEmpty && (targetVariantId == null || targetVariantId.isEmpty)) {
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
                                               content: Text('Please select a product variant.'),
@@ -591,7 +591,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         final targetVariant = selectedVariant ?? activeVariant ?? product.defaultVariant ?? (product.variants.isNotEmpty ? product.variants.first : null);
                                         final targetVariantId = targetVariant?.id;
 
-                                        if (targetVariantId == null || targetVariantId.isEmpty) {
+                                        if (product.variants.isNotEmpty && (targetVariantId == null || targetVariantId.isEmpty)) {
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
                                               content: Text('Please select a product variant.'),

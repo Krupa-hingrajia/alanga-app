@@ -9,7 +9,7 @@ import { CheckoutService } from '../services/checkout.service';
 @ApiTags('Customer Checkout')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('CUSTOMER')
+@Roles('CUSTOMER', 'VENDOR', 'ADMIN')
 @Controller('customer/checkout')
 export class CustomerCheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}

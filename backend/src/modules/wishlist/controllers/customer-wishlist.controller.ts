@@ -24,7 +24,7 @@ import { WishlistCheckResponseDto } from '../dto/wishlist-check-response.dto';
 @ApiTags('Customer Wishlist')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.CUSTOMER)
+@Roles(Role.CUSTOMER, Role.VENDOR, Role.ADMIN)
 @Controller('customer/wishlist')
 export class CustomerWishlistController {
   constructor(private readonly wishlistService: WishlistService) {}

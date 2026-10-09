@@ -24,7 +24,7 @@ import { CartFullResponseDto } from '../dto/cart-response.dto';
 @ApiTags('Customer Shopping Cart')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.CUSTOMER)
+@Roles(Role.CUSTOMER, Role.VENDOR, Role.ADMIN)
 @Controller('customer/cart')
 export class CustomerCartController {
   constructor(private readonly cartService: CartService) {}

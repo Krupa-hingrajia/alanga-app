@@ -10,7 +10,7 @@ import { PlaceOrderDto } from '../dto/place-order.dto';
 @ApiTags('Customer Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('CUSTOMER')
+@Roles('CUSTOMER', 'VENDOR', 'ADMIN')
 @Controller('customer/orders')
 export class CustomerOrderController {
   constructor(private readonly orderService: OrderService) {}

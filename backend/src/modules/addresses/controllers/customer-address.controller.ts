@@ -34,7 +34,7 @@ import {
 @ApiTags('Customer Addresses')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('CUSTOMER')
+@Roles('CUSTOMER', 'VENDOR', 'ADMIN')
 @Controller('customer/addresses')
 export class CustomerAddressController {
   constructor(private readonly addressService: AddressService) {}

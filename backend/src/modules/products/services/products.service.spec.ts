@@ -95,7 +95,7 @@ describe('ProductsService', () => {
 
       expect(repository.update).toHaveBeenCalledWith(
         'prod-1',
-        { name: 'Updated T-Shirt' },
+        { name: 'Updated T-Shirt', status: 'PENDING' },
         'vendor-1',
       );
       expect(result.status).toBe('PENDING');

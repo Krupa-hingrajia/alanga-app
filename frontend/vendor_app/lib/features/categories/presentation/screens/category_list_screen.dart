@@ -10,6 +10,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class CategoryListScreen extends StatefulWidget {
   final String? initialStatus;
@@ -43,20 +44,9 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     return BlocProvider(
       create: (_) => sl<CategoryBloc>()..add(const FetchCategoriesEvent()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            context.tr('categories'),
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        backgroundColor: const Color(0xFFF6F8F6),
+        appBar: CustomAppBar(
+          titleText: context.tr('categories'),
         ),
         floatingActionButton: null,
         body: BlocConsumer<CategoryBloc, CategoryState>(

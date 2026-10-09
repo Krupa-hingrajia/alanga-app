@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/models/brand_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class BrandDetailScreen extends StatelessWidget {
   final BrandModel brand;
@@ -48,27 +49,41 @@ class BrandDetailScreen extends StatelessWidget {
         brand.status.toUpperCase() == 'REJECTED';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F4),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Brand Details',
-          style: TextStyle(
-            color: Color(0xFF11261B),
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+      backgroundColor: const Color(0xFFF6F8F6),
+      appBar: CustomAppBar(
+        titleText: 'Brand Details',
         actions: [
           if (canEdit)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: AppColors.brandOrange),
-              onPressed: () {
-                context.push('/brands/edit', extra: brand);
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {
+                    context.push('/brands/edit', extra: brand);
+                  },
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFE4ECE8), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: AppColors.brandOrange,
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
       ),

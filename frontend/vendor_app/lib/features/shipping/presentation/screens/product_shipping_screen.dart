@@ -12,6 +12,7 @@ import '../widgets/shipping_summary_card.dart';
 import '../widgets/customer_shipping_preview.dart';
 import '../widgets/shipping_empty_state.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class ProductShippingScreen extends StatefulWidget {
   final String productId;
@@ -51,19 +52,8 @@ class _ProductShippingScreenState extends State<ProductShippingScreen> {
       value: _shippingBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F8F6),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            context.tr('shipping_management'),
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        appBar: CustomAppBar(
+          titleText: context.tr('shipping_management'),
         ),
         body: BlocConsumer<ShippingBloc, ShippingState>(
           listener: (context, state) {

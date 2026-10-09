@@ -11,6 +11,7 @@ import '../widgets/inventory_card.dart';
 import '../widgets/update_inventory_bottom_sheet.dart';
 import '../widgets/inventory_history_bottom_sheet.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class ProductInventoryScreen extends StatefulWidget {
   final String productId;
@@ -137,19 +138,8 @@ class _ProductInventoryScreenState extends State<ProductInventoryScreen> {
       value: _inventoryBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F8F6),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            context.tr('inventory_management'),
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        appBar: CustomAppBar(
+          titleText: context.tr('inventory_management'),
         ),
         body: BlocConsumer<InventoryBloc, InventoryState>(
           listener: (context, state) {

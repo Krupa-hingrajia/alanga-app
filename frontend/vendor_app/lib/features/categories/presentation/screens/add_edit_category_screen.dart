@@ -8,6 +8,7 @@ import '../../data/models/category_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/image_picker_widget.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class AddEditCategoryScreen extends StatefulWidget {
   final CategoryModel? category;
@@ -147,20 +148,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     return BlocProvider(
       create: (_) => sl<CategoryBloc>(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            isEdit ? 'Edit Category' : 'Add Category',
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        backgroundColor: const Color(0xFFF6F8F6),
+        appBar: CustomAppBar(
+          titleText: isEdit ? 'Edit Category' : 'Add Category',
         ),
         body: BlocConsumer<CategoryBloc, CategoryState>(
           listener: (context, state) {

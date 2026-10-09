@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../products/data/models/product_model.dart';
 import '../../../products/domain/repositories/product_repository.dart';
 
@@ -256,35 +257,45 @@ class _GlobalInventoryScreenState extends State<GlobalInventoryScreen> {
     final filtered = _filteredProducts;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F4),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF11261B)),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
-        ),
-        title: Text(
-          context.tr('inventory_stock_manager'),
-          style: const TextStyle(
-            color: Color(0xFF11261B),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      backgroundColor: const Color(0xFFF6F8F6),
+      appBar: CustomAppBar(
+        titleText: context.tr('inventory_stock_manager'),
+        onBackPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/home');
+          }
+        },
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.primaryGreen),
-            tooltip: context.tr('refresh_inventory'),
-            onPressed: _loadProducts,
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Center(
+              child: GestureDetector(
+                onTap: _loadProducts,
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFFE4ECE8), width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                    size: 17,
+                    color: Color(0xFF1A3827),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

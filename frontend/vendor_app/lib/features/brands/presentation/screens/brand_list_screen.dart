@@ -10,6 +10,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class BrandListScreen extends StatefulWidget {
   final String? initialStatus;
@@ -54,20 +55,9 @@ class _BrandListScreenState extends State<BrandListScreen> {
     return BlocProvider(
       create: (_) => sl<BrandBloc>()..add(const FetchBrandsEvent()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            context.tr('my_brands'),
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        backgroundColor: const Color(0xFFF6F8F6),
+        appBar: CustomAppBar(
+          titleText: context.tr('my_brands'),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {

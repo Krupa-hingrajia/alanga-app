@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/vendor_profile_model.dart';
 import '../../domain/repositories/vendor_profile_repository.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class StoreKycScreen extends StatefulWidget {
   const StoreKycScreen({super.key});
@@ -184,20 +185,9 @@ class _StoreKycScreenState extends State<StoreKycScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F5),
-      appBar: AppBar(
-        title: const Text(
-          'Store KYC & Bank Details',
-          style: TextStyle(
-            color: Color(0xFF0F2016),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Color(0xFF0F2016)),
+      backgroundColor: const Color(0xFFF6F8F6),
+      appBar: const CustomAppBar(
+        titleText: 'Store KYC & Bank Details',
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))

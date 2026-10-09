@@ -9,6 +9,7 @@ import '../../data/models/sub_category_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 
 class SubCategoryListScreen extends StatefulWidget {
@@ -66,20 +67,9 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
     return BlocProvider(
       create: (_) => sl<SubCategoryBloc>()..add(const FetchSubCategoriesEvent()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: const Text(
-            'Sub Categories',
-            style: TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        backgroundColor: const Color(0xFFF6F8F6),
+        appBar: const CustomAppBar(
+          titleText: 'Sub Categories',
         ),
         floatingActionButton: null,
         body: _loadingCategories

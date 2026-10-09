@@ -10,6 +10,7 @@ import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/image_picker_widget.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class AddEditSubCategoryScreen extends StatefulWidget {
   final SubCategoryModel? subCategory;
@@ -192,20 +193,9 @@ class _AddEditSubCategoryScreenState extends State<AddEditSubCategoryScreen> {
     return BlocProvider(
       create: (_) => sl<SubCategoryBloc>(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            isEdit ? 'Edit Sub Category' : 'Add Sub Category',
-            style: const TextStyle(
-              color: Color(0xFF11261B),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Color(0xFF11261B)),
+        backgroundColor: const Color(0xFFF6F8F6),
+        appBar: CustomAppBar(
+          titleText: isEdit ? 'Edit Sub Category' : 'Add Sub Category',
         ),
         body: _loadingCategories
             ? const Center(child: CircularProgressIndicator(color: AppColors.brandOrange))

@@ -142,6 +142,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         _categories = results[0];
         _brands = results[1];
         _loadingDropdowns = false;
+
+        // Reset if selected category does not exist in active categories
+        if (_selectedCategoryId != null && !_categories.any((c) => c.id == _selectedCategoryId)) {
+          _selectedCategoryId = null;
+          _selectedSubCategoryId = null;
+          _subCategories = [];
+        }
       });
 
       if (_selectedCategoryId != null) {
@@ -169,6 +176,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       setState(() {
         _subCategories = list;
         _loadingSubCategories = false;
+        if (_selectedSubCategoryId != null && !_subCategories.any((sc) => sc.id == _selectedSubCategoryId)) {
+          _selectedSubCategoryId = null;
+        }
       });
     } catch (e) {
       setState(() {

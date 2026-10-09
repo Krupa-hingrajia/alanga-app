@@ -30,34 +30,43 @@ export class ProductsService {
       throw new BadRequestException('Selling Price cannot exceed MRP.');
     }
 
-    // Validate vendor has completed basic store profile (Store name and non-placeholder email)
-    const vendor = await this.prisma.user.findUnique({
+    // Ensure vendor exists and has a vendorProfile (auto-create if newly onboarded via OTP)
+    let vendor = await this.prisma.user.findUnique({
       where: { id: vendorId },
       include: { vendorProfile: true },
     });
 
     if (!vendor) {
-      throw new NotFoundException('Vendor account not found.');
+      throw new NotFoundException('Vendor account not found. Please log in again.');
     }
 
-    const email = vendor.email?.trim().toLowerCase() || '';
-    const isPlaceholderEmail =
-      email.length === 0 ||
-      email.startsWith('vendor_') ||
-      email.startsWith('customer_') ||
-      email.endsWith('@alanga.com');
-
-    const storeName = (vendor.vendorProfile?.storeName || '').trim();
-
-    if (isPlaceholderEmail || storeName.length === 0) {
-      throw new BadRequestException(
-        'Store profile incomplete. Please set your Store Name and a valid Email Address before adding products.',
-      );
+    if (!vendor.vendorProfile) {
+      const defaultStoreName = vendor.fullName || `Store ${vendor.phoneNumber?.slice(-4) || 'Vendor'}`;
+      await this.prisma.vendorProfile.create({
+        data: {
+          userId: vendor.id,
+          storeName: defaultStoreName,
+          businessType: 'Individual Seller',
+          pickupContactPhone: vendor.phoneNumber,
+        },
+      });
     }
 
     // Validate category, subcategory, brand exist and are active
-    await this.categoriesService.findOne(data.categoryId);
-    await this.subCategoriesService.findOne(data.subCategoryId);
+    const category = await this.prisma.category.findFirst({
+      where: { id: data.categoryId, deletedAt: null },
+    });
+    if (!category) {
+      throw new BadRequestException('Selected Category does not exist or is inactive. Please select a valid category from the dropdown.');
+    }
+
+    const subCategory = await this.prisma.subCategory.findFirst({
+      where: { id: data.subCategoryId, categoryId: data.categoryId, deletedAt: null },
+    });
+    if (!subCategory) {
+      throw new BadRequestException('Selected Sub Category does not exist or does not belong to the chosen category. Please select a valid sub category.');
+    }
+
     if (data.brandId) {
       await this.brandsService.validateActiveBrandForProduct(data.brandId);
     }

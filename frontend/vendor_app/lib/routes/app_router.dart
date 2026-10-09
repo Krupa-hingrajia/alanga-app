@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
+import '../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../features/auth/presentation/screens/success_screen.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -65,15 +66,16 @@ class AppRouter {
       
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
+      final isOtpVerification = state.matchedLocation == '/otp-verification';
       final isSuccess = state.matchedLocation == '/success';
       final isForgotPassword = state.matchedLocation == '/forgot-password';
 
       if (token == null) {
-        if (!isLoggingIn && !isRegistering && !isSuccess && !isForgotPassword) {
+        if (!isLoggingIn && !isRegistering && !isOtpVerification && !isSuccess && !isForgotPassword) {
           return '/login';
         }
       } else {
-        if (isLoggingIn || isRegistering || isForgotPassword) {
+        if (isLoggingIn || isRegistering || isOtpVerification || isForgotPassword) {
           return '/home';
         }
       }
@@ -91,6 +93,21 @@ class AppRouter {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/otp-verification',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return OtpVerificationScreen(
+            verificationId: extra['verificationId'] as String? ?? '',
+            phoneNumber: extra['phoneNumber'] as String? ?? '',
+            resendToken: extra['resendToken'] as int?,
+            isRegister: extra['isRegister'] as bool? ?? false,
+            fullName: extra['fullName'] as String?,
+            businessName: extra['businessName'] as String?,
+            email: extra['email'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: '/forgot-password',

@@ -3,12 +3,14 @@ import '../../../../core/network/api_service.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/login_request_model.dart';
 import '../models/login_response_model.dart';
+import '../models/phone_auth_request_model.dart';
 import '../models/register_request_model.dart';
 import '../models/register_response_model.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> login(LoginRequestModel request);
+  Future<LoginResponseModel> phoneAuth(PhoneAuthRequestModel request);
   Future<RegisterResponseModel> register(RegisterRequestModel request);
   Future<UserModel> getCurrentUser();
   Future<void> logout();
@@ -30,6 +32,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await _apiService.post(
         ApiEndpoints.login,
+        data: request.toJson(),
+      );
+      final data = response.data['data'] as Map<String, dynamic>;
+      return LoginResponseModel.fromJson(data);
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> phoneAuth(PhoneAuthRequestModel request) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.phoneAuth,
         data: request.toJson(),
       );
       final data = response.data['data'] as Map<String, dynamic>;

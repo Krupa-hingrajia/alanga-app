@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../bloc/register/register_bloc.dart';
 import '../bloc/register/register_event.dart';
 import '../bloc/register/register_state.dart';
+import '../widgets/country_code_picker.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -30,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _phoneError;
 
   // Step 1: Personal & Login Info
+  CountryInfo _selectedCountry = supportedCountries.first;
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _countryCodeController = TextEditingController(text: '+91');
@@ -678,18 +680,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: 70,
-                child: TextFormField(
-                  controller: _countryCodeController,
-                  style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-                  decoration: _buildInputDecoration('Code', null),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Required';
-                    return null;
-                  },
-                ),
+              CountryCodePickerButton(
+                selectedCountry: _selectedCountry,
+                onCountryChanged: (country) {
+                  setState(() {
+                    _selectedCountry = country;
+                    _countryCodeController.text = country.dialCode;
+                  });
+                },
               ),
               const SizedBox(width: 10),
               Expanded(

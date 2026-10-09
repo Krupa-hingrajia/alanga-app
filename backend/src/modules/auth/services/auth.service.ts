@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { PhoneAuthDto } from '../dto/phone-auth.dto';
 import { UserEntity } from '../../users/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { Role, AccountStatus, KYCStatus } from '@prisma/client';
@@ -144,6 +145,85 @@ export class AuthService {
     const tokens = await this.generateTokens(user.id, user.email, user.role);
     return {
       user,
+      ...tokens,
+    };
+  }
+
+  async phoneAuth(phoneAuthDto: PhoneAuthDto) {
+    const rawPhone = phoneAuthDto.phoneNumber.trim();
+    const cleanDigits = rawPhone.replace(/\D/g, '');
+
+    // Search user by raw phone or normalized 10-digit number
+    let user = await this.authRepository.findUserByMobile(rawPhone);
+    if (!user && cleanDigits.length >= 10) {
+      const last10 = cleanDigits.slice(-10);
+      user = await this.authRepository.findUserByMobile(last10);
+      if (!user) {
+        user = await this.authRepository.findUserByMobile(`+91${last10}`);
+      }
+      if (!user) {
+        user = await this.authRepository.findUserByMobile(`+${cleanDigits}`);
+      }
+    }
+
+    if (user) {
+      if (user.status === AccountStatus.SUSPENDED) {
+        throw new ForbiddenException('Your account has been suspended');
+      }
+      if (user.status === AccountStatus.REJECTED) {
+        throw new ForbiddenException('Your account registration was rejected');
+      }
+      const tokens = await this.generateTokens(user.id, user.email, user.role);
+      return {
+        isNewUser: false,
+        user,
+        ...tokens,
+      };
+    }
+
+    // New user registration via Phone OTP
+    const targetRole = phoneAuthDto.role || Role.VENDOR;
+    const generatedEmail = phoneAuthDto.email?.trim().toLowerCase() || `vendor_${cleanDigits}@alanga.com`;
+
+    let finalEmail = generatedEmail;
+    const existingEmail = await this.authRepository.findUserByEmail(finalEmail);
+    if (existingEmail) {
+      finalEmail = `vendor_${cleanDigits}_${Date.now()}@alanga.com`;
+    }
+
+    const saltRounds = 10;
+    const randomPassword = Math.random().toString(36).slice(-10) + 'A1!';
+    const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
+
+    const fullName = phoneAuthDto.fullName?.trim() || phoneAuthDto.businessName?.trim() || `Vendor ${cleanDigits.slice(-4)}`;
+    const storeName = phoneAuthDto.businessName?.trim() || fullName;
+
+    const userData: any = {
+      fullName,
+      email: finalEmail,
+      phoneNumber: rawPhone,
+      password: hashedPassword,
+      role: targetRole,
+      status: AccountStatus.ACTIVE,
+      kycStatus: KYCStatus.NOT_SUBMITTED,
+    };
+
+    if (targetRole === Role.VENDOR) {
+      userData.vendorProfile = {
+        create: {
+          storeName,
+          businessType: 'Individual Seller',
+          pickupContactPhone: rawPhone,
+        },
+      };
+    }
+
+    const newUser = await this.authRepository.createUser(userData);
+    const tokens = await this.generateTokens(newUser.id, newUser.email, newUser.role);
+
+    return {
+      isNewUser: true,
+      user: newUser,
       ...tokens,
     };
   }

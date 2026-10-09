@@ -9,8 +9,10 @@ import '../../features/auth/data/datasource/auth_remote_datasource.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
+import '../../features/auth/domain/usecases/phone_auth_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/login/login_bloc.dart';
+import '../../features/auth/presentation/bloc/phone_auth/phone_auth_bloc.dart';
 import '../../features/auth/presentation/bloc/register/register_bloc.dart';
 import '../../features/auth/presentation/bloc/forgot_password/forgot_password_bloc.dart';
 
@@ -68,6 +70,7 @@ Future<void> init() async {
   // Blocs
   sl.registerLazySingleton(() => LanguageBloc(storageService: sl())..add(const LoadSavedLanguageEvent()));
   sl.registerFactory(() => LoginBloc(loginUseCase: sl()));
+  sl.registerFactory(() => PhoneAuthBloc(phoneAuthUseCase: sl()));
   sl.registerFactory(() => RegisterBloc(registerUseCase: sl()));
   sl.registerFactory(() => ForgotPasswordBloc(authRepository: sl()));
   sl.registerFactory(() => CategoryBloc(categoryRepository: sl()));
@@ -80,6 +83,7 @@ Future<void> init() async {
 
   // Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => PhoneAuthUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
 
   // Repository

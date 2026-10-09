@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { PhoneAuthDto } from '../dto/phone-auth.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import {
   ForgotPasswordDto,
@@ -57,6 +58,18 @@ export class AuthController {
     return {
       message: 'Login successful',
       data: loginData,
+    };
+  }
+
+  @Post('phone-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Phone OTP Authentication', description: 'Authenticates or auto-registers a user via verified phone number and issues JWT tokens.' })
+  @ApiResponse({ status: 200, description: 'Successfully authenticated via phone' })
+  async phoneAuth(@Body() phoneAuthDto: PhoneAuthDto) {
+    const authData = await this.authService.phoneAuth(phoneAuthDto);
+    return {
+      message: authData.isNewUser ? 'Registration successful via phone' : 'Login successful via phone',
+      data: authData,
     };
   }
 

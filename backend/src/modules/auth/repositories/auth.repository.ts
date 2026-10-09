@@ -65,6 +65,7 @@ export class AuthRepository implements IAuthRepository {
     const user = await this.prisma.user.update({
       where: { id },
       data,
+      include: { vendorProfile: true },
     });
     return this.mapToEntity(user);
   }

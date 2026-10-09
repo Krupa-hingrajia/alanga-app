@@ -36,6 +36,29 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final phone = json['phoneNumber'] as String? ?? json['mobileNumber'] as String? ?? '';
     final code = json['countryCode'] as String? ?? '+91';
+    final vendorProfile = json['vendorProfile'] as Map<String, dynamic>?;
+
+    final storeName = json['businessName'] as String? ??
+        json['storeName'] as String? ??
+        vendorProfile?['storeName'] as String?;
+
+    final bType = json['businessType'] as String? ??
+        vendorProfile?['businessType'] as String?;
+
+    final city = json['city'] as String? ??
+        vendorProfile?['pickupCity'] as String?;
+
+    final state = json['state'] as String? ??
+        vendorProfile?['pickupState'] as String?;
+
+    final pincode = json['pincode'] as String? ??
+        vendorProfile?['pickupPincode'] as String?;
+
+    final gst = json['gstNumber'] as String? ??
+        vendorProfile?['gstNumber'] as String?;
+
+    final pan = json['panNumber'] as String? ??
+        vendorProfile?['panNumber'] as String?;
 
     return UserModel(
       id: json['id'] as String? ?? '',
@@ -45,13 +68,13 @@ class UserModel {
       mobileNumber: phone,
       role: json['role'] as String? ?? 'CUSTOMER',
       status: json['status'] as String? ?? 'PENDING',
-      businessName: json['businessName'] as String?,
-      businessType: json['businessType'] as String?,
-      city: json['city'] as String?,
-      state: json['state'] as String?,
-      pincode: json['pincode'] as String?,
-      gstNumber: json['gstNumber'] as String?,
-      panNumber: json['panNumber'] as String?,
+      businessName: storeName,
+      businessType: bType,
+      city: city,
+      state: state,
+      pincode: pincode,
+      gstNumber: gst,
+      panNumber: pan,
     );
   }
 

@@ -64,6 +64,8 @@ abstract class AuthRepository {
 
   Future<UserEntity> updateProfile({
     String? fullName,
+    String? email,
+    String? businessName,
     String? phoneNumber,
     String? profileImage,
   });

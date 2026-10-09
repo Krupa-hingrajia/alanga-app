@@ -399,18 +399,39 @@ export class AuthService {
     };
   }
 
-  async updateProfile(userId: string, data: { fullName?: string; phoneNumber?: string; profileImage?: string }) {
+  async updateProfile(userId: string, data: { fullName?: string; email?: string; businessName?: string; storeName?: string; phoneNumber?: string; profileImage?: string }) {
     const user = await this.authRepository.findUserById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const updated = await this.authRepository.updateUser(userId, {
-      ...(data.fullName && { fullName: data.fullName }),
-      ...(data.phoneNumber && { phoneNumber: data.phoneNumber }),
-      ...(data.profileImage && { profileImage: data.profileImage }),
-    });
+    if (data.email) {
+      const cleanEmail = data.email.trim().toLowerCase();
+      const existing = await this.authRepository.findUserByEmail(cleanEmail);
+      if (existing && existing.id !== userId) {
+        throw new BadRequestException('This email is already registered with another account.');
+      }
+    }
 
+    const storeName = (data.businessName || data.storeName)?.trim();
+
+    const updateData: any = {
+      ...(data.fullName && { fullName: data.fullName.trim() }),
+      ...(data.email && { email: data.email.trim().toLowerCase() }),
+      ...(data.phoneNumber && { phoneNumber: data.phoneNumber.trim() }),
+      ...(data.profileImage && { profileImage: data.profileImage }),
+    };
+
+    if (storeName && user.role === Role.VENDOR) {
+      updateData.vendorProfile = {
+        upsert: {
+          create: { storeName, businessType: 'Individual Seller' },
+          update: { storeName },
+        },
+      };
+    }
+
+    const updated = await this.authRepository.updateUser(userId, updateData);
     return updated;
   }
 }

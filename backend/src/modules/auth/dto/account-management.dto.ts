@@ -100,6 +100,21 @@ export class UpdateProfileDto {
   @IsString()
   fullName?: string;
 
+  @ApiPropertyOptional({ example: 'seller@example.com', description: 'User email address' })
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @ApiPropertyOptional({ example: 'Krupa Textiles', description: 'Store or business name' })
+  @IsOptional()
+  @IsString()
+  businessName?: string;
+
+  @ApiPropertyOptional({ example: 'Krupa Textiles', description: 'Store name' })
+  @IsOptional()
+  @IsString()
+  storeName?: string;
+
   @ApiPropertyOptional({ example: '+919876543210', description: 'Contact phone number' })
   @IsOptional()
   @IsString()

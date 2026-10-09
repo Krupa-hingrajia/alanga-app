@@ -232,17 +232,23 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserEntity> updateProfile({
     String? fullName,
+    String? email,
+    String? businessName,
     String? phoneNumber,
     String? profileImage,
   }) async {
     try {
       final updatedModel = await _remoteDataSource.updateProfile(
         fullName: fullName,
+        email: email,
+        businessName: businessName,
         phoneNumber: phoneNumber,
         profileImage: profileImage,
       );
       final currentData = await _storageService.getUserData() ?? {};
       if (fullName != null) currentData['fullName'] = fullName;
+      if (email != null) currentData['email'] = email;
+      if (businessName != null) currentData['businessName'] = businessName;
       if (phoneNumber != null) currentData['phoneNumber'] = phoneNumber;
       if (profileImage != null) currentData['profileImage'] = profileImage;
       await _storageService.saveUserData(currentData);

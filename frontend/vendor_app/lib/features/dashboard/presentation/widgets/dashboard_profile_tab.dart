@@ -8,6 +8,7 @@ import '../../../../core/localization/bloc/language_state.dart';
 import '../../../../core/localization/widgets/language_selection_bottom_sheet.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../settings/presentation/widgets/delete_account_dialog.dart';
+import '../../../profile/presentation/widgets/first_time_store_setup_sheet.dart';
 
 class DashboardProfileTab extends StatelessWidget {
   final Map<String, dynamic>? userData;
@@ -71,46 +72,71 @@ class DashboardProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F6F4),
-              borderRadius: BorderRadius.circular(10),
+  Widget _buildProfileDetailRow(IconData icon, String label, String value, {VoidCallback? onTap, bool isActionRequired = false}) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F6F4),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 18, color: const Color(0xFF1A3827)),
             ),
-            child: Icon(icon, size: 18, color: const Color(0xFF1A3827)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondaryLight,
-                    fontWeight: FontWeight.w500,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondaryLight,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF11261B),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: isActionRequired ? AppColors.brandOrange : const Color(0xFF11261B),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isActionRequired)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'Add',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.brandOrange),
+                          ),
+                        ),
+                    ],
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            if (onTap != null) ...[
+              const SizedBox(width: 6),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Color(0xFF7A9A86)),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -119,10 +145,25 @@ class DashboardProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final businessName = userData?['businessName'] ?? 'Alanga Store';
     final fullName = userData?['fullName'] ?? 'Vendor User';
-    final email = userData?['email'] ?? 'vendor@alanga.com';
-    final mobileNumber = userData?['mobileNumber'] ?? '';
+    final rawEmail = userData?['email'] ?? '';
+    final isPlaceholderEmail = rawEmail.contains('@alanga.com') && rawEmail.startsWith('vendor_');
+    final displayEmail = isPlaceholderEmail ? 'Not Set (Tap to add)' : rawEmail;
+
+    final mobileNumber = userData?['mobileNumber'] ?? userData?['phoneNumber'] ?? '';
     final countryCode = userData?['countryCode'] ?? '+91';
-    final formattedMobile = mobileNumber.isNotEmpty ? '$countryCode $mobileNumber' : 'Not Provided';
+    final String formattedMobile;
+    if (mobileNumber.isEmpty) {
+      formattedMobile = 'Not Provided';
+    } else if (mobileNumber.startsWith('+')) {
+      if (mobileNumber.startsWith('+91') && mobileNumber.length > 3) {
+        formattedMobile = '+91 ${mobileNumber.substring(3)}';
+      } else {
+        formattedMobile = mobileNumber;
+      }
+    } else {
+      formattedMobile = '$countryCode $mobileNumber';
+    }
+
     final initials = businessName.isNotEmpty ? businessName.substring(0, 1).toUpperCase() : 'V';
     final profileImage = userData?['profileImage'] as String?;
 
@@ -223,7 +264,21 @@ class DashboardProfileTab extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildProfileDetailRow(Icons.email_outlined, context.tr('email'), email),
+                _buildProfileDetailRow(
+                  Icons.email_outlined,
+                  context.tr('email'),
+                  displayEmail,
+                  isActionRequired: isPlaceholderEmail,
+                  onTap: () {
+                    FirstTimeStoreSetupSheet.show(
+                      context,
+                      initialFullName: fullName,
+                      initialBusinessName: businessName,
+                      initialEmail: isPlaceholderEmail ? null : rawEmail,
+                      onUpdated: onRefreshUser,
+                    );
+                  },
+                ),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),
                 _buildProfileDetailRow(Icons.phone_outlined, context.tr('phone_number'), formattedMobile),
                 const Divider(height: 1, color: Color(0xFFF1F5F2)),

@@ -19,7 +19,13 @@ abstract class AuthRemoteDataSource {
   Future<void> resetPassword(String identifier, String otp, String newPassword);
   Future<void> changePassword(String currentPassword, String newPassword);
   Future<void> deleteAccount({String? password, String? reason});
-  Future<UserModel> updateProfile({String? fullName, String? phoneNumber, String? profileImage});
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? email,
+    String? businessName,
+    String? phoneNumber,
+    String? profileImage,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -162,12 +168,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateProfile({String? fullName, String? phoneNumber, String? profileImage}) async {
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? email,
+    String? businessName,
+    String? phoneNumber,
+    String? profileImage,
+  }) async {
     try {
       final response = await _apiService.patch(
         ApiEndpoints.updateProfile,
         data: {
           if (fullName != null) 'fullName': fullName,
+          if (email != null) 'email': email,
+          if (businessName != null) 'businessName': businessName,
           if (phoneNumber != null) 'phoneNumber': phoneNumber,
           if (profileImage != null) 'profileImage': profileImage,
         },

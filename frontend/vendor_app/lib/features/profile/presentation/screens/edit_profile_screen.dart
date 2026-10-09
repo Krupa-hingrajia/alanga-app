@@ -84,8 +84,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final storage = sl<SecureStorageService>();
       final currentData = await storage.getUserData() ?? {};
 
-      currentData['fullName'] = _fullNameController.text.trim();
-      currentData['businessName'] = _businessNameController.text.trim();
+      final email = _emailController.text.trim().toLowerCase();
+      final businessName = _businessNameController.text.trim();
+      final fullName = _fullNameController.text.trim();
+
+      currentData['fullName'] = fullName;
+      currentData['businessName'] = businessName;
+      if (email.isNotEmpty) currentData['email'] = email;
       currentData['mobileNumber'] = _phoneController.text.trim();
       currentData['phoneNumber'] = _phoneController.text.trim();
       currentData['city'] = _cityController.text.trim();
@@ -102,7 +107,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // Attempt remote sync if online
       try {
         await sl<AuthRepository>().updateProfile(
-          fullName: _fullNameController.text.trim(),
+          fullName: fullName,
+          email: email.isNotEmpty ? email : null,
+          businessName: businessName.isNotEmpty ? businessName : null,
           phoneNumber: _phoneController.text.trim(),
           profileImage: currentImagePath,
         );

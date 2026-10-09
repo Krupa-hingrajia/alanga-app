@@ -25,6 +25,7 @@ import '../widgets/dashboard_quick_add_modal.dart';
 import '../widgets/dashboard_master_data_sheets.dart';
 import '../widgets/dashboard_alerts_tab.dart';
 import '../widgets/dashboard_profile_tab.dart';
+import '../../../profile/presentation/widgets/first_time_store_setup_sheet.dart';
 
 // Product imports
 import '../../../products/data/models/product_model.dart';
@@ -52,6 +53,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _userData;
   bool _dataLoading = true;
+  bool _hasPromptedProfileSetup = false;
 
   List<ProductModel> _products = [];
   List<CategoryModel> _categories = [];
@@ -75,6 +77,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         setState(() {
           _userData = data;
         });
+
+        final rawEmail = data?['email'] as String? ?? '';
+        final isPlaceholder = rawEmail.contains('@alanga.com') && rawEmail.startsWith('vendor_');
+        if (isPlaceholder && !_hasPromptedProfileSetup) {
+          _hasPromptedProfileSetup = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FirstTimeStoreSetupSheet.show(
+              context,
+              initialFullName: data?['fullName'] as String?,
+              initialBusinessName: data?['businessName'] as String?,
+              initialEmail: null,
+              onUpdated: () async {
+                await _loadUser();
+                await _loadDashboardData();
+              },
+            );
+          });
+        }
       }
     } catch (_) {
       // ignore
@@ -790,6 +810,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 0. First-Time Store Profile Setup Action Banner
+          _buildStoreSetupActionBanner(),
+
           // 1. KYC Verification Action Banner
           _buildKycBannerSection(),
           const SizedBox(height: 12),
@@ -1095,6 +1118,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: const Text('Manage', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStoreSetupActionBanner() {
+    final rawEmail = _userData?['email'] as String? ?? '';
+    final isPlaceholder = rawEmail.contains('@alanga.com') && rawEmail.startsWith('vendor_');
+    if (!isPlaceholder) return const SizedBox.shrink();
+
+    final fullName = _userData?['fullName'] as String? ?? '';
+    final businessName = _userData?['businessName'] as String? ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFFED7AA), width: 1.2),
+      ),
+      child: InkWell(
+        onTap: () {
+          FirstTimeStoreSetupSheet.show(
+            context,
+            initialFullName: fullName,
+            initialBusinessName: businessName,
+            initialEmail: null,
+            onUpdated: () async {
+              await _loadUser();
+              await _loadDashboardData();
+            },
+          );
+        },
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFEDD5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.storefront_rounded, color: Color(0xFFC2410C), size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Complete Your Store Profile',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF9A3412),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Add your store name & email for order alerts',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Color(0xFFC2410C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC2410C),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'SETUP',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

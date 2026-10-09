@@ -7,7 +7,7 @@ export class ProductEntity implements Product {
   shortDescription: string | null;
   categoryId: string;
   subCategoryId: string;
-  brandId: string;
+  brandId: string | null;
   sellingPrice: number;
   mrp: number;
   taxPercentage: number;

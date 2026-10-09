@@ -194,10 +194,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       if (!canProceed) return;
     }
 
-    if (_formKey.currentState!.validate()) {
-      if (_selectedCategoryId == null || _selectedSubCategoryId == null || _selectedBrandId == null) {
+      if (_selectedCategoryId == null || _selectedSubCategoryId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select Category, Sub Category, and Brand')),
+          const SnackBar(content: Text('Please select Category and Sub Category')),
         );
         return;
       }
@@ -225,7 +224,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         'description': _descController.text.trim(),
         'categoryId': _selectedCategoryId,
         'subCategoryId': _selectedSubCategoryId,
-        'brandId': _selectedBrandId,
+        if (_selectedBrandId != null && _selectedBrandId!.isNotEmpty) 'brandId': _selectedBrandId,
         'mrp': mrp,
         'sellingPrice': sellingPrice,
         'status': targetStatus,
@@ -591,19 +590,14 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                                       ),
                                       const SizedBox(height: 16),
                                       SearchableDropdownField(
-                                        label: 'Brand *',
+                                        label: 'Brand (Optional)',
                                         value: _selectedBrandId,
                                         items: _brands,
-                                        placeholder: 'Select Brand',
+                                        placeholder: 'Select Brand (Optional)',
                                         emptyStateMessage: 'No Brands Available',
                                         loading: _loadingDropdowns,
                                         onRequestBrand: () => RequestBrandBottomSheet.show(context),
-                                        validator: (val) {
-                                          if (val == null || val.trim().isEmpty) {
-                                            return 'Brand is required';
-                                          }
-                                          return null;
-                                        },
+                                        validator: (val) => null,
                                         onChanged: (id, name) {
                                           setState(() {
                                             _selectedBrandId = id;

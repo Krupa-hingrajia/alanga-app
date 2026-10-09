@@ -126,8 +126,8 @@ model Product {
   category         Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategoryId    String           @map("sub_category_id")
   subCategory      SubCategory      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  brandId          String           @map("brand_id")
-  brand            Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId          String?          @map("brand_id")
+  brand            Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
   sku              String           @unique
   name             String
   description      String?

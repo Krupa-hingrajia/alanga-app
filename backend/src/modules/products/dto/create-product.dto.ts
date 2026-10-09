@@ -27,10 +27,10 @@ export class CreateProductDto {
   @IsUUID()
   subCategoryId: string;
 
-  @ApiProperty({ example: 'c0d1e2f3-a4b5-6789-0123-456789abcdef', description: 'Brand UUID reference' })
-  @IsNotEmpty()
+  @ApiProperty({ required: false, example: 'c0d1e2f3-a4b5-6789-0123-456789abcdef', description: 'Brand UUID reference (optional)' })
+  @IsOptional()
   @IsUUID()
-  brandId: string;
+  brandId?: string;
 
   @ApiProperty({ example: 120000, description: 'Selling price of the product (cannot exceed MRP)' })
   @IsNotEmpty()

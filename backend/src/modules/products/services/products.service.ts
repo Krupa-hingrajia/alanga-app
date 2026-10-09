@@ -58,7 +58,9 @@ export class ProductsService {
     // Validate category, subcategory, brand exist and are active
     await this.categoriesService.findOne(data.categoryId);
     await this.subCategoriesService.findOne(data.subCategoryId);
-    await this.brandsService.validateActiveBrandForProduct(data.brandId);
+    if (data.brandId) {
+      await this.brandsService.validateActiveBrandForProduct(data.brandId);
+    }
 
     return this.productsRepository.create(data, vendorId);
   }

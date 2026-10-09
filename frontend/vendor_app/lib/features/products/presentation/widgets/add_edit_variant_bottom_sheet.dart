@@ -32,6 +32,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
   // List of dynamic attribute key-value pairs
   final List<MapEntry<String, String>> _attributePairs = [];
   bool _isDefault = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -74,6 +75,20 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
     super.dispose();
   }
 
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
+  }
+
+  void _showError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+  }
+
   void _autoGenerateVariantName() {
     final values = _attributePairs
         .map((p) => p.value.trim())
@@ -85,6 +100,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
   }
 
   void _addAttributePair() {
+    _clearError();
     String defaultKey = 'Attribute';
     String defaultVal = '';
 
@@ -104,10 +120,9 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
   }
 
   void _removeAttributePair(int index) {
+    _clearError();
     if (_attributePairs.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('At least one attribute is required.')),
-      );
+      _showError('At least one attribute is required.');
       return;
     }
     setState(() {
@@ -117,14 +132,22 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
   }
 
   void _submit() {
+    _clearError();
     if (!_formKey.currentState!.validate()) {
+      _showError('Please check and fill all required fields properly.');
       return;
     }
 
-    if (_attributePairs.isEmpty || _attributePairs.every((p) => p.key.isEmpty || p.value.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('At least one attribute is required.')),
-      );
+    final hasEmptyPair = _attributePairs.any((p) => p.key.trim().isEmpty || p.value.trim().isEmpty);
+    if (_attributePairs.isEmpty || hasEmptyPair) {
+      _showError('Please provide both attribute name and value for all attributes.');
+      return;
+    }
+
+    // Check duplicate attribute keys
+    final keys = _attributePairs.map((p) => p.key.trim().toLowerCase()).toList();
+    if (keys.toSet().length < keys.length) {
+      _showError('Duplicate attribute types detected. Each attribute must be unique.');
       return;
     }
 
@@ -134,11 +157,9 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
     final variantName = _variantNameCtrl.text.trim();
 
     // Check SKU Uniqueness
-    final isEditingSameSku = widget.initialVariant != null && widget.initialVariant!.sku == sku;
+    final isEditingSameSku = widget.initialVariant != null && widget.initialVariant!.sku.toUpperCase() == sku.toUpperCase();
     if (!isEditingSameSku && widget.existingSkus.contains(sku.toUpperCase())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('SKU "$sku" is already in use. Please enter a unique SKU.')),
-      );
+      _showError('SKU "$sku" is already in use. Please enter a unique SKU.');
       return;
     }
 
@@ -379,6 +400,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                 // Variant Name Field
                 TextFormField(
                   controller: _variantNameCtrl,
+                  onChanged: (_) => _clearError(),
                   decoration: const InputDecoration(
                     labelText: 'Variant Name *',
                     hintText: 'e.g. Black / XL',
@@ -391,6 +413,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                 // SKU Field
                 TextFormField(
                   controller: _skuCtrl,
+                  onChanged: (_) => _clearError(),
                   decoration: const InputDecoration(
                     labelText: 'SKU (Stock Keeping Unit) *',
                     hintText: 'e.g. TSHIRT-BLK-XL-001',
@@ -408,6 +431,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                         controller: _priceCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => _clearError(),
                         decoration: const InputDecoration(
                           labelText: 'Price (₹) *',
                           hintText: '999',
@@ -427,6 +451,7 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                         controller: _stockCtrl,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
+                        onChanged: (_) => _clearError(),
                         onFieldSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                         decoration: const InputDecoration(
                           labelText: 'Stock Quantity *',
@@ -469,6 +494,45 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 16),
+
+                // In-Modal Error Banner
+                if (_errorMessage != null) ...[
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFDE8E8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF98080), width: 1.2),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline_rounded, color: Color(0xFFE02424), size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Color(0xFF9B1C1C),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() => _errorMessage = null),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 6),
+                            child: Icon(Icons.close_rounded, color: Color(0xFF9B1C1C), size: 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 // Save Variant Button
                 ElevatedButton(

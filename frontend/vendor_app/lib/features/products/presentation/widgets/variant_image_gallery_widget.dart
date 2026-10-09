@@ -203,8 +203,9 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
   }
 
   Future<void> _pickImages(ImageSource source) async {
+    _clearError();
     if (_images.length >= maxGalleryImages) {
-      _showErrorSnackBar('Maximum $maxGalleryImages images allowed per variant gallery.');
+      _showError('Maximum $maxGalleryImages images allowed per variant gallery.');
       return;
     }
 
@@ -245,7 +246,7 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
       int addedCount = 0;
       for (final file in pickedFiles) {
         if (_images.length >= maxGalleryImages) {
-          _showErrorSnackBar('Maximum $maxGalleryImages images limit reached.');
+          _showError('Maximum $maxGalleryImages images limit reached.');
           break;
         }
 
@@ -270,13 +271,13 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
             path.contains('Camera');
 
         if (!isAllowed) {
-          _showErrorSnackBar('Invalid file format: ${file.name}.');
+          _showError('Invalid file format: ${file.name}.');
           continue;
         }
 
         final fileLength = await file.length();
         if (fileLength > maxFileSizeBytes) {
-          _showErrorSnackBar('File size too large: ${file.name}. Maximum 25MB allowed.');
+          _showError('File size too large: ${file.name}. Maximum 25MB allowed.');
           continue;
         }
 
@@ -295,19 +296,24 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
         widget.onSaveGallery(_images);
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to pick images: $e');
+      _showError('Failed to pick images: $e');
     }
   }
 
-  void _showErrorSnackBar(String msg) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: AppColors.brandRed,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  String? _errorMessage;
+
+  void _showError(String msg) {
+    setState(() {
+      _errorMessage = msg;
+    });
+  }
+
+  void _clearError() {
+    if (_errorMessage != null) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
   }
 
   void _setPrimary(int index) {
@@ -443,7 +449,42 @@ class _VariantImageGalleryWidgetState extends State<VariantImageGalleryWidget> {
               },
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // In-Modal Error Banner
+          if (_errorMessage != null) ...[
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDE8E8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFF98080), width: 1.2),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: Color(0xFFE02424), size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Color(0xFF9B1C1C),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _errorMessage = null),
+                    child: const Icon(Icons.close_rounded, color: Color(0xFF9B1C1C), size: 16),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Save / Close Button
           SizedBox(

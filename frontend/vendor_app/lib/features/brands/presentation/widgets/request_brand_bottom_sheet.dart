@@ -36,6 +36,7 @@ class _RequestBrandBottomSheetState extends State<RequestBrandBottomSheet> {
   final _descController = TextEditingController();
 
   bool _isSubmitting = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -50,6 +51,7 @@ class _RequestBrandBottomSheetState extends State<RequestBrandBottomSheet> {
 
     setState(() {
       _isSubmitting = true;
+      _errorMessage = null;
     });
 
     try {
@@ -73,17 +75,11 @@ class _RequestBrandBottomSheetState extends State<RequestBrandBottomSheet> {
       widget.onRequestSubmitted?.call();
     } catch (e) {
       if (!mounted) return;
+      final errorMsg = e.toString().replaceAll('Exception:', '').replaceAll('ServerFailure:', '').trim();
       setState(() {
         _isSubmitting = false;
+        _errorMessage = errorMsg.isNotEmpty ? errorMsg : 'Failed to submit brand request.';
       });
-
-      final errorMsg = e.toString().replaceAll('Exception:', '').replaceAll('ServerFailure:', '').trim();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMsg.isNotEmpty ? errorMsg : 'Failed to submit brand request.'),
-          backgroundColor: AppColors.brandRed,
-        ),
-      );
     }
   }
 
@@ -205,6 +201,40 @@ class _RequestBrandBottomSheetState extends State<RequestBrandBottomSheet> {
                 decoration: _inputDecoration('Description (Optional)', Icons.notes_outlined),
               ),
               const SizedBox(height: 24),
+
+              // In-Modal Error Banner
+              if (_errorMessage != null) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDE8E8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFF98080), width: 1.2),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: Color(0xFFE02424), size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Color(0xFF9B1C1C),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => setState(() => _errorMessage = null),
+                        child: const Icon(Icons.close_rounded, color: Color(0xFF9B1C1C), size: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               // Submit Button
               ElevatedButton(

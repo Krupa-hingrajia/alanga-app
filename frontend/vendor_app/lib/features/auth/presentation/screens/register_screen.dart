@@ -382,25 +382,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 20),
 
-                        // Progress Indicator Row (5 Steps)
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildStepIndicator(0, 'Login'),
-                              _buildStepLine(),
-                              _buildStepIndicator(1, 'Business'),
-                              _buildStepLine(),
-                              _buildStepIndicator(2, 'Tax & KYC'),
-                              _buildStepLine(),
-                              _buildStepIndicator(3, 'Pickup'),
-                              _buildStepLine(),
-                              _buildStepIndicator(4, 'Bank'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+                        // Responsive Connected Stepper (5 Steps)
+                        _buildCustomStepper(),
+                        const SizedBox(height: 18),
+
+                        // Active Step Header Badge
+                        _buildStepHeaderBadge(),
+                        const SizedBox(height: 18),
 
                         // Step Forms
                         if (_currentStep == 0) _buildPersonalInfoForm(),
@@ -536,77 +524,212 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   String _getStepSubTitle() {
-    switch (_currentStep) {
-      case 0:
-        return 'Step 1 of 5: Account & Login Credentials';
-      case 1:
-        return 'Step 2 of 5: Business Identity';
-      case 2:
-        return 'Step 3 of 5: Tax & Legal (KYC)';
-      case 3:
-        return 'Step 4 of 5: Pickup & Warehouse Address';
-      case 4:
-        return 'Step 5 of 5: Bank Account Details (Payouts)';
-      default:
-        return '';
-    }
+    return 'Complete all steps to activate your merchant account';
   }
 
-  Widget _buildStepIndicator(int stepIndex, String title) {
-    final isActive = _currentStep == stepIndex;
-    final isCompleted = _currentStep > stepIndex;
+  Widget _buildCustomStepper() {
+    const steps = [
+      {'title': 'Account', 'icon': Icons.person_outline},
+      {'title': 'Business', 'icon': Icons.storefront_outlined},
+      {'title': 'Tax & KYC', 'icon': Icons.verified_user_outlined},
+      {'title': 'Pickup', 'icon': Icons.location_on_outlined},
+      {'title': 'Bank', 'icon': Icons.account_balance_outlined},
+    ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Column(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCompleted
-                  ? AppColors.primaryGreen
-                  : isActive
-                      ? AppColors.primaryGreen
-                      : const Color(0xFFD1DDD6),
-              border: isActive
-                  ? Border.all(color: AppColors.primaryGreen, width: 2)
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F2),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFD1DDD6)),
+      ),
+      child: Row(
+        children: List.generate(steps.length * 2 - 1, (index) {
+          if (index.isOdd) {
+            final stepBefore = index ~/ 2;
+            final isPassed = _currentStep > stepBefore;
+            return Expanded(
+              child: Container(
+                height: 2.5,
+                margin: const EdgeInsets.symmetric(horizontal: 1),
+                decoration: BoxDecoration(
+                  color: isPassed ? const Color(0xFF1A3827) : const Color(0xFFCAD8D0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            );
+          } else {
+            final stepIndex = index ~/ 2;
+            final isActive = _currentStep == stepIndex;
+            final isCompleted = _currentStep > stepIndex;
+
+            return InkWell(
+              onTap: isCompleted
+                  ? () {
+                      setState(() => _currentStep = stepIndex);
+                    }
                   : null,
-            ),
-            child: Center(
-              child: isCompleted
-                  ? const Icon(Icons.check, size: 14, color: Colors.white)
-                  : Text(
-                      '${stepIndex + 1}',
-                      style: TextStyle(
-                        color: isActive || isCompleted ? Colors.white : AppColors.textSecondaryLight,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                            ? const Color(0xFF1A3827)
+                            : isActive
+                                ? const Color(0xFF1A3827)
+                                : Colors.white,
+                        border: Border.all(
+                          color: isCompleted || isActive
+                              ? const Color(0xFF1A3827)
+                              : const Color(0xFFCAD8D0),
+                          width: isActive ? 2 : 1.5,
+                        ),
+                        boxShadow: isActive
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF1A3827).withOpacity(0.2),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: isCompleted
+                            ? const Icon(Icons.check_rounded, size: 15, color: Colors.white)
+                            : Text(
+                                '${stepIndex + 1}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isActive ? Colors.white : const Color(0xFF7A9A86),
+                                ),
+                              ),
                       ),
                     ),
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 9,
-              color: isActive ? AppColors.primaryGreen : AppColors.textSecondaryLight,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            ),
-          )
-        ],
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        steps[stepIndex]['title'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                          color: isActive
+                              ? const Color(0xFF1A3827)
+                              : isCompleted
+                                  ? const Color(0xFF2E5E43)
+                                  : const Color(0xFF8B9E94),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        }),
       ),
     );
   }
 
-  Widget _buildStepLine() {
+  Widget _buildStepHeaderBadge() {
+    final stepDetails = [
+      {'title': 'Account & Credentials', 'icon': Icons.lock_person_outlined, 'desc': 'Create your login credentials'},
+      {'title': 'Business Identity', 'icon': Icons.storefront_outlined, 'desc': 'Store name & seller category'},
+      {'title': 'Tax & Legal Compliance', 'icon': Icons.verified_user_outlined, 'desc': 'PAN & GSTIN verification'},
+      {'title': 'Pickup Address', 'icon': Icons.local_shipping_outlined, 'desc': 'Warehouse / dispatch location'},
+      {'title': 'Bank Account Payouts', 'icon': Icons.account_balance_outlined, 'desc': 'Direct seller payout settlements'},
+    ];
+
+    final current = stepDetails[_currentStep];
+
     return Container(
-      width: 18,
-      height: 2,
-      margin: const EdgeInsets.only(bottom: 12),
-      color: const Color(0xFFD1DDD6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A3827).withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF1A3827).withOpacity(0.12)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A3827),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              current['icon'] as IconData,
+              size: 16,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'STEP ${_currentStep + 1} OF 5',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: Color(0xFF1A3827),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF7A9A86),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        current['title'] as String,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF11261B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  current['desc'] as String,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF5A7866),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1049,18 +1172,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ? Icon(icon, color: const Color(0xFF1A3827), size: 20)
           : null,
       filled: true,
-      fillColor: const Color(0xFFF7FAF8),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      fillColor: const Color(0xFFF1F5F2),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFDCE6E1)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFDCE6E1)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFF1A3827), width: 1.5),
       ),
     );

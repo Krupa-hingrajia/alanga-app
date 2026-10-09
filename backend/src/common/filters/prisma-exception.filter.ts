@@ -13,6 +13,12 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     let message = 'Database operation failed';
     const errors: string[] = [];
 
+    console.error('[PrismaExceptionFilter]', {
+      code: exception.code,
+      message: exception.message,
+      meta: exception.meta,
+    });
+
     switch (exception.code) {
       case 'P2002': {
         statusCode = HttpStatus.CONFLICT;
@@ -29,11 +35,22 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       }
       case 'P2003': {
         statusCode = HttpStatus.BAD_REQUEST;
-        message = 'Foreign key constraint failed';
+        const fieldName = (exception.meta?.field_name as string) || (exception.meta?.constraint as string) || '';
+        message = fieldName.includes('category')
+          ? 'Selected Category or Sub Category is invalid or does not exist.'
+          : fieldName.includes('brand')
+          ? 'Selected Brand is invalid or does not exist.'
+          : 'Foreign key constraint failed. Related record does not exist.';
+        errors.push(message);
+        break;
+      }
+      case 'P2011':
+      case 'P2012': {
+        statusCode = HttpStatus.BAD_REQUEST;
+        message = 'Missing required field in database operation.';
         break;
       }
       default:
-        // In production, do NOT expose raw Prisma error messages (may leak schema info)
         message = isProduction
           ? 'An unexpected database error occurred'
           : `Database error: ${exception.message}`;

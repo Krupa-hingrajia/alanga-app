@@ -241,7 +241,53 @@ class _AddEditVariantBottomSheetState extends State<AddEditVariantBottomSheet> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+
+                // Top In-Modal Error Banner
+                if (_errorMessage != null) ...[
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFDE8E8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF98080), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFE02424).withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline_rounded, color: Color(0xFFE02424), size: 22),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Color(0xFF9B1C1C),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() => _errorMessage = null),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 6),
+                            child: Icon(Icons.close_rounded, color: Color(0xFF9B1C1C), size: 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 // Dynamic Attributes Section Header
                 Row(

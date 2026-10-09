@@ -42,10 +42,17 @@ class FirstTimeStoreSetupSheet extends StatefulWidget {
   /// Returns true if profile is ready, false if blocked.
   static Future<bool> guardProductCreation(
     BuildContext context, {
-    required UserEntity? user,
-    required VoidCallback onProfileUpdated,
+    UserEntity? user,
+    VoidCallback? onProfileUpdated,
   }) async {
-    if (user != null && user.isStoreProfileComplete) {
+    UserEntity? currentUser = user;
+    if (currentUser == null) {
+      try {
+        currentUser = await sl<AuthRepository>().getCurrentUser();
+      } catch (_) {}
+    }
+
+    if (currentUser != null && currentUser.isStoreProfileComplete) {
       return true;
     }
 
@@ -97,10 +104,10 @@ class FirstTimeStoreSetupSheet extends StatefulWidget {
     if (proceedToSetup == true && context.mounted) {
       await show(
         context,
-        initialFullName: user?.fullName,
-        initialBusinessName: user?.businessName,
-        initialEmail: user?.email,
-        onUpdated: onProfileUpdated,
+        initialFullName: currentUser?.fullName,
+        initialBusinessName: currentUser?.businessName,
+        initialEmail: currentUser?.email,
+        onUpdated: onProfileUpdated ?? () {},
       );
     }
     return false;

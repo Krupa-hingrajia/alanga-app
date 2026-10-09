@@ -10,9 +10,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/delete_confirmation_dialog.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../profile/presentation/widgets/first_time_store_setup_sheet.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -316,16 +313,7 @@ class _ProductListScreenState extends State<ProductListScreen>
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-            final user = (context.read<AuthBloc>().state is AuthenticatedState)
-                ? (context.read<AuthBloc>().state as AuthenticatedState).user
-                : null;
-            final canProceed = await FirstTimeStoreSetupSheet.guardProductCreation(
-              context,
-              user: user,
-              onProfileUpdated: () {
-                context.read<AuthBloc>().add(const CheckAuthStatusEvent());
-              },
-            );
+            final canProceed = await FirstTimeStoreSetupSheet.guardProductCreation(context);
             if (canProceed && context.mounted) {
               await context.push('/products/add');
               if (context.mounted) {

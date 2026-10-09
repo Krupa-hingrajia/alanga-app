@@ -18,9 +18,8 @@ import '../../../brands/presentation/widgets/request_brand_bottom_sheet.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../brands/domain/repositories/brand_repository.dart';
 import '../../../sub_categories/domain/repositories/sub_category_repository.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../profile/presentation/widgets/first_time_store_setup_sheet.dart';
 
 class AddEditProductScreen extends StatefulWidget {
@@ -96,7 +95,21 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       _productVariants = widget.product!.variants;
     }
 
+    _loadCurrentUserProfile();
     _loadDropdownData();
+  }
+
+  UserEntity? _currentUser;
+
+  Future<void> _loadCurrentUserProfile() async {
+    try {
+      final user = await sl<AuthRepository>().getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -164,7 +177,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     }
   }
 
-  void _submitForm(BuildContext context, String targetStatus) {
+  Future<void> _submitForm(BuildContext context, String targetStatus) async {
     if (_isUploading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please wait for image upload to complete.')),
@@ -172,17 +185,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       return;
     }
 
-    final authState = context.read<AuthBloc>().state;
-    final user = (authState is AuthenticatedState) ? authState.user : null;
-    if (!isEdit && user != null && !user.isStoreProfileComplete) {
-      FirstTimeStoreSetupSheet.guardProductCreation(
+    if (!isEdit) {
+      final canProceed = await FirstTimeStoreSetupSheet.guardProductCreation(
         context,
-        user: user,
-        onProfileUpdated: () {
-          context.read<AuthBloc>().add(const CheckAuthStatusEvent());
-        },
+        user: _currentUser,
+        onProfileUpdated: _loadCurrentUserProfile,
       );
-      return;
+      if (!canProceed) return;
     }
 
     if (_formKey.currentState!.validate()) {
@@ -473,68 +482,59 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (!isEdit)
-                                BlocBuilder<AuthBloc, AuthState>(
-                                  builder: (context, authState) {
-                                    if (authState is AuthenticatedState && !authState.user.isStoreProfileComplete) {
-                                      return Container(
-                                        margin: const EdgeInsets.only(bottom: 16),
-                                        padding: const EdgeInsets.all(14),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFFBEB),
-                                          borderRadius: BorderRadius.circular(14),
-                                          border: Border.all(color: const Color(0xFFFDE68A)),
-                                        ),
-                                        child: Row(
+                              if (!isEdit && _currentUser != null && !_currentUser!.isStoreProfileComplete)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFFBEB),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: const Color(0xFFFDE68A)),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 22),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 22),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text(
-                                                    'Store Profile Incomplete',
-                                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E)),
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  const Text(
-                                                    'You must setup your Store Name & Email Address before submitting new products.',
-                                                    style: TextStyle(fontSize: 12, color: Color(0xFFB45309)),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      FirstTimeStoreSetupSheet.show(
-                                                        context,
-                                                        initialFullName: authState.user.fullName,
-                                                        initialBusinessName: authState.user.businessName,
-                                                        initialEmail: authState.user.email,
-                                                        onUpdated: () {
-                                                          context.read<AuthBloc>().add(const CheckAuthStatusEvent());
-                                                        },
-                                                      );
-                                                    },
-                                                    child: const Text(
-                                                      'Setup Store Profile Now →',
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 12,
-                                                        color: Color(0xFF1A3827),
-                                                        decoration: TextDecoration.underline,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
+                                            const Text(
+                                              'Store Profile Incomplete',
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E)),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            const Text(
+                                              'You must setup your Store Name & Email Address before submitting new products.',
+                                              style: TextStyle(fontSize: 12, color: Color(0xFFB45309)),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            GestureDetector(
+                                              onTap: () {
+                                                FirstTimeStoreSetupSheet.show(
+                                                  context,
+                                                  initialFullName: _currentUser?.fullName,
+                                                  initialBusinessName: _currentUser?.businessName,
+                                                  initialEmail: _currentUser?.email,
+                                                  onUpdated: _loadCurrentUserProfile,
+                                                );
+                                              },
+                                              child: const Text(
+                                                'Setup Store Profile Now →',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                  color: Color(0xFF1A3827),
+                                                  decoration: TextDecoration.underline,
+                                                ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                      );
-                                    }
-                                    return const SizedBox.shrink();
-                                  },
+                                      ),
+                                    ],
+                                  ),
                                 ),
 
                               // STEP 1: Product Classification (Category -> Sub Category -> Brand FIRST!)

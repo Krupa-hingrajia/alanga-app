@@ -182,48 +182,87 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
 
-                      // Brand Logo Asset
+                      // Brand Logo & Title Area
                       Center(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            'assets/images/app_icon.jpg',
-                            height: 72,
-                            width: 72,
-                            fit: BoxFit.cover,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xFF1A3827).withOpacity(0.12),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF1A3827).withOpacity(0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(36),
+                            child: Image.asset(
+                              'assets/images/app_icon.jpg',
+                              height: 68,
+                              width: 68,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
+
+                      // Seller Portal Badge
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A3827).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'SELLER CENTRAL',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1A3827),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
 
                       Text(
-                        context.tr('app_name').toUpperCase(),
+                        context.tr('app_name'),
                         style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
                           color: Color(0xFF0F2016),
-                          letterSpacing: 2,
+                          letterSpacing: 0.5,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        context.tr('login_subtitle'),
-                        style: const TextStyle(
-                          fontSize: 12,
+                      const Text(
+                        'Enter your mobile number to sign in or start selling instantly',
+                        style: TextStyle(
+                          fontSize: 12.5,
                           color: AppColors.textSecondaryLight,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Mode Switcher Tab (Phone OTP vs Email/Password)
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: const Color(0xFFD1DDD6)),
                         ),
                         child: Row(
@@ -233,14 +272,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onTap: () {
                                   setState(() => _selectedMode = LoginMode.phoneOtp);
                                 },
-                                borderRadius: BorderRadius.circular(9),
+                                borderRadius: BorderRadius.circular(10),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 10),
                                   decoration: BoxDecoration(
                                     color: _selectedMode == LoginMode.phoneOtp
                                         ? const Color(0xFF1A3827)
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(9),
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: _selectedMode == LoginMode.phoneOtp
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(0xFF1A3827).withOpacity(0.2),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -273,14 +321,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onTap: () {
                                   setState(() => _selectedMode = LoginMode.emailPassword);
                                 },
-                                borderRadius: BorderRadius.circular(9),
+                                borderRadius: BorderRadius.circular(10),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 10),
                                   decoration: BoxDecoration(
                                     color: _selectedMode == LoginMode.emailPassword
                                         ? const Color(0xFF1A3827)
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(9),
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: _selectedMode == LoginMode.emailPassword
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(0xFF1A3827).withOpacity(0.2),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -311,7 +368,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Mode Content
                       if (_selectedMode == LoginMode.phoneOtp)
@@ -319,30 +376,58 @@ class _LoginScreenState extends State<LoginScreen> {
                       else
                         _buildEmailPasswordSection(context),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 20),
 
-                      // Don't have an account / Register Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            context.tr('dont_have_account'),
-                            style: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+                      // Instant Onboarding / Helper Info Card
+                      if (_selectedMode == LoginMode.phoneOtp)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF6FAF7),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE2EDE6)),
                           ),
-                          const SizedBox(width: 4),
-                          TextButton(
-                            onPressed: () => context.go('/register'),
-                            style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                            child: Text(
-                              context.tr('register'),
-                              style: const TextStyle(
-                                color: Color(0xFF1A3827),
-                                fontWeight: FontWeight.bold,
+                          child: const Row(
+                            children: [
+                              Icon(Icons.bolt_rounded, size: 18, color: Color(0xFF1A3827)),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'New seller? Account is created automatically on OTP verification.',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: Color(0xFF2E5E43),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'New to selling on Alanga?',
+                              style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+                            ),
+                            const SizedBox(width: 4),
+                            TextButton(
+                              onPressed: () {
+                                setState(() => _selectedMode = LoginMode.phoneOtp);
+                              },
+                              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                              child: const Text(
+                                'Instant Sign Up →',
+                                style: TextStyle(
+                                  color: Color(0xFF1A3827),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

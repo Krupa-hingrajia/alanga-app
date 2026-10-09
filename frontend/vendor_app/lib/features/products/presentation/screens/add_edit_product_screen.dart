@@ -253,7 +253,6 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               ),
             );
       }
-    }
   }
 
   Widget _buildSectionCard({

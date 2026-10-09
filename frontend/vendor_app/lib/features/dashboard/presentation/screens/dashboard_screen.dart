@@ -725,7 +725,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () => context.push('/products/add'),
+                  onPressed: () async {
+                    final user = (context.read<AuthBloc>().state is AuthenticatedState)
+                        ? (context.read<AuthBloc>().state as AuthenticatedState).user
+                        : null;
+                    final canProceed = await FirstTimeStoreSetupSheet.guardProductCreation(
+                      context,
+                      user: user,
+                      onProfileUpdated: () {
+                        context.read<AuthBloc>().add(const CheckAuthStatusEvent());
+                      },
+                    );
+                    if (canProceed && context.mounted) {
+                      context.push('/products/add');
+                    }
+                  },
                   icon: const Icon(Icons.add, size: 16, color: Colors.white),
                   label: Text(
                     context.tr('add_new_product'),

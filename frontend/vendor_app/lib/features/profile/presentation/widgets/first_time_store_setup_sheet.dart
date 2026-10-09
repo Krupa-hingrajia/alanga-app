@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 
 class FirstTimeStoreSetupSheet extends StatefulWidget {
@@ -35,6 +36,74 @@ class FirstTimeStoreSetupSheet extends StatefulWidget {
         onUpdated: onUpdated,
       ),
     );
+  }
+
+  /// Checks if store profile is complete. If not, shows a dialog prompting the user to complete setup first.
+  /// Returns true if profile is ready, false if blocked.
+  static Future<bool> guardProductCreation(
+    BuildContext context, {
+    required UserEntity? user,
+    required VoidCallback onProfileUpdated,
+  }) async {
+    if (user != null && user.isStoreProfileComplete) {
+      return true;
+    }
+
+    final proceedToSetup = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.storefront_rounded, color: Color(0xFF1A3827), size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Store Setup Required',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Please complete your store setup with a valid Store Name and Email Address before adding products. This ensures customers can identify your shop and you receive order invoices.',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondaryLight, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: const Text('Later', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1A3827),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Setup Store Now', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (proceedToSetup == true && context.mounted) {
+      await show(
+        context,
+        initialFullName: user?.fullName,
+        initialBusinessName: user?.businessName,
+        initialEmail: user?.email,
+        onUpdated: onProfileUpdated,
+      );
+    }
+    return false;
   }
 
   @override

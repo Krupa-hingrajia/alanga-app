@@ -30,6 +30,31 @@ export class ProductsService {
       throw new BadRequestException('Selling Price cannot exceed MRP.');
     }
 
+    // Validate vendor has completed basic store profile (Store name and non-placeholder email)
+    const vendor = await this.prisma.user.findUnique({
+      where: { id: vendorId },
+      include: { vendorProfile: true },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor account not found.');
+    }
+
+    const email = vendor.email?.trim().toLowerCase() || '';
+    const isPlaceholderEmail =
+      email.length === 0 ||
+      email.startsWith('vendor_') ||
+      email.startsWith('customer_') ||
+      email.endsWith('@alanga.com');
+
+    const storeName = (vendor.vendorProfile?.storeName || '').trim();
+
+    if (isPlaceholderEmail || storeName.length === 0) {
+      throw new BadRequestException(
+        'Store profile incomplete. Please set your Store Name and a valid Email Address before adding products.',
+      );
+    }
+
     // Validate category, subcategory, brand exist and are active
     await this.categoriesService.findOne(data.categoryId);
     await this.subCategoriesService.findOne(data.subCategoryId);

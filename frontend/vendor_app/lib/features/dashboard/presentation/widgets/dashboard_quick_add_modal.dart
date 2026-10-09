@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../profile/presentation/widgets/first_time_store_setup_sheet.dart';
 
 class DashboardQuickAddModal {
   static void show(BuildContext context) {
@@ -57,7 +62,22 @@ class DashboardQuickAddModal {
                         subtitle: 'List a new item',
                         icon: Icons.add_box_rounded,
                         color: AppColors.primaryGreen,
-                        route: '/products/add',
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          final user = (context.read<AuthBloc>().state is AuthenticatedState)
+                              ? (context.read<AuthBloc>().state as AuthenticatedState).user
+                              : null;
+                          final canProceed = await FirstTimeStoreSetupSheet.guardProductCreation(
+                            context,
+                            user: user,
+                            onProfileUpdated: () {
+                              context.read<AuthBloc>().add(const CheckAuthStatusEvent());
+                            },
+                          );
+                          if (canProceed && context.mounted) {
+                            context.push('/products/add');
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -88,13 +108,17 @@ class DashboardQuickAddModal {
     required String subtitle,
     required IconData icon,
     required Color color,
-    required String route,
+    String? route,
+    VoidCallback? onTap,
   }) {
     return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        context.push(route);
-      },
+      onTap: onTap ??
+          () {
+            Navigator.pop(context);
+            if (route != null) {
+              context.push(route);
+            }
+          },
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(14),

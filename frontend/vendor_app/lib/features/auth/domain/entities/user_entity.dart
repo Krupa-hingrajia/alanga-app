@@ -36,6 +36,17 @@ class UserEntity extends Equatable {
     this.panNumber,
   });
 
+  /// Returns true if the vendor has set a real email and store name.
+  bool get isStoreProfileComplete {
+    final cleanEmail = email.trim().toLowerCase();
+    final isPlaceholderEmail = cleanEmail.isEmpty ||
+        cleanEmail.startsWith('vendor_') ||
+        cleanEmail.endsWith('@alanga.com') ||
+        cleanEmail.startsWith('customer_');
+    final hasStoreName = (businessName ?? '').trim().isNotEmpty;
+    return !isPlaceholderEmail && hasStoreName;
+  }
+
   @override
   List<Object?> get props => [
         id,

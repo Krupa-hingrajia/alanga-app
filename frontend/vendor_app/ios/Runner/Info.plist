@@ -37,6 +37,8 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Alanga Vendor requires access to your camera to take photos of your products and store profile.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

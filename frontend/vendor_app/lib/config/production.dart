@@ -8,9 +8,8 @@
 class ProductionConfig {
   ProductionConfig._();
 
-  /// Production API base URL.
-  /// ⚠️  Update this before releasing to Google Play.
-  static const String apiBaseUrl = 'https://alanga-app.vercel.app/api/v1';
+  /// Production API base URL (Google Cloud Run Singapore).
+  static const String apiBaseUrl = 'https://alanga-backend-807103326316.asia-southeast1.run.app/api/v1';
 
   /// Disable verbose API logging in production.
   static const bool enableApiLogging = false;

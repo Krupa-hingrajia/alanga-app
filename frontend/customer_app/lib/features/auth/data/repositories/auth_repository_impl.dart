@@ -85,6 +85,77 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<String?> forgotPassword(String identifier) async {
+    try {
+      return await _remoteDataSource.forgotPassword(identifier);
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
+  @override
+  Future<void> verifyOtp({
+    required String identifier,
+    required String otp,
+  }) async {
+    try {
+      await _remoteDataSource.verifyOtp(identifier, otp);
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String identifier,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      await _remoteDataSource.resetPassword(identifier, otp, newPassword);
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
+  @override
+  Future<String?> sendPhoneOtp(String phoneNumber) async {
+    try {
+      return await _remoteDataSource.sendPhoneOtp(phoneNumber);
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
+  @override
+  Future<UserEntity> verifyPhoneOtp({
+    required String phoneNumber,
+    required String otp,
+    String? fullName,
+  }) async {
+    try {
+      final response = await _remoteDataSource.verifyPhoneOtp(
+        phoneNumber,
+        otp,
+        fullName: fullName,
+      );
+
+      await _storageService.saveAccessToken(response.accessToken);
+      await _storageService.saveRefreshToken(response.refreshToken);
+      await _storageService.saveUserData(response.user.toJson());
+
+      return response.user.toEntity();
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
   String _getErrorMessage(DioException e) {
     if (e.response != null && e.response?.data != null) {
       final responseData = e.response?.data;

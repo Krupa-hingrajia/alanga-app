@@ -70,7 +70,7 @@ class AppRouter {
       final isSuccess = state.matchedLocation == '/success';
       final isForgotPassword = state.matchedLocation == '/forgot-password';
 
-      if (token == null) {
+      if (token == null || token.isEmpty) {
         if (!isLoggingIn && !isRegistering && !isOtpVerification && !isSuccess && !isForgotPassword) {
           return '/login';
         }

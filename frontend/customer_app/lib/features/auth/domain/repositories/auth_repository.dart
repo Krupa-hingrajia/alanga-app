@@ -17,4 +17,25 @@ abstract class AuthRepository {
   });
 
   Future<UserEntity> getCurrentUser();
+
+  Future<String?> forgotPassword(String identifier);
+
+  Future<void> verifyOtp({
+    required String identifier,
+    required String otp,
+  });
+
+  Future<void> resetPassword({
+    required String identifier,
+    required String otp,
+    required String newPassword,
+  });
+
+  Future<String?> sendPhoneOtp(String phoneNumber);
+
+  Future<UserEntity> verifyPhoneOtp({
+    required String phoneNumber,
+    required String otp,
+    String? fullName,
+  });
 }

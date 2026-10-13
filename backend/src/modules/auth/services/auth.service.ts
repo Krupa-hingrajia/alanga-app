@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
-import { PhoneAuthDto } from '../dto/phone-auth.dto';
+import { PhoneAuthDto, SendPhoneOtpDto, VerifyPhoneOtpDto } from '../dto/phone-auth.dto';
 import { UserEntity } from '../../users/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { Role, AccountStatus, KYCStatus } from '@prisma/client';
@@ -152,6 +152,7 @@ export class AuthService {
   async phoneAuth(phoneAuthDto: PhoneAuthDto) {
     const rawPhone = phoneAuthDto.phoneNumber.trim();
     const cleanDigits = rawPhone.replace(/\D/g, '');
+    const targetRole = phoneAuthDto.role || Role.VENDOR;
 
     // Search user by raw phone or normalized 10-digit number
     let user = await this.authRepository.findUserByMobile(rawPhone);
@@ -170,9 +171,25 @@ export class AuthService {
       if (user.status === AccountStatus.SUSPENDED) {
         throw new ForbiddenException('Your account has been suspended');
       }
-      if (user.status === AccountStatus.REJECTED) {
-        throw new ForbiddenException('Your account registration was rejected');
+      if (targetRole === Role.VENDOR && user.role === Role.CUSTOMER) {
+        const storeName = phoneAuthDto.businessName?.trim() || user.fullName || `Vendor ${cleanDigits.slice(-4)}`;
+        await this.authRepository.updateUser(user.id, {
+          role: Role.VENDOR,
+          vendorProfile: {
+            upsert: {
+              create: {
+                storeName,
+                businessType: 'Individual Seller',
+                pickupContactPhone: rawPhone,
+              },
+              update: {},
+            },
+          },
+        });
+        const refreshed = await this.authRepository.findUserById(user.id);
+        if (refreshed) user = refreshed;
       }
+
       const tokens = await this.generateTokens(user.id, user.email, user.role);
       return {
         isNewUser: false,
@@ -182,7 +199,6 @@ export class AuthService {
     }
 
     // New user registration via Phone OTP
-    const targetRole = phoneAuthDto.role || Role.VENDOR;
     const generatedEmail = phoneAuthDto.email?.trim().toLowerCase() || `vendor_${cleanDigits}@alanga.com`;
 
     let finalEmail = generatedEmail;
@@ -293,7 +309,7 @@ export class AuthService {
     return {
       message: 'Verification OTP has been sent successfully',
       identifier: identifier.trim(),
-      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      devOtp: (!process.env.SMS_API_KEY || process.env.NODE_ENV !== 'production') ? otp : undefined,
     };
   }
 
@@ -422,7 +438,10 @@ export class AuthService {
       ...(data.profileImage && { profileImage: data.profileImage }),
     };
 
-    if (storeName && user.role === Role.VENDOR) {
+    if (storeName) {
+      if (user.role === Role.CUSTOMER) {
+        updateData.role = Role.VENDOR;
+      }
       updateData.vendorProfile = {
         upsert: {
           create: { storeName, businessType: 'Individual Seller' },
@@ -433,5 +452,40 @@ export class AuthService {
 
     const updated = await this.authRepository.updateUser(userId, updateData);
     return updated;
+  }
+
+  async sendPhoneOtp(phoneNumber: string) {
+    const rawPhone = phoneNumber.trim();
+    const cleanDigits = rawPhone.replace(/\D/g, '');
+    if (cleanDigits.length < 10) {
+      throw new BadRequestException('Please provide a valid 10-digit mobile number');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    AuthService.otpStore.set(rawPhone.toLowerCase(), {
+      otp,
+      expiresAt: Date.now() + 15 * 60 * 1000,
+    });
+    AuthService.otpStore.set(cleanDigits.slice(-10), {
+      otp,
+      expiresAt: Date.now() + 15 * 60 * 1000,
+    });
+
+    return {
+      message: 'Verification OTP has been sent successfully',
+      phoneNumber: rawPhone,
+      devOtp: (!process.env.SMS_API_KEY || process.env.NODE_ENV !== 'production') ? otp : undefined,
+    };
+  }
+
+  async verifyPhoneOtp(dto: VerifyPhoneOtpDto) {
+    const rawPhone = dto.phoneNumber.trim();
+    await this.verifyOtp(rawPhone, dto.otp);
+
+    return this.phoneAuth({
+      phoneNumber: rawPhone,
+      fullName: dto.fullName,
+      role: dto.role || Role.CUSTOMER,
+    });
   }
 }

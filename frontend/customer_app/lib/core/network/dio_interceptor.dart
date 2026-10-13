@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../storage/secure_storage_service.dart';
+import '../../routes/app_router.dart';
 import 'api_endpoints.dart';
 
 class DioInterceptor extends Interceptor {
@@ -100,6 +101,11 @@ class DioInterceptor extends Interceptor {
             return handler.next(retryErr);
           }
         }
+      } else {
+        await _storageService.clearAll();
+        try {
+          AppRouter.router.go('/login');
+        } catch (_) {}
       }
     }
     return handler.next(err);

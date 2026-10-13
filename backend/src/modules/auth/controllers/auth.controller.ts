@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
-import { PhoneAuthDto } from '../dto/phone-auth.dto';
+import { PhoneAuthDto, SendPhoneOtpDto, VerifyPhoneOtpDto } from '../dto/phone-auth.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import {
   ForgotPasswordDto,
@@ -67,6 +67,27 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Successfully authenticated via phone' })
   async phoneAuth(@Body() phoneAuthDto: PhoneAuthDto) {
     const authData = await this.authService.phoneAuth(phoneAuthDto);
+    return {
+      message: authData.isNewUser ? 'Registration successful via phone' : 'Login successful via phone',
+      data: authData,
+    };
+  }
+
+  @Post('send-phone-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send Phone Login OTP', description: 'Dispatches a 6-digit OTP to user mobile number for fast login.' })
+  @ApiResponse({ status: 200, description: 'OTP dispatched successfully' })
+  async sendPhoneOtp(@Body() dto: SendPhoneOtpDto) {
+    const result = await this.authService.sendPhoneOtp(dto.phoneNumber);
+    return result;
+  }
+
+  @Post('verify-phone-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify Phone Login OTP', description: 'Verifies 6-digit OTP code and logs in or registers user directly.' })
+  @ApiResponse({ status: 200, description: 'Successfully authenticated via phone OTP' })
+  async verifyPhoneOtp(@Body() dto: VerifyPhoneOtpDto) {
+    const authData = await this.authService.verifyPhoneOtp(dto);
     return {
       message: authData.isNewUser ? 'Registration successful via phone' : 'Login successful via phone',
       data: authData,

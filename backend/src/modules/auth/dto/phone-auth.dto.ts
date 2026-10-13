@@ -33,3 +33,32 @@ export class PhoneAuthDto {
   @IsString()
   firebaseUid?: string;
 }
+
+export class SendPhoneOtpDto {
+  @ApiProperty({ description: 'Phone number with country code (e.g. +919999999999)', example: '+919999999999' })
+  @IsNotEmpty()
+  @IsString()
+  phoneNumber: string;
+}
+
+export class VerifyPhoneOtpDto {
+  @ApiProperty({ description: 'Phone number with country code (e.g. +919999999999)', example: '+919999999999' })
+  @IsNotEmpty()
+  @IsString()
+  phoneNumber: string;
+
+  @ApiProperty({ description: '6-digit verification code', example: '123456' })
+  @IsNotEmpty()
+  @IsString()
+  otp: string;
+
+  @ApiPropertyOptional({ description: 'Full name for new user registration', example: 'Rahul Sharma' })
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
+  @ApiPropertyOptional({ description: 'Target user role', enum: Role, default: Role.CUSTOMER })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
+}

@@ -11,6 +11,11 @@ abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> login(LoginRequestModel request);
   Future<RegisterResponseModel> register(RegisterRequestModel request);
   Future<UserModel> getCurrentUser();
+  Future<String?> forgotPassword(String identifier);
+  Future<void> verifyOtp(String identifier, String otp);
+  Future<void> resetPassword(String identifier, String otp, String newPassword);
+  Future<String?> sendPhoneOtp(String phoneNumber);
+  Future<LoginResponseModel> verifyPhoneOtp(String phoneNumber, String otp, {String? fullName});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -52,6 +57,81 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await _apiService.get(ApiEndpoints.me);
       final data = response.data['data'] as Map<String, dynamic>;
       return UserModel.fromJson(data);
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String?> forgotPassword(String identifier) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.forgotPassword,
+        data: {'identifier': identifier},
+      );
+      final data = response.data as Map<String, dynamic>?;
+      return data?['devOtp'] as String?;
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> verifyOtp(String identifier, String otp) async {
+    try {
+      await _apiService.post(
+        ApiEndpoints.verifyOtp,
+        data: {'identifier': identifier, 'otp': otp},
+      );
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String identifier, String otp, String newPassword) async {
+    try {
+      await _apiService.post(
+        ApiEndpoints.resetPassword,
+        data: {
+          'identifier': identifier,
+          'otp': otp,
+          'newPassword': newPassword,
+        },
+      );
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String?> sendPhoneOtp(String phoneNumber) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.sendPhoneOtp,
+        data: {'phoneNumber': phoneNumber},
+      );
+      final data = response.data as Map<String, dynamic>?;
+      return data?['devOtp'] as String?;
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<LoginResponseModel> verifyPhoneOtp(String phoneNumber, String otp, {String? fullName}) async {
+    try {
+      final response = await _apiService.post(
+        ApiEndpoints.verifyPhoneOtp,
+        data: {
+          'phoneNumber': phoneNumber,
+          'otp': otp,
+          if (fullName != null && fullName.isNotEmpty) 'fullName': fullName,
+          'role': 'CUSTOMER',
+        },
+      );
+      final data = response.data['data'] as Map<String, dynamic>;
+      return LoginResponseModel.fromJson(data);
     } on DioException catch (_) {
       rethrow;
     }

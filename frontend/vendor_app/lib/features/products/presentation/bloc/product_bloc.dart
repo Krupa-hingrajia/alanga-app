@@ -40,6 +40,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (e is ServerFailure) {
         message = e.message;
       }
+      final lower = message.toLowerCase();
+      if (lower.contains('401') || lower.contains('unauthorized') || lower.contains('missing or invalid')) {
+        message = 'Session expired. Please log in again.';
+      }
       emit(ProductListError(message: message));
     }
   }

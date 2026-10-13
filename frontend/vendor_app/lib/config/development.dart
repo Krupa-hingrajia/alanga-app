@@ -2,8 +2,6 @@
 //
 // Development-only configuration constants — Vendor App.
 
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
 
 class DevelopmentConfig {
   DevelopmentConfig._();

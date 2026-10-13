@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/error/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 
@@ -183,9 +184,12 @@ class _FirstTimeStoreSetupSheetState extends State<FirstTimeStoreSetupSheet> {
       );
     } catch (e) {
       if (!mounted) return;
+      final msg = e is Failure
+          ? e.message
+          : e.toString().replaceAll('Exception: ', '').replaceAll('ServerFailure: ', '');
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('ServerFailure: ', '');
+        _errorMessage = msg;
       });
     }
   }

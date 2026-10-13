@@ -70,7 +70,11 @@ class VendorOrderBloc extends Bloc<VendorOrderEvent, VendorOrderState> {
         statusCounts: counts,
       ));
     } catch (e) {
-      emit(VendorOrderError(message: e.toString().replaceAll('Exception: ', '')));
+      final str = e.toString();
+      final msg = str.contains('401') || str.toLowerCase().contains('unauthorized') || str.toLowerCase().contains('missing or invalid')
+          ? 'Session expired. Please log in again.'
+          : str.replaceAll('Exception: ', '').replaceAll('ServerFailure: ', '').split('\n').first;
+      emit(VendorOrderError(message: msg));
     }
   }
 
@@ -172,14 +176,18 @@ class VendorOrderBloc extends Bloc<VendorOrderEvent, VendorOrderState> {
         actionMessage: 'Order status updated to ${event.newStatus}',
       ));
     } catch (e) {
+      final str = e.toString();
+      final msg = str.contains('401') || str.toLowerCase().contains('unauthorized') || str.toLowerCase().contains('missing or invalid')
+          ? 'Session expired. Please log in again.'
+          : str.replaceAll('Exception: ', '').replaceAll('ServerFailure: ', '').split('\n').first;
       if (currentLoaded != null) {
         emit(currentLoaded.copyWith(
           isUpdating: false,
           updatingOrderId: null,
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          errorMessage: msg,
         ));
       } else {
-        emit(VendorOrderError(message: e.toString().replaceAll('Exception: ', '')));
+        emit(VendorOrderError(message: msg));
       }
     }
   }

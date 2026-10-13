@@ -12,7 +12,7 @@ export function getMediaUrl(path?: string | null): string {
   }
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL ||
-    'https://alanga-backend-uat-807103326316.asia-southeast1.run.app/api/v1';
+    'https://alanga-backend-807103326316.asia-southeast1.run.app/api/v1';
   const baseUrl = apiUrl.replace(/\/api(\/v\d+)?\/?$/, '');
   return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 }

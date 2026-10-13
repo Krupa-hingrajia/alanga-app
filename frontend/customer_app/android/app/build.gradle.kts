@@ -36,7 +36,7 @@ android {
             if (keystorePropertiesFile.exists()) {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
                 storePassword = keystoreProperties["storePassword"] as String
             }
         }
@@ -46,9 +46,8 @@ android {
         applicationId = "com.alanga.store"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        // Increment versionCode by 1 for each Play Store upload
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {

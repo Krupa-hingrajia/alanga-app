@@ -3,7 +3,6 @@ import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../core/widgets/main_navigation_screen.dart';
 
 // Categories imports
@@ -46,8 +45,7 @@ class AppRouter {
 
       final isAuthRoute = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register' ||
-          state.matchedLocation == '/forgot-password' ||
-          state.matchedLocation == '/otp-verification';
+          state.matchedLocation == '/forgot-password';
 
       if (token == null || token.isEmpty) {
         if (!isAuthRoute) {
@@ -76,17 +74,6 @@ class AppRouter {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
-      ),
-      GoRoute(
-        path: '/otp-verification',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>? ?? {};
-          return OtpVerificationScreen(
-            phoneNumber: extra['phoneNumber'] as String? ?? '',
-            devOtp: extra['devOtp'] as String?,
-            fullName: extra['fullName'] as String?,
-          );
-        },
       ),
       GoRoute(
         path: '/home',

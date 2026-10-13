@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Alanga Vendor App</title>
+    <meta name="description" content="Privacy Policy for Alanga Vendor Application - Google Play Store Compliant">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #11261B;
+            --primary-accent: #1e3e2d;
+            --accent-green: #10b981;
+            --accent-light: #e6f4ea;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-accent) 100%);
+            color: #ffffff;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .app-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .app-badge span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .last-updated {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        /* Container & Layout */
+        .main-container {
+            max-width: 1000px;
+            margin: -2rem auto 3rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                margin-top: 1rem;
+            }
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: block;
+        }
+
+        .nav-links a:hover {
+            background-color: var(--accent-light);
+            color: var(--primary);
+        }
+
+        /* Controls / Search */
+        .search-box {
+            margin-bottom: 1rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-green);
+        }
+
+        /* Content Card */
+        .content-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (max-width: 640px) {
+            .content-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background-color: var(--accent-green);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 1.2rem 0 0.5rem 0;
+        }
+
+        p {
+            color: #374151;
+            margin-bottom: 1rem;
+            font-size: 0.975rem;
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+
+        /* Highlight Box / Alerts */
+        .info-box {
+            background-color: var(--accent-light);
+            border-left: 4px solid var(--accent-green);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .alert-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #f97316;
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .alert-box p {
+            margin-bottom: 0;
+            color: #9a3412;
+            font-weight: 500;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Form / Deletion Request */
+        .deletion-box {
+            background: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-accent);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-light);
+        }
+
+        /* Actions Top Bar */
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border-color);
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <div class="app-badge">
+                <span></span> Google Play Store Compliant Policy
+            </div>
+            <h1>Alanga Vendor - Privacy Policy</h1>
+            <p class="last-updated">Last Updated & Effective Date: August 26, 2026</p>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <div class="main-container">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="search-box">
+                <input type="text" id="searchInput" onkeyup="filterContent()" placeholder="🔍 Search policy...">
+            </div>
+            <h3>Navigation</h3>
+            <ul class="nav-links">
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#information-collected">2. Information We Collect</a></li>
+                <li><a href="#permissions">3. App Permissions & Access</a></li>
+                <li><a href="#how-we-use">4. How We Use Information</a></li>
+                <li><a href="#data-sharing">5. Data Sharing & Security</a></li>
+                <li><a href="#data-deletion">6. Data Retention & Deletion</a></li>
+                <li><a href="#children">7. Children's Privacy</a></li>
+                <li><a href="#changes">8. Changes to This Policy</a></li>
+                <li><a href="#contact">9. Contact Us</a></li>
+            </ul>
+        </aside>
+
+        <!-- Right Content Section -->
+        <main class="content-card">
+            
+            <div class="actions-bar">
+                <button onclick="window.print()" class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.85rem;">🖨️ Print / Save PDF</button>
+            </div>
+
+            <!-- Section 1: Overview -->
+            <section id="overview" class="section">
+                <h2>1. Overview</h2>
+                <p>Welcome to <strong>Alanga Vendor</strong> ("we", "our", or "us"). We are committed to protecting the privacy and security of our merchant partners, sellers, and vendors who use the <strong>Alanga Vendor Application</strong> ("App").</p>
+                <p>This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you register, log in, manage products, upload variant images, process orders, and manage store settings through our application. Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access or use the App.</p>
+                
+                <div class="info-box">
+                    <p><strong>Notice for Google Play Users:</strong> Alanga Vendor is a B2B merchant management application designed to facilitate store setup, product catalogue management, variant image uploads, and order processing for authorized sellers on the Alanga platform.</p>
+                </div>
+            </section>
+
+            <!-- Section 2: Information We Collect -->
+            <section id="information-collected" class="section">
+                <h2>2. Information We Collect</h2>
+                <p>We collect personal information and operational data necessary to provide seamless vendor management services.</p>
+
+                <h3>A. Personal & Account Information</h3>
+                <ul>
+                    <li><strong>Vendor Profile Data:</strong> Full Name, Email Address, Mobile Phone Number, Business/Store Name, Business Address.</li>
+                    <li><strong>Authentication Credentials:</strong> Passwords, Authentication Tokens (stored securely on device via encrypted local storage).</li>
+                    <li><strong>Financial & Settlement Data:</strong> Bank Account Details, UPI ID, Tax/GST Identification Numbers (used solely for processing vendor payout settlements).</li>
+                </ul>
+
+                <h3>B. Media, Catalog & Content Data</h3>
+                <ul>
+                    <li><strong>Product & Store Media:</strong> Product images, variant photos, store banners, and business verification documents uploaded by you using your device camera or media gallery.</li>
+                </ul>
+
+                <h3>C. Device & Technical Information</h3>
+                <ul>
+                    <li><strong>Device Identifiers & Logs:</strong> Device model, OS version, IP address, app performance logs, and error/crash diagnostics to maintain server stability and prevent fraud.</li>
+                </ul>
+            </section>
+
+            <!-- Section 3: App Permissions & Access -->
+            <section id="permissions" class="section">
+                <h2>3. App Permissions & Access Disclosure</h2>
+                <p>To function effectively on Android devices, the <strong>Alanga Vendor App</strong> requests specific runtime permissions. We only request permissions essential for features actively used by vendors:</p>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Permission</th>
+                            <th>Purpose & Play Store Justification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>INTERNET Access</strong></td>
+                            <td>Required to sync product listings, fetch orders, send requests to Alanga APIs, and manage vendor backend data in real time.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAMERA & MEDIA / GALLERY</strong></td>
+                            <td>Required to let vendors capture and upload product photos, store logos, variant images, and business verification documents directly from their device.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ENCRYPTED STORAGE</strong></td>
+                            <td>Required to safely store authentication session tokens locally using Flutter Secure Storage (KeyStore/Keychain) for automatic, secure relogin.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Section 4: How We Use Information -->
+            <section id="how-we-use" class="section">
+                <h2>4. How We Use Your Information</h2>
+                <p>We use the collected data strictly for lawful business purposes related to operating the Alanga Vendor marketplace platform:</p>
+                <ul>
+                    <li>To create and manage your vendor account and merchant store page.</li>
+                    <li>To upload and update product catalogs, pricing, inventory, and variant gallery images.</li>
+                    <li>To notify you of incoming customer orders, fulfillment updates, and delivery statuses.</li>
+                    <li>To calculate vendor payouts, process settlements, and generate revenue reports.</li>
+                    <li>To ensure platform security, prevent fraudulent seller activity, and verify merchant credentials.</li>
+                    <li>To respond to your support queries and system diagnostic issues.</li>
+                </ul>
+            </section>
+
+            <!-- Section 5: Data Sharing & Security -->
+            <section id="data-sharing" class="section">
+                <h2>5. Data Sharing & Security</h2>
+                <h3>A. Data Protection & Encryption</h3>
+                <p>We take the security of your data very seriously. All network communication between the Alanga Vendor App and our servers is encrypted in transit using industry-standard HTTPS / TLS 1.3 protocol. Sensitive credentials are securely stored using device hardware KeyStore encryption.</p>
+
+                <h3>B. Third-Party Service Sharing</h3>
+                <p>We <strong>NEVER sell, rent, or trade your personal or business data</strong> to third-party advertisers. We only share necessary data with trusted service providers under strict confidentiality agreements:</p>
+                <ul>
+                    <li><strong>Banking & Payout Partners:</strong> To transfer payment settlements to your registered bank account.</li>
+                    <li><strong>Cloud Hosting Infrastructure:</strong> Secure servers hosting database storage and product media assets.</li>
+                    <li><strong>Legal Compliance:</strong> If required by law, court order, or governmental regulations.</li>
+                </ul>
+            </section>
+
+            <!-- Section 6: Data Retention & Account Deletion -->
+            <section id="data-deletion" class="section">
+                <h2>6. Data Retention & Account Deletion Request</h2>
+                <p>We retain your personal and store data for as long as your vendor account remains active or as required by law for financial accounting and tax compliance.</p>
+                
+                <div class="alert-box">
+                    <p><strong>Google Play User Data Rights:</strong> You have the right to request deletion of your account and associated personal data at any time.</p>
+                </div>
+
+                <h3>How to Request Account & Data Deletion</h3>
+                <p>If you wish to permanently delete your Alanga Vendor account and remove all personal information from our active databases, you can submit a deletion request through any of the following methods:</p>
+
+                <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                    <li><strong>In-App Option:</strong> Navigate to <em>Settings &gt; Store Settings &gt; Delete Account</em> inside the Alanga Vendor App.</li>
+                    <li><strong>Email Request:</strong> Send an email from your registered vendor email address to <a href="mailto:alanga.founder@gmail.com?subject=Account%20Deletion%20Request">alanga.founder@gmail.com</a> with the subject line <code>"Account Deletion Request - [Your Store Name]"</code>.</li>
+                    <li><strong>Online Deletion Page:</strong> Visit our dedicated <a href="delete_account.html" target="_blank" style="color: var(--primary); font-weight:700;">Account Deletion Request Form Page</a>.</li>
+                </ol>
+
+                <div class="deletion-box">
+                    <h3>Account Deletion Request Form</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Submitting this form will send a direct email notification to our administrative compliance team via Web3Forms.</p>
+                    <form action="https://api.web3forms.com/submit" method="POST" id="deletionForm" onsubmit="handleDeletionSubmit(event)">
+                        <input type="hidden" name="access_key" value="4ec34637-ea65-457b-aaaa-3e9b486a3134">
+                        <input type="hidden" name="subject" value="Account Deletion Request - Alanga Vendor App">
+                        <input type="hidden" name="from_name" value="Alanga Vendor App">
+
+                        <div class="form-group">
+                            <label for="vendorEmail">Registered Vendor Email *</label>
+                            <input type="email" id="vendorEmail" name="vendor_email" required placeholder="vendor@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="storeName">Store / Business Name *</label>
+                            <input type="text" id="storeName" name="store_name" required placeholder="e.g. Acme Traders">
+                        </div>
+                        <div class="form-group">
+                            <label for="reason">Reason for Account Deletion (Optional)</label>
+                            <textarea id="reason" name="deletion_reason" rows="3" placeholder="Tell us why you want to delete your vendor account..."></textarea>
+                        </div>
+                        <button type="submit" class="btn" id="deletionSubmitBtn">Submit Deletion Request</button>
+                    </form>
+                    <div id="formSuccessMessage" style="display: none; margin-top: 1rem; color: var(--accent-green); font-weight: 600;">
+                        ✓ Deletion request submitted via Web3Forms! Our support team will verify your request and contact you at your email within 48 business hours.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: Children's Privacy -->
+            <section id="children" class="section">
+                <h2>7. Children's Privacy</h2>
+                <p>The Alanga Vendor App is strictly designed for adult business owners, merchants, and enterprise sellers. It is not intended for use by children under the age of 18 (or 13 in applicable jurisdictions). We do not knowingly collect personal data from children.</p>
+            </section>
+
+            <!-- Section 8: Policy Updates -->
+            <section id="changes" class="section">
+                <h2>8. Changes to This Privacy Policy</h2>
+                <p>We may update this Privacy Policy from time to time to reflect changes in our app features, legal requirements, or platform standards. When updates occur, we will update the "Last Updated" date at the top of this document. Continued use of the App following the posting of changes constitutes acceptance of those changes.</p>
+            </section>
+
+            <!-- Section 9: Contact Us -->
+            <section id="contact" class="section">
+                <h2>9. Contact Us</h2>
+                <p>If you have any questions, concerns, or inquiries regarding this Privacy Policy or our data practices, please reach out to us:</p>
+                
+                <div style="background-color: #f8fafc; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <p style="margin-bottom: 0.3rem;"><strong>Alanga Technologies Support Team</strong></p>
+                    <p style="margin-bottom: 0.3rem;">📧 Email: <a href="mailto:alanga.founder@gmail.com" style="color: var(--primary); font-weight: 600;">alanga.founder@gmail.com</a></p>
+                    <p style="margin-bottom: 0;">🏢 App Name: <strong>Alanga Vendor</strong></p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Alanga Technologies. All rights reserved. | Google Play Store Developer Compliance</p>
+    </footer>
+
+    <!-- Interactive Script -->
+    <script>
+        function filterContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const sections = document.querySelectorAll('.section');
+
+            sections.forEach(section => {
+                const text = section.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        async function handleDeletionSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('deletionForm');
+            const btn = document.getElementById('deletionSubmitBtn');
+            const msg = document.getElementById('formSuccessMessage');
+
+            btn.disabled = true;
+            btn.innerText = 'Submitting Request...';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if(data.success) {
+                    msg.style.display = 'block';
+                    form.reset();
+                    btn.innerText = 'Request Submitted ✓';
+                } else {
+                    alert('Submission error. Please email alanga.founder@gmail.com directly.');
+                    btn.disabled = false;
+                    btn.innerText = 'Submit Deletion Request';
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Submission error. Please email alanga.founder@gmail.com directly.');
+                btn.disabled = false;
+                btn.innerText = 'Submit Deletion Request';
+            }
+        }
+    </script>
+</body>
+</html>

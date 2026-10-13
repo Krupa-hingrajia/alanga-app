@@ -23,7 +23,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   
-  UserRole _selectedRole = UserRole.customer;
   bool _obscurePassword = true;
 
   @override
@@ -87,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -290,47 +289,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
-
-                          // Role Dropdown
-                          DropdownButtonFormField<UserRole>(
-                            value: _selectedRole,
-                            dropdownColor: Colors.white,
-                            style: const TextStyle(color: Color(0xFF0F2016), fontSize: 14),
-                            decoration: InputDecoration(
-                              labelText: 'Account Role',
-                              labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
-                              prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.textSecondaryLight, size: 20),
-                              filled: true,
-                              fillColor: const Color(0xFFF1F5F2),
-                              contentPadding: const EdgeInsets.all(16),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFD1DDD6)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2E5E43), width: 1.5),
-                              ),
-                            ),
-                            items: const [
-                              DropdownMenuItem(value: UserRole.customer, child: Text('Customer', style: TextStyle(color: Color(0xFF0F2016)))),
-                              DropdownMenuItem(value: UserRole.vendor, child: Text('Vendor', style: TextStyle(color: Color(0xFF0F2016)))),
-                              DropdownMenuItem(value: UserRole.admin, child: Text('Admin', style: TextStyle(color: Color(0xFF0F2016)))),
-                            ],
-                            onChanged: (role) {
-                              if (role != null) {
-                                setState(() {
-                                  _selectedRole = role;
-                                });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 28),
 
                           // Action Button using logo green
                           ElevatedButton(
@@ -346,7 +305,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           mobileNumber: _mobileController.text.trim(),
                                           password: _passwordController.text,
                                           confirmPassword: _passwordController.text, // Duplicate password
-                                          role: _selectedRole,
+                                          role: UserRole.customer,
                                         ),
                                       );
                                     }

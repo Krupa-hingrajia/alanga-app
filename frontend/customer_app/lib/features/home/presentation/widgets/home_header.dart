@@ -210,24 +210,14 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                                     ),
                                   ],
                                 ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.bolt_rounded,
-                                      size: 11,
-                                      color: Color(0xFF1E281F),
-                                    ),
-                                    Text(
-                                      '10 MIN',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w900,
-                                        color: Color(0xFF1E281F),
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
+                                child: const Text(
+                                  'STORE',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF1E281F),
+                                    letterSpacing: 0.6,
+                                  ),
                                 ),
                               ),
                             ],

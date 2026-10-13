@@ -194,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 4),
 
                               const Text(
-                                'Quality Products • Superfast Delivery',
+                                'Quality Products • Trusted Marketplace',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondaryLight,

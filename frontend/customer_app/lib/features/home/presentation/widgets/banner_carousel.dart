@@ -19,7 +19,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
     {
       'title': 'FRESH FARM HARVEST',
       'subtitle': 'Up to 50% OFF on Organic Veggies & Fruits',
-      'badge': '10-MIN DELIVERY',
+      'badge': 'TOP SELLER',
       'gradient': const [Color(0xFF092215), Color(0xFF15442A), Color(0xFF1F5C3B)],
       'accentColor': AppColors.brandYellow,
       'badgeColor': AppColors.primaryGreen,

@@ -220,36 +220,33 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         ),
                         const SizedBox(height: 20),
 
-                        // Superfast Delivery Badge
+                        // Quality & Trust Badge
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                           decoration: BoxDecoration(
-                            gradient: AppColors.brandGoldGradient,
+                            color: Colors.white.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.brandOrange.withValues(alpha: 0.35),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.25),
+                              width: 0.8,
+                            ),
                           ),
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.bolt_rounded,
-                                size: 16,
-                                color: Color(0xFF162B1D),
+                                Icons.verified_rounded,
+                                size: 15,
+                                color: AppColors.ribbonLime,
                               ),
-                              SizedBox(width: 4),
+                              SizedBox(width: 5),
                               Text(
-                                '10-15 MIN SUPERFAST DELIVERY',
+                                'QUALITY PRODUCTS • TRUSTED SELLERS',
                                 style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.1,
-                                  color: Color(0xFF162B1D),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.0,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],

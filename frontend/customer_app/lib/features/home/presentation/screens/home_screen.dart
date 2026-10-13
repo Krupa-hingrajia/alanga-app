@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/home_bloc.dart';
@@ -12,6 +13,8 @@ import '../widgets/top_brands_section.dart';
 import '../widgets/coupons_offers_section.dart';
 import '../../../products/data/models/product_model.dart';
 import '../../../products/presentation/widgets/customer_product_card.dart';
+import '../../../cart/presentation/bloc/cart_cubit.dart';
+import '../../../cart/presentation/bloc/cart_state.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
@@ -66,23 +69,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartState = context.watch<CartCubit>().state;
+    int cartCount = 0;
+    if (cartState is CartLoaded) {
+      cartCount = cartState.summary.totalItems;
+    }
+
     return BlocProvider(
       create: (_) => sl<HomeBloc>()..add(const LoadHomeDataEvent()),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        body: Column(
-          children: [
-            // 1. Top Fixed Header with Integrated Search (Blinkit / Zepto Style)
-            HomeHeader(
-              customerName: _customerName,
-              deliveryAddress: 'Navi Mumbai, 400706',
-              notificationCount: 3,
-              cartCount: 2,
-              onNotificationTap: () {},
-              onCartTap: () => context.push('/cart'),
-              searchController: _searchController,
-              onSearchSubmitted: _onSearchSubmitted,
-            ),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark, // Clean dark status bar icons (Time, Battery, Wifi)
+          statusBarBrightness: Brightness.light,    // Clean dark status bar text/icons on iOS
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF7FAF8),
+          body: Column(
+            children: [
+              // 1. Top Fixed Header with Integrated Search (Blinkit / Zepto Style)
+              HomeHeader(
+                customerName: _customerName,
+                deliveryAddress: 'Navi Mumbai, 400706',
+                notificationCount: 3,
+                cartCount: cartCount,
+                onNotificationTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('You have no new notifications'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                onCartTap: () => context.push('/cart'),
+                onAddressTap: () => context.push('/addresses'),
+                searchController: _searchController,
+                onSearchSubmitted: _onSearchSubmitted,
+              ),
 
             // 2. Scrollable Content
             Expanded(
@@ -255,6 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

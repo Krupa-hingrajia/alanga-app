@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
@@ -114,21 +115,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'C';
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F4),
-      body: SingleChildScrollView(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF7FAF8),
+        body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Account Hero Header Banner
+            // 1. Modern Account Hero Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(20, topPadding + 14, 20, 24),
+              padding: EdgeInsets.fromLTRB(20, topPadding + 10, 20, 22),
               decoration: const BoxDecoration(
-                color: AppColors.darkGreen,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(28),
                   bottomRight: Radius.circular(28),
                 ),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFE2ECE5), width: 1.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x0A000000),
+                    blurRadius: 16,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -139,14 +158,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         'My Profile',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0C2417),
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // Avatar & Details
                   Row(
@@ -154,8 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Stack(
                         children: [
                           Container(
-                            width: 72,
-                            height: 72,
+                            width: 68,
+                            height: 68,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: const LinearGradient(
@@ -164,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               border: Border.all(color: Colors.white, width: 2.5),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
+                                  color: AppColors.brandOrange.withValues(alpha: 0.25),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -174,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Text(
                                 initial,
                                 style: const TextStyle(
-                                  fontSize: 28,
+                                  fontSize: 26,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                 ),
@@ -210,9 +229,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Text(
                                     name,
                                     style: const TextStyle(
-                                      fontSize: 19,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      fontSize: 18.5,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF0C2417),
                                       letterSpacing: -0.2,
                                     ),
                                     maxLines: 1,
@@ -221,19 +240,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.brandYellow.withValues(alpha: 0.2),
+                                    gradient: AppColors.brandGoldGradient,
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: AppColors.brandYellow.withValues(alpha: 0.5),
-                                      width: 0.8,
-                                    ),
                                   ),
                                   child: const Text(
                                     'VIP',
                                     style: TextStyle(
-                                      color: AppColors.brandYellow,
+                                      color: Color(0xFF1E281F),
                                       fontSize: 9,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -245,8 +260,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               email,
                               style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFFB0CDC0),
+                                fontSize: 12.5,
+                                color: Color(0xFF456353),
+                                fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -256,7 +272,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               phone,
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFFB0CDC0),
+                                color: Color(0xFF6B8A78),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -453,6 +470,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 36),
           ],
         ),
+      ),
       ),
     );
   }

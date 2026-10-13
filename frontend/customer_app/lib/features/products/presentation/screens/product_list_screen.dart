@@ -277,7 +277,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return BlocProvider(
       create: (_) => sl<ProductBloc>()..add(const FetchProductsEvent()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
+        backgroundColor: const Color(0xFFF7FAF8),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,

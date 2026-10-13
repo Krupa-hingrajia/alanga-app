@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/category_bloc.dart';
@@ -34,19 +35,37 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
 
     return BlocProvider(
       create: (_) => sl<CategoryBloc>()..add(const FetchCategoriesEvent()),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF3F6F4),
-        body: Column(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF7FAF8),
+          body: Column(
           children: [
-            // Fixed Edge-to-Edge Header Bar
+            // Modern Fixed Edge-to-Edge Header Bar
             Container(
-              padding: EdgeInsets.fromLTRB(16, topPadding + 10, 16, 16),
+              padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 16),
               decoration: const BoxDecoration(
-                color: AppColors.darkGreen,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFE2ECE5), width: 1.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x0A000000),
+                    blurRadius: 16,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +80,7 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                             'EXPLORE',
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
                               color: AppColors.brandOrange,
                               letterSpacing: 1.2,
                             ),
@@ -71,8 +90,8 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                             'All Categories',
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0C2417),
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -81,13 +100,14 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                       // View Toggle Icon Button
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: const Color(0xFFF3F8F5),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFDEECE3), width: 1.2),
                         ),
                         child: IconButton(
                           icon: Icon(
                             _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                            color: Colors.white,
+                            color: const Color(0xFF0C2417),
                             size: 20,
                           ),
                           onPressed: () {
@@ -106,8 +126,9 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                   Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: const Color(0xFFF4F8F5),
                       borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFDEECE3), width: 1.2),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.1),
@@ -224,6 +245,7 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -95,7 +95,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F4),
+      backgroundColor: const Color(0xFFF7FAF8),
       appBar: AppBar(
         title: const Text(
           'My Addresses',

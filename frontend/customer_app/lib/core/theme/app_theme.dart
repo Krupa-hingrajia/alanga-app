@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -16,6 +17,17 @@ class AppTheme {
         onSurface: AppColors.textPrimaryLight,
       ),
       scaffoldBackgroundColor: AppColors.bgLight,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF11261B),
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
@@ -53,6 +65,17 @@ class AppTheme {
         onSurface: AppColors.textPrimaryDark,
       ),
       scaffoldBackgroundColor: AppColors.bgDark,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.surfaceDark,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,

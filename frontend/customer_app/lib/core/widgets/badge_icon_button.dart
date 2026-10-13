@@ -6,13 +6,17 @@ class BadgeIconButton extends StatelessWidget {
   final int count;
   final VoidCallback onTap;
   final Color iconColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
 
   const BadgeIconButton({
     super.key,
     required this.icon,
     required this.count,
     required this.onTap,
-    this.iconColor = AppColors.darkGreen,
+    this.iconColor = const Color(0xFF0C2417),
+    this.backgroundColor,
+    this.borderColor,
   });
 
   @override
@@ -25,19 +29,23 @@ class BadgeIconButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: backgroundColor ?? const Color(0xFFF3F8F5),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: borderColor ?? const Color(0xFFDEECE3),
+                width: 1.2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.darkGreen.withValues(alpha: 0.08),
-                  blurRadius: 10,
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Icon(
               icon,
-              size: 22,
+              size: 21,
               color: iconColor,
             ),
           ),

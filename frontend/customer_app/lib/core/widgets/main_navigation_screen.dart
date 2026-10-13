@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/categories/presentation/screens/category_grid_screen.dart';
@@ -40,7 +41,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    const overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, // Clean dark status bar icons across all light screens
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, cartState) {
           int cartCount = 0;
@@ -61,7 +72,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 children: _screens,
               ),
 
-              // Floating Alanga Luxury Bottom Cart Pill (visible when cart has items and not on cart tab)
+              // Modern Light Floating Bottom Cart Pill
               if (cartCount > 0 && _selectedIndex != 3)
                 Positioned(
                   left: 14,
@@ -69,26 +80,36 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   bottom: 12,
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFFD2E8DB),
+                        width: 1.2,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.darkGreen.withValues(alpha: 0.35),
-                          blurRadius: 22,
-                          offset: const Offset(0, 8),
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                        BoxShadow(
+                          color: AppColors.primaryGreen.withValues(alpha: 0.12),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
                     child: Row(
                       children: [
-                        // Left: Free Delivery Progress Bar (Themed with Alanga Forest & Amber)
+                        // Left: Free Delivery Progress Bar (Clean Mint Pearl Aesthetic)
                         Expanded(
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF0F2B1C),
+                              color: Color(0xFFF5FAF7),
                               borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(18),
-                                bottomLeft: Radius.circular(18),
+                                topLeft: Radius.circular(19),
+                                bottomLeft: Radius.circular(19),
                               ),
                             ),
                             child: Row(
@@ -98,13 +119,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                   height: 34,
                                   decoration: BoxDecoration(
                                     color: isFreeDelivery
-                                        ? AppColors.primaryGreen
-                                        : AppColors.brandOrange.withValues(alpha: 0.2),
+                                        ? const Color(0xFFDCFCE7)
+                                        : const Color(0xFFFEF3C7),
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isFreeDelivery
-                                          ? Colors.white.withValues(alpha: 0.4)
-                                          : AppColors.brandOrange,
+                                          ? const Color(0xFF86EFAC)
+                                          : const Color(0xFFFCD34D),
                                       width: 1.2,
                                     ),
                                   ),
@@ -112,7 +133,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                     isFreeDelivery
                                         ? Icons.check_circle_rounded
                                         : Icons.electric_bolt_rounded,
-                                    color: isFreeDelivery ? Colors.white : AppColors.brandYellow,
+                                    color: isFreeDelivery
+                                        ? const Color(0xFF16A34A)
+                                        : const Color(0xFFD97706),
                                     size: 18,
                                   ),
                                 ),
@@ -128,8 +151,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                             : 'Add ₹${remainingAmount.toStringAsFixed(0)} for FREE Delivery',
                                         style: TextStyle(
                                           color: isFreeDelivery
-                                              ? const Color(0xFF6EE7B7)
-                                              : AppColors.brandYellow,
+                                              ? const Color(0xFF15803D)
+                                              : const Color(0xFFB45309),
                                           fontWeight: FontWeight.w800,
                                           fontSize: 11,
                                           letterSpacing: 0.2,
@@ -143,7 +166,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                         child: LinearProgressIndicator(
                                           value: (subtotal / freeDeliveryThreshold).clamp(0.0, 1.0),
                                           minHeight: 4,
-                                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                                          backgroundColor: const Color(0xFFE2EFE7),
                                           valueColor: AlwaysStoppedAnimation<Color>(
                                             isFreeDelivery
                                                 ? AppColors.primaryGreen
@@ -301,6 +324,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

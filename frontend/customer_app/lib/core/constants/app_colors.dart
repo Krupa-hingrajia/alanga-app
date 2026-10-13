@@ -21,7 +21,7 @@ class AppColors {
   static const Color ribbonEmerald = Color(0xFF10B981);
 
   // Light Mode Colors
-  static const Color bgLight = Color(0xFFF4F7F5);
+  static const Color bgLight = Color(0xFFF7FAF8); // Clean, airy modern off-white
   static const Color surfaceLight = Colors.white;
   static const Color textPrimaryLight = Color(0xFF0F261A);
   static const Color textSecondaryLight = Color(0xFF456353);
@@ -34,21 +34,32 @@ class AppColors {
   static const Color textSecondaryDark = Color(0xFF8B9E94);
   static const Color borderDark = Color(0xFF1E4330);
 
-  // Iconic Logo-Matching Gradients
+  // Modern Fresh & Bright Gradients
   static const LinearGradient logoRibbonGradient = LinearGradient(
     colors: [ribbonRuby, ribbonAmber, ribbonLime],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  // Clean Modern Light Header Gradient (Subtle fresh pearl mint)
+  static const LinearGradient modernLightHeaderGradient = LinearGradient(
+    colors: [
+      Colors.white,
+      Color(0xFFF6FAF7),
+      Color(0xFFEFF7F2),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
   static const LinearGradient brandHeaderGradient = LinearGradient(
     colors: [
-      Color(0xFF081C12),
-      Color(0xFF0F321F),
-      Color(0xFF184A30),
+      Colors.white,
+      Color(0xFFF7FAF8),
+      Color(0xFFEFF7F2),
     ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 
   static const LinearGradient brandEmeraldGradient = LinearGradient(

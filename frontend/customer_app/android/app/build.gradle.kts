@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.alanga.marketplace.frontend"
+    namespace = "com.alanga.store"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.alanga.marketplace.frontend"
+        applicationId = "com.alanga.store"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         // Increment versionCode by 1 for each Play Store upload

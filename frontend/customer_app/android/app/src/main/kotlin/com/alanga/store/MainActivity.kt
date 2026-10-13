@@ -1,4 +1,4 @@
-package com.alanga.marketplace.frontend
+package com.alanga.store
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 enum AppEnvironment { development, uat, production }
 
 class EnvironmentConfig {
@@ -14,16 +12,16 @@ class EnvironmentConfig {
     if (localIp.isNotEmpty) {
       return 'http://$localIp:3000/api/v1';
     }
-    // Default fallback to UAT for development builds
-    return _uatUrl;
+    // Default fallback to Production
+    return _prodUrl;
   }
 
   /// Current environment based on Flutter build mode or ENV flag.
   static AppEnvironment get environment {
     const envDefine = String.fromEnvironment('ENV');
     if (envDefine == 'uat') return AppEnvironment.uat;
-    if (envDefine == 'prod' || kReleaseMode) return AppEnvironment.production;
-    return AppEnvironment.development;
+    if (envDefine == 'dev') return AppEnvironment.development;
+    return AppEnvironment.production;
   }
 
   /// Whether the app is running in production (release) mode.
@@ -33,23 +31,10 @@ class EnvironmentConfig {
   static bool get isDebugLoggingEnabled => !isProduction;
 
   /// The base API URL for the current environment.
-  /// Can be overridden at build time:
-  ///   --dart-define=ENV=prod   → always use production URL
-  ///   --dart-define=ENV=uat    → always use UAT URL
-  ///   --dart-define=ENV=dev    → always use development URL
   static String get baseUrl {
     const envDefine = String.fromEnvironment('ENV');
-    if (envDefine == 'prod') return _prodUrl;
     if (envDefine == 'uat') return _uatUrl;
     if (envDefine == 'dev') return _getDevUrl();
-
-    switch (environment) {
-      case AppEnvironment.production:
-        return _prodUrl;
-      case AppEnvironment.uat:
-        return _uatUrl;
-      case AppEnvironment.development:
-        return _getDevUrl();
-    }
+    return _prodUrl;
   }
 }

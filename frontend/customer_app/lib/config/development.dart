@@ -14,8 +14,8 @@ class DevelopmentConfig {
     if (localIp.isNotEmpty) {
       return 'http://$localIp:3000/api/v1';
     }
-    // Default to live Vercel backend server
-    return 'https://alanga-app.vercel.app/api/v1';
+    // Default to Google Cloud Run Production backend server
+    return 'https://alanga-backend-807103326316.asia-southeast1.run.app/api/v1';
   }
 
   /// Enable verbose API request/response logging in development.

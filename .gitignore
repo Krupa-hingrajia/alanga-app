@@ -17,6 +17,8 @@ frontend/customer_app/android/key.properties
 frontend/customer_app/android/**/*.jks
 frontend/vendor_app/android/key.properties
 frontend/vendor_app/android/**/*.jks
+*.aab
+*.apk
 
 # Flutter generated
 frontend/customer_app/.dart_tool/

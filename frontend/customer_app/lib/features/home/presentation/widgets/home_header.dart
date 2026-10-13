@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/badge_icon_button.dart';
 
-class HomeHeader extends StatelessWidget {
+class HomeHeader extends StatefulWidget {
   final String customerName;
   final String deliveryAddress;
   final int notificationCount;
@@ -27,70 +28,159 @@ class HomeHeader extends StatelessWidget {
   });
 
   @override
+  State<HomeHeader> createState() => _HomeHeaderState();
+}
+
+class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateMixin {
+  final List<String> _searchHints = const [
+    'Search "Fresh Fruits & Veggies"...',
+    'Search "Dairy, Milk & Paneer"...',
+    'Search "Snacks, Biscuits & Cold Drinks"...',
+    'Search "Atta, Rice & Organic Staples"...',
+    'Search "Personal Care & Home Needs"...',
+  ];
+
+  int _currentHintIndex = 0;
+  Timer? _hintTimer;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.96, end: 1.04).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _hintTimer = Timer.periodic(const Duration(milliseconds: 2800), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentHintIndex = (_currentHintIndex + 1) % _searchHints.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF072717),
-            Color(0xFF0D4726),
-            Color(0xFF15803D),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: AppColors.brandHeaderGradient,
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(26),
-          bottomRight: Radius.circular(26),
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF072717).withValues(alpha: 0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: AppColors.darkGreen.withValues(alpha: 0.35),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Stack(
         children: [
-          // Ambient decorative glow circles
+          // Ambient decorative brand glows (Ruby, Amber & Emerald rings)
           Positioned(
-            right: -30,
+            right: -35,
             top: -20,
             child: Container(
-              width: 140,
-              height: 140,
+              width: 150,
+              height: 150,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.ribbonAmber.withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            left: -20,
-            bottom: -20,
+            left: -30,
+            bottom: -30,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 130,
+              height: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primaryGreen.withValues(alpha: 0.18),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
 
           // Main Header Content
           Padding(
-            padding: EdgeInsets.fromLTRB(16, topPadding + 6, 16, 16),
+            padding: EdgeInsets.fromLTRB(16, topPadding + 6, 16, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top Row: Brand & Delivery Pill + Actions
+                // Top Row: Brand Emblem, Delivery Pill + Action Buttons
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Brand & Delivery Pill Column
+                    // Alanga Logo Emblem with Animated Gradient Glow
+                    ScaleTransition(
+                      scale: _pulseAnimation,
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.logoRibbonGradient,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.ribbonAmber.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.darkGreen,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/images/app_icon.jpg',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.storefront_rounded,
+                                color: AppColors.ribbonGold,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Brand Title & Delivery Address
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,27 +190,44 @@ class HomeHeader extends StatelessWidget {
                               const Text(
                                 'ALANGA',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 19,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
-                                  letterSpacing: 1.2,
+                                  letterSpacing: 1.6,
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFBBF24),
+                                  gradient: AppColors.brandGoldGradient,
                                   borderRadius: BorderRadius.circular(6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.brandOrange.withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                                child: const Text(
-                                  'STORE',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF1F2937),
-                                    letterSpacing: 0.5,
-                                  ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.bolt_rounded,
+                                      size: 11,
+                                      color: Color(0xFF1E281F),
+                                    ),
+                                    Text(
+                                      '10 MIN',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF1E281F),
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -129,23 +236,23 @@ class HomeHeader extends StatelessWidget {
 
                           // Delivery Location Pill
                           GestureDetector(
-                            onTap: onAddressTap ?? () {},
+                            onTap: widget.onAddressTap ?? () {},
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
-                                  Icons.flash_on_rounded,
-                                  size: 14,
-                                  color: Color(0xFFFBBF24),
+                                  Icons.location_on_rounded,
+                                  size: 13,
+                                  color: AppColors.brandYellow,
                                 ),
                                 const SizedBox(width: 2),
                                 Flexible(
                                   child: Text(
-                                    'Deliver to $deliveryAddress',
+                                    'Deliver to ${widget.deliveryAddress}',
                                     style: const TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFFD1FAE5),
+                                      color: Color(0xFFD4EDE0),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -154,8 +261,8 @@ class HomeHeader extends StatelessWidget {
                                 const SizedBox(width: 2),
                                 const Icon(
                                   Icons.keyboard_arrow_down_rounded,
-                                  size: 16,
-                                  color: Color(0xFFD1FAE5),
+                                  size: 15,
+                                  color: Color(0xFFD4EDE0),
                                 ),
                               ],
                             ),
@@ -167,67 +274,123 @@ class HomeHeader extends StatelessWidget {
                     // Actions: Notification & Cart Buttons
                     BadgeIconButton(
                       icon: Icons.notifications_none_rounded,
-                      count: notificationCount,
-                      onTap: onNotificationTap ?? () {},
+                      count: widget.notificationCount,
+                      onTap: widget.onNotificationTap ?? () {},
                     ),
                     const SizedBox(width: 8),
                     BadgeIconButton(
                       icon: Icons.shopping_bag_outlined,
-                      count: cartCount,
-                      onTap: onCartTap ?? () {},
+                      count: widget.cartCount,
+                      onTap: widget.onCartTap ?? () {},
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
-                // Integrated Search Bar
+                // Premium Search Bar with Animated Hint Transition
                 Container(
+                  height: 48,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
+                        color: Colors.black.withValues(alpha: 0.14),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: TextField(
-                    controller: searchController,
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: onSearchSubmitted,
-                    style: const TextStyle(fontSize: 13.5, color: Color(0xFF11261B)),
-                    decoration: InputDecoration(
-                      hintText: 'Search for clothes, gadgets, essentials...',
-                      hintStyle: const TextStyle(
-                        fontSize: 12.5,
-                        color: Color(0xFF8BA697),
-                        fontWeight: FontWeight.normal,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: AppColors.primaryGreen,
-                        size: 22,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(
-                          Icons.mic_none_rounded,
-                          color: AppColors.brandOrange,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Voice Search coming soon!'),
-                              duration: Duration(seconds: 2),
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      // Animated Rotating Hint Text (visible when search input is empty)
+                      if (widget.searchController == null || widget.searchController!.text.isEmpty)
+                        Positioned(
+                          left: 44,
+                          right: 48,
+                          child: IgnorePointer(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 350),
+                              transitionBuilder: (child, animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.4),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                _searchHints[_currentHintIndex],
+                                key: ValueKey<int>(_currentHintIndex),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF7A9688),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          );
+                          ),
+                        ),
+
+                      // Text Field
+                      TextField(
+                        controller: widget.searchController,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: widget.onSearchSubmitted,
+                        onChanged: (_) {
+                          if (mounted) setState(() {});
                         },
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          color: Color(0xFF0F261A),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '',
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.primaryGreen,
+                            size: 22,
+                          ),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 1,
+                                height: 18,
+                                color: const Color(0xFFE2E8E4),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.mic_none_rounded,
+                                  color: AppColors.brandOrange,
+                                  size: 21,
+                                ),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Voice Search coming soon!'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
                       ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
+                    ],
                   ),
                 ),
               ],

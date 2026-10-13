@@ -273,29 +273,36 @@ class _HomeScreenState extends State<HomeScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryGreen : Colors.white,
+            gradient: isSelected ? AppColors.brandEmeraldGradient : null,
+            color: isSelected ? null : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? AppColors.primaryGreen : const Color(0xFFD6E2DA),
+              color: isSelected ? Colors.transparent : const Color(0xFFD6E2DA),
               width: 1.2,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.28),
-                      blurRadius: 8,
+                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
+                      blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
                   ]
-                : [],
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12.5,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF284835),
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                color: isSelected ? Colors.white : const Color(0xFF1E3A2B),
               ),
             ),
           ),
@@ -317,14 +324,23 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: iconColor, size: 20),
+              Container(
+                width: 3.5,
+                height: 16,
+                decoration: BoxDecoration(
+                  gradient: AppColors.logoRibbonGradient,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(icon, color: iconColor, size: 19),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF11261B),
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0C2417),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -343,8 +359,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'View All',
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.primaryGreen,
                     ),
                   ),

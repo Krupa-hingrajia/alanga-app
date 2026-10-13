@@ -88,17 +88,17 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: AppColors.lightGreenHeaderGradient,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(26),
             bottomRight: Radius.circular(26),
           ),
           border: const Border(
-            bottom: BorderSide(color: Color(0xFFE2ECE5), width: 1.2),
+            bottom: BorderSide(color: Color(0xFFC0E4CF), width: 1.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: const Color(0xFF0C9A56).withValues(alpha: 0.08),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -215,7 +215,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF456353),
+                                    color: Color(0xFF1B4D31),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -225,7 +225,7 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                               const Icon(
                                 Icons.keyboard_arrow_down_rounded,
                                 size: 16,
-                                color: Color(0xFF6B8A78),
+                                color: Color(0xFF38684D),
                               ),
                             ],
                           ),
@@ -238,33 +238,39 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                   BadgeIconButton(
                     icon: Icons.notifications_none_rounded,
                     count: widget.notificationCount,
+                    backgroundColor: Colors.white,
+                    borderColor: const Color(0xFFC0E4CF),
+                    iconColor: const Color(0xFF0C2417),
                     onTap: widget.onNotificationTap ?? () {},
                   ),
                   const SizedBox(width: 8),
                   BadgeIconButton(
                     icon: Icons.shopping_bag_outlined,
                     count: widget.cartCount,
+                    backgroundColor: Colors.white,
+                    borderColor: const Color(0xFFC0E4CF),
+                    iconColor: const Color(0xFF0C2417),
                     onTap: widget.onCartTap ?? () {},
                   ),
                 ],
               ),
               const SizedBox(height: 14),
 
-              // Premium Search Bar with Animated Hint Transition
+              // Premium Search Bar with Animated Hint Transition (Crisp White on Light Green)
               Container(
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4F8F5),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFDEECE3),
+                    color: const Color(0xFFBCE0CB),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),

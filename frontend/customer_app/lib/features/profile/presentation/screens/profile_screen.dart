@@ -128,22 +128,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Modern Account Hero Header
+            // 1. Modern Account Hero Header (Fresh Light Green)
             Container(
               width: double.infinity,
               padding: EdgeInsets.fromLTRB(20, topPadding + 10, 20, 22),
               decoration: const BoxDecoration(
-                color: Colors.white,
+                gradient: AppColors.lightGreenHeaderGradient,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(28),
                   bottomRight: Radius.circular(28),
                 ),
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE2ECE5), width: 1.2),
+                  bottom: BorderSide(color: Color(0xFFC0E4CF), width: 1.2),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x0A000000),
+                    color: Color(0x100C9A56),
                     blurRadius: 16,
                     offset: Offset(0, 4),
                   ),

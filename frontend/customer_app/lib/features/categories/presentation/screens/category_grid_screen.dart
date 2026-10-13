@@ -51,17 +51,17 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
             Container(
               padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 16),
               decoration: const BoxDecoration(
-                color: Colors.white,
+                gradient: AppColors.lightGreenHeaderGradient,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE2ECE5), width: 1.2),
+                  bottom: BorderSide(color: Color(0xFFC0E4CF), width: 1.2),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x0A000000),
+                    color: Color(0x100C9A56),
                     blurRadius: 16,
                     offset: Offset(0, 4),
                   ),
@@ -100,9 +100,9 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                       // View Toggle Icon Button
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F8F5),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFDEECE3), width: 1.2),
+                          border: Border.all(color: const Color(0xFFC0E4CF), width: 1.2),
                         ),
                         child: IconButton(
                           icon: Icon(
@@ -122,18 +122,18 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Search Bar inside Header
+                  // Search Bar inside Header (Crisp White on Light Green)
                   Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F8F5),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFDEECE3), width: 1.2),
+                      border: Border.all(color: const Color(0xFFBCE0CB), width: 1.2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),

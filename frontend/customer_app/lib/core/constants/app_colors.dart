@@ -41,12 +41,12 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 
-  // Clean Modern Light Header Gradient (Subtle fresh pearl mint)
-  static const LinearGradient modernLightHeaderGradient = LinearGradient(
+  // Modern Fresh Light Green Header Gradient (Fresh Mint / Matcha Glow)
+  static const LinearGradient lightGreenHeaderGradient = LinearGradient(
     colors: [
-      Colors.white,
-      Color(0xFFF6FAF7),
-      Color(0xFFEFF7F2),
+      Color(0xFFEAF8EF),
+      Color(0xFFDCF3E4),
+      Color(0xFFCEECD8),
     ],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -54,9 +54,9 @@ class AppColors {
 
   static const LinearGradient brandHeaderGradient = LinearGradient(
     colors: [
-      Colors.white,
-      Color(0xFFF7FAF8),
-      Color(0xFFEFF7F2),
+      Color(0xFFEAF8EF),
+      Color(0xFFDCF3E4),
+      Color(0xFFCEECD8),
     ],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

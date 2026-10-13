@@ -353,15 +353,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 22),
 
-                              // Action Button using Alanga Emerald Gradient
+                              // Action Button using App Icon Dark Green
                               Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  gradient: AppColors.brandEmeraldGradient,
+                                  color: const Color(0xFF1A3827),
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
+                                      color: const Color(0xFF1A3827).withValues(alpha: 0.35),
                                       blurRadius: 14,
                                       offset: const Offset(0, 4),
                                     ),

@@ -123,7 +123,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ? 'OTP sent! Test code: ${state.devOtp}'
                                 : 'Verification code sent to ${state.identifier}',
                           ),
-                          backgroundColor: AppColors.primaryGreen,
+                          backgroundColor: const Color(0xFF1A3827),
                           duration: const Duration(seconds: 4),
                         ),
                       );
@@ -153,7 +153,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
+                            color: Colors.black.withValues(alpha: 0.06),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -211,7 +211,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           height: 28,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: active ? AppColors.primaryGreen : const Color(0xFFE0E0E0),
+            color: active ? const Color(0xFF1A3827) : const Color(0xFFE0E0E0),
           ),
           child: Center(
             child: Text(
@@ -229,7 +229,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           label,
           style: TextStyle(
             fontSize: 10,
-            color: active ? AppColors.primaryGreen : Colors.black45,
+            color: active ? const Color(0xFF1A3827) : Colors.black45,
             fontWeight: active ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -242,7 +242,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       width: 32,
       height: 2,
       margin: const EdgeInsets.only(bottom: 16, left: 4, right: 4),
-      color: active ? AppColors.primaryGreen : const Color(0xFFE0E0E0),
+      color: active ? const Color(0xFF1A3827) : const Color(0xFFE0E0E0),
     );
   }
 
@@ -253,7 +253,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.lock_reset, size: 48, color: AppColors.primaryGreen),
+          const Icon(Icons.lock_reset, size: 48, color: Color(0xFF1A3827)),
           const SizedBox(height: 12),
           const Text(
             'Forgot Password?',
@@ -285,7 +285,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                borderSide: const BorderSide(color: Color(0xFF1A3827), width: 2),
               ),
             ),
             validator: (value) {
@@ -316,7 +316,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -339,7 +339,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: () => context.go('/login'),
             child: const Text(
               'Back to Login',
-              style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
+              style: TextStyle(color: Color(0xFF1A3827), fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -354,7 +354,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.mark_email_read_outlined, size: 48, color: AppColors.primaryGreen),
+          const Icon(Icons.mark_email_read_outlined, size: 48, color: Color(0xFF1A3827)),
           const SizedBox(height: 12),
           const Text(
             'Verify Verification Code',
@@ -389,7 +389,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                borderSide: const BorderSide(color: Color(0xFF1A3827), width: 2),
               ),
             ),
             validator: (value) {
@@ -443,7 +443,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -473,7 +473,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.lock_outline, size: 48, color: AppColors.primaryGreen),
+          const Icon(Icons.lock_outline, size: 48, color: Color(0xFF1A3827)),
           const SizedBox(height: 12),
           const Text(
             'Create New Password',
@@ -508,7 +508,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                borderSide: const BorderSide(color: Color(0xFF1A3827), width: 2),
               ),
             ),
             validator: (value) {
@@ -532,7 +532,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                borderSide: const BorderSide(color: Color(0xFF1A3827), width: 2),
               ),
             ),
             validator: (value) {
@@ -562,7 +562,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppColors.primaryGreen,
+              backgroundColor: const Color(0xFF1A3827),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -593,7 +593,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.check_circle, color: AppColors.primaryGreen),
+            Icon(Icons.check_circle, color: Color(0xFF1A3827)),
             SizedBox(width: 8),
             Text('Success', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -605,7 +605,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               Navigator.of(ctx).pop();
               context.go('/login');
             },
-            child: const Text('Back to Login', style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
+            child: const Text('Back to Login', style: TextStyle(color: Color(0xFF1A3827), fontWeight: FontWeight.bold)),
           ),
         ],
       ),

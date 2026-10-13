@@ -378,16 +378,13 @@ class _CustomerProductCardState extends State<CustomerProductCard> with SingleTi
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
                           decoration: BoxDecoration(
-                            gradient: isOutOfStock
-                                ? null
-                                : AppColors.brandEmeraldGradient,
-                            color: isOutOfStock ? Colors.grey.shade300 : null,
+                            color: isOutOfStock ? Colors.grey.shade300 : const Color(0xFF1A3827),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: isOutOfStock
                                 ? null
                                 : [
                                     BoxShadow(
-                                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
+                                      color: const Color(0xFF1A3827).withValues(alpha: 0.25),
                                       blurRadius: 8,
                                       offset: const Offset(0, 3),
                                     ),

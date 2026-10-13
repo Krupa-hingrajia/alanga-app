@@ -312,7 +312,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: AppColors.primaryGreen, // Logo green background
+                              backgroundColor: const Color(0xFF1A3827), // App icon dark green
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

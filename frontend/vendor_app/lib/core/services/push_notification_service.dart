@@ -72,7 +72,7 @@ class PushNotificationService {
       );
 
       await _localNotifications.initialize(
-        const InitializationSettings(android: androidSettings, iOS: darwinSettings),
+        settings: const InitializationSettings(android: androidSettings, iOS: darwinSettings),
         onDidReceiveNotificationResponse: (response) {
           if (response.payload != null && response.payload!.isNotEmpty) {
             try {
@@ -132,10 +132,10 @@ class PushNotificationService {
     final body = message.notification?.body ?? message.data['body'] ?? '';
 
     _localNotifications.show(
-      message.hashCode,
-      title,
-      body,
-      NotificationDetails(
+      id: message.hashCode,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _vendorNotificationChannel.id,
           _vendorNotificationChannel.name,

@@ -6,6 +6,13 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<UserEntity> phoneAuth({
+    required String phoneNumber,
+    String? fullName,
+    String? email,
+    String? firebaseUid,
+  });
+
   Future<UserEntity> register({
     required String fullName,
     required String email,

@@ -4,6 +4,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasource/auth_remote_datasource.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../models/login_request_model.dart';
+import '../models/phone_auth_request_model.dart';
 import '../models/register_request_model.dart';
 import '../../../../core/error/failures.dart';
 
@@ -25,6 +26,34 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final loginModel = LoginRequestModel(identifier: identifier, password: password);
       final response = await _remoteDataSource.login(loginModel);
+
+      await _storageService.saveAccessToken(response.accessToken);
+      await _storageService.saveRefreshToken(response.refreshToken);
+      await _storageService.saveUserData(response.user.toJson());
+
+      return response.user.toEntity();
+    } on DioException catch (e) {
+      final message = _getErrorMessage(e);
+      throw ServerFailure(message);
+    }
+  }
+
+  @override
+  Future<UserEntity> phoneAuth({
+    required String phoneNumber,
+    String? fullName,
+    String? email,
+    String? firebaseUid,
+  }) async {
+    try {
+      final request = PhoneAuthRequestModel(
+        phoneNumber: phoneNumber,
+        fullName: fullName,
+        email: email,
+        role: 'CUSTOMER',
+        firebaseUid: firebaseUid,
+      );
+      final response = await _remoteDataSource.phoneAuth(request);
 
       await _storageService.saveAccessToken(response.accessToken);
       await _storageService.saveRefreshToken(response.refreshToken);

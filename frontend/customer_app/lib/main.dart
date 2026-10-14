@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/dependency_injection/injection.dart' as di;
 import 'core/dependency_injection/injection.dart';
 import 'core/theme/app_theme.dart';
@@ -25,6 +26,11 @@ void main() async {
     ),
   );
   await di.init();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase initialization error in customer app: $e');
+  }
   runApp(const MyApp());
 }
 

@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UsersService } from '../services/users.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @ApiTags('Admin Vendor Management')
 @ApiBearerAuth('access-token')
@@ -12,7 +13,10 @@ import { UsersService } from '../services/users.service';
 @Roles(Role.ADMIN)
 @Controller('admin/vendors')
 export class AdminUsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -77,6 +81,16 @@ export class AdminUsersController {
       status: AccountStatus.ACTIVE,
       kycStatus: KYCStatus.VERIFIED,
     });
+
+    // Send push & in-app notification to vendor
+    await this.notificationsService.sendNotificationToUser(
+      id,
+      '🎉 Store & KYC Approved!',
+      'Congratulations! Your Alanga vendor account and KYC have been verified. You can now start adding products to your store.',
+      'KYC_VERIFIED',
+      { vendorId: id },
+    );
+
     return {
       success: true,
       message: 'Vendor and KYC approved successfully',
@@ -100,6 +114,16 @@ export class AdminUsersController {
       status: AccountStatus.ACTIVE,
       kycStatus: KYCStatus.VERIFIED,
     });
+
+    // Send push & in-app notification to vendor
+    await this.notificationsService.sendNotificationToUser(
+      id,
+      '🎉 KYC Verification Approved!',
+      'Your store KYC documents have been verified and approved. Your store is now active.',
+      'KYC_VERIFIED',
+      { vendorId: id },
+    );
+
     return {
       success: true,
       message: 'Vendor KYC approved successfully',
@@ -123,6 +147,16 @@ export class AdminUsersController {
       status: AccountStatus.REJECTED,
       kycStatus: KYCStatus.REJECTED,
     });
+
+    // Send push & in-app notification to vendor
+    await this.notificationsService.sendNotificationToUser(
+      id,
+      '⚠️ Vendor Registration Rejected',
+      'Your vendor application was not approved. Please contact Alanga support for details.',
+      'KYC_REJECTED',
+      { vendorId: id },
+    );
+
     return {
       success: true,
       message: 'Vendor rejected successfully',
@@ -145,6 +179,16 @@ export class AdminUsersController {
     const data = await this.usersService.update(id, {
       kycStatus: KYCStatus.REJECTED,
     });
+
+    // Send push & in-app notification to vendor
+    await this.notificationsService.sendNotificationToUser(
+      id,
+      '⚠️ KYC Verification Rejected',
+      'Your submitted KYC documents could not be verified. Please review and update your KYC details in Store Profile.',
+      'KYC_REJECTED',
+      { vendorId: id },
+    );
+
     return {
       success: true,
       message: 'Vendor KYC rejected',

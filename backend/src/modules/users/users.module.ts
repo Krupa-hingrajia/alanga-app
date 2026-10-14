@@ -5,7 +5,10 @@ import { UsersRepository } from './repositories/users.repository';
 import { AdminUsersController } from './controllers/admin-users.controller';
 import { AdminCustomersController } from './controllers/admin-customers.controller';
 
+import { NotificationsModule } from '../notifications/notifications.module';
+
 @Module({
+  imports: [NotificationsModule],
   controllers: [AdminUsersController, AdminCustomersController],
   providers: [
     UsersService,

@@ -64,6 +64,12 @@ import '../../features/dashboard/data/repositories/vendor_dashboard_repository_i
 import '../../features/profile/domain/repositories/vendor_profile_repository.dart';
 import '../../features/profile/data/repositories/vendor_profile_repository_impl.dart';
 
+// Notifications imports
+import '../services/push_notification_service.dart';
+import '../../features/notifications/data/datasource/notifications_remote_datasource.dart';
+import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -117,6 +123,9 @@ Future<void> init() async {
   sl.registerLazySingleton<VendorOrderRepository>(
     () => VendorOrderRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<NotificationsRepository>(
+    () => NotificationsRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -143,11 +152,15 @@ Future<void> init() async {
   sl.registerLazySingleton<VendorOrderRemoteDataSource>(
     () => VendorOrderRemoteDataSourceImpl(apiService: sl()),
   );
+  sl.registerLazySingleton<NotificationsRemoteDataSource>(
+    () => NotificationsRemoteDataSourceImpl(apiService: sl()),
+  );
 
   // Core
   sl.registerLazySingleton(() => SecureStorageService(sl()));
   sl.registerLazySingleton(() => DioClient(sl()));
   sl.registerLazySingleton(() => ApiService(sl()));
+  sl.registerLazySingleton(() => PushNotificationService());
 
   // External
   sl.registerLazySingleton(() => const FlutterSecureStorage());

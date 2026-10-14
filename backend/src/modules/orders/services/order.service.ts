@@ -13,6 +13,7 @@ import { PlaceOrderDto } from '../dto/place-order.dto';
 import { UpdateOrderStatusDto, OrderStatus } from '../dto/update-order-status.dto';
 import { AdminOrderQueryDto } from '../dto/admin-order-query.dto';
 import { calculateItemShippingFee } from '../utils/shipping-calculator.util';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class OrderService {
@@ -35,6 +36,7 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
     private readonly addressRepository: AddressRepository,
     private readonly cartRepository: CartRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   private generateOrderNumber(): string {
@@ -189,6 +191,41 @@ export class OrderService {
 
       return newOrder;
     });
+
+    // Send notifications to vendors and customer
+    try {
+      const vendorTotals: Record<string, { total: number; itemCount: number }> = {};
+      for (const item of result.orderItems || []) {
+        if (!item.vendorId) continue;
+        if (!vendorTotals[item.vendorId]) {
+          vendorTotals[item.vendorId] = { total: 0, itemCount: 0 };
+        }
+        vendorTotals[item.vendorId].total += Number(item.totalPrice || 0);
+        vendorTotals[item.vendorId].itemCount += Number(item.quantity || 1);
+      }
+
+      // Notify each vendor
+      for (const [vendorId, summary] of Object.entries(vendorTotals)) {
+        await this.notificationsService.sendNotificationToUser(
+          vendorId,
+          '🔔 New Order Received!',
+          `You have a new order #${result.orderNumber} for ₹${summary.total.toFixed(2)} (${summary.itemCount} items). Please prepare for dispatch.`,
+          'ORDER',
+          { orderId: result.id, orderNumber: result.orderNumber },
+        );
+      }
+
+      // Notify Customer
+      await this.notificationsService.sendNotificationToUser(
+        customerId,
+        '🛍️ Order Placed Successfully!',
+        `Your order #${result.orderNumber} for ₹${result.totalAmount.toFixed(2)} has been placed. Thank you for shopping with Alanga!`,
+        'ORDER',
+        { orderId: result.id, orderNumber: result.orderNumber },
+      );
+    } catch (notifErr) {
+      this.logger.error(`Error dispatching order notification: ${notifErr.message}`);
+    }
 
     return result;
   }

@@ -8,12 +8,14 @@ import 'core/localization/bloc/language_bloc.dart';
 import 'core/localization/bloc/language_state.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/keyboard_dismiss_wrapper.dart';
+import 'core/services/push_notification_service.dart';
 import 'routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp();
+    await PushNotificationService().initialize();
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }

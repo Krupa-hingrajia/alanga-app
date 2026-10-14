@@ -22,6 +22,7 @@ import { AddressModule } from './modules/addresses/address.module';
 import { OrderModule } from './modules/orders/order.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { VendorProfileModule } from './modules/vendor-profile/vendor-profile.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { VendorProfileModule } from './modules/vendor-profile/vendor-profile.mod
     AddressModule,
     OrderModule,
     ReviewsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

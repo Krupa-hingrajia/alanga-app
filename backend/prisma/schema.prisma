@@ -56,6 +56,8 @@ model User {
   orders        Order[]
   reviews       Review[]
   reviewReplies ReviewReply[]
+  notifications Notification[]
+  fcmTokens     FcmToken[]
 
   @@map("users")
 }
@@ -459,4 +461,35 @@ model VendorProfile {
 
   @@map("vendor_profiles")
 }
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String   @default("GENERAL") // ORDER, PRODUCT_APPROVAL, PRODUCT_REJECTION, KYC_VERIFIED, KYC_REJECTED, etc.
+  data      Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model FcmToken {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  deviceType String   @default("ANDROID") @map("device_type") // ANDROID, IOS, WEB
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("fcm_tokens")
+}
+
 

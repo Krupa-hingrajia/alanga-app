@@ -9,6 +9,9 @@ backend/logs/
 backend/.env
 backend/.env.development
 backend/.env.production
+backend/firebase-service-account.json
+backend/*service-account*.json
+*serviceAccountKey*.json
 
 # ============================================================
 # Flutter — Android Signing (NEVER commit these)

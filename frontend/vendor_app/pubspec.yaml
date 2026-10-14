@@ -30,6 +30,8 @@ dependencies:
   firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
   package_info_plus: ^9.0.1
+  firebase_messaging: ^15.2.10
+  flutter_local_notifications: ^22.3.2
 
 dependency_overrides:
   path_provider_foundation: 2.3.2

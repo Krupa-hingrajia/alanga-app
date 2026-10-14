@@ -21,4 +21,11 @@ class ApiEndpoints {
   // Vendor Dashboard & Profile endpoints
   static const String vendorDashboardSummary = '/vendor/dashboard/summary';
   static const String vendorProfile = '/vendor/profile';
+
+  // Notifications endpoints
+  static const String fcmToken = '/notifications/fcm-token';
+  static const String notifications = '/notifications';
+  static const String notificationsUnreadCount = '/notifications/unread-count';
+  static const String notificationsReadAll = '/notifications/read-all';
+  static String notificationRead(String id) => '/notifications/$id/read';
 }

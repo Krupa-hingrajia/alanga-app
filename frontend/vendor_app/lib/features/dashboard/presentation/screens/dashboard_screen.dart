@@ -42,6 +42,8 @@ import '../../data/models/vendor_dashboard_summary_model.dart';
 
 // Settings & Auth imports
 import '../../../auth/domain/repositories/auth_repository.dart';
+import '../../../../core/services/push_notification_service.dart';
+import '../../../notifications/domain/repositories/notifications_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -54,6 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _userData;
   bool _dataLoading = true;
   bool _hasPromptedProfileSetup = false;
+  int _unreadAlertsCount = 0;
 
   List<ProductModel> _products = [];
   List<CategoryModel> _categories = [];
@@ -66,6 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    sl<PushNotificationService>().syncTokenWithBackend();
     _loadUser();
     _loadDashboardData();
   }
@@ -130,7 +134,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (mounted) setState(() => _summary = res);
       }).catchError((_) => null);
 
-      await Future.wait([catFuture, subCatFuture, brandFuture, prodFuture, summaryFuture]);
+      final notifFuture = sl<NotificationsRepository>().getUnreadCount().then((count) {
+        if (mounted) setState(() => _unreadAlertsCount = count);
+      }).catchError((_) => null);
+
+      await Future.wait([catFuture, subCatFuture, brandFuture, prodFuture, summaryFuture, notifFuture]);
     } catch (_) {
       // ignore
     } finally {
@@ -342,14 +350,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 label: context.tr('products'),
               ),
               BottomNavigationBarItem(
-                icon: const Badge(
-                  label: Text('3'),
-                  child: Icon(Icons.notifications_outlined),
-                ),
-                activeIcon: const Badge(
-                  label: Text('3'),
-                  child: Icon(Icons.notifications),
-                ),
+                icon: _unreadAlertsCount > 0
+                    ? Badge(
+                        label: Text(_unreadAlertsCount > 99 ? '99+' : '$_unreadAlertsCount'),
+                        child: const Icon(Icons.notifications_outlined),
+                      )
+                    : const Icon(Icons.notifications_outlined),
+                activeIcon: _unreadAlertsCount > 0
+                    ? Badge(
+                        label: Text(_unreadAlertsCount > 99 ? '99+' : '$_unreadAlertsCount'),
+                        child: const Icon(Icons.notifications),
+                      )
+                    : const Icon(Icons.notifications),
                 label: context.tr('alerts'),
               ),
               BottomNavigationBarItem(
@@ -429,10 +441,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           IconButton(
-            icon: const Badge(
-              label: Text('3'),
-              child: Icon(Icons.notifications_outlined, color: Colors.white),
-            ),
+            icon: _unreadAlertsCount > 0
+                ? Badge(
+                    label: Text(_unreadAlertsCount > 99 ? '99+' : '$_unreadAlertsCount'),
+                    child: const Icon(Icons.notifications_outlined, color: Colors.white),
+                  )
+                : const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {
               setState(() {
                 _currentIndex = 3;
@@ -2329,6 +2343,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+
+    try {
+      await sl<PushNotificationService>().removeTokenFromBackend();
+    } catch (_) {}
 
     try {
       await sl<AuthRepository>().logout().timeout(

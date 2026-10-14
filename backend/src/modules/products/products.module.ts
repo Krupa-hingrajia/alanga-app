@@ -24,12 +24,14 @@ import { ProductShippingRepository } from './repositories/product-shipping.repos
 import { CategoriesModule } from '../master-data/categories/categories.module';
 import { SubCategoriesModule } from '../master-data/sub-categories/sub-categories.module';
 import { BrandsModule } from '../master-data/brands/brands.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     CategoriesModule,
     SubCategoriesModule,
     BrandsModule,
+    NotificationsModule,
   ],
   controllers: [
     AdminProductsController,

@@ -8,6 +8,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ProductsService } from '../services/products.service';
 import { RejectDto } from '../../master-data/categories/dto/reject.dto';
 import { AdminProductFilterDto } from '../dto/admin-product-filter.dto';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @ApiTags('Admin Products Approval & Management')
 @ApiBearerAuth('access-token')
@@ -15,7 +16,10 @@ import { AdminProductFilterDto } from '../dto/admin-product-filter.dto';
 @Roles(Role.ADMIN)
 @Controller('admin/products')
 export class AdminProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -53,6 +57,18 @@ export class AdminProductsController {
   @ApiResponse({ status: 404, description: 'Product not found.' })
   async approve(@Param('id') id: string, @CurrentUser('id') adminId: string) {
     const data = await this.productsService.approve(id, adminId);
+
+    // Send push & in-app notification to the product's vendor
+    if (data?.vendorId) {
+      await this.notificationsService.sendNotificationToUser(
+        data.vendorId,
+        '🎉 Product Approved!',
+        `Your product "${data.name}" has been approved and is now live on the store.`,
+        'PRODUCT_APPROVAL',
+        { productId: data.id },
+      );
+    }
+
     return {
       success: true,
       message: 'Product approved successfully',
@@ -72,6 +88,19 @@ export class AdminProductsController {
     @CurrentUser('id') adminId: string,
   ) {
     const data = await this.productsService.reject(id, adminId, rejectDto.reason);
+
+    // Send push & in-app notification to the product's vendor
+    if (data?.vendorId) {
+      const reasonSuffix = rejectDto.reason ? ` Reason: ${rejectDto.reason}` : '';
+      await this.notificationsService.sendNotificationToUser(
+        data.vendorId,
+        '⚠️ Product Rejected',
+        `Your product "${data.name}" was not approved.${reasonSuffix}`,
+        'PRODUCT_REJECTION',
+        { productId: data.id, reason: rejectDto.reason },
+      );
+    }
+
     return {
       success: true,
       message: 'Product rejected successfully',

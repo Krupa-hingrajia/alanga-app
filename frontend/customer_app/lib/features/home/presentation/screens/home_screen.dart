@@ -23,6 +23,9 @@ import '../../../../core/widgets/shimmer_effect.dart';
 
 import '../../../wishlist/presentation/bloc/wishlist_bloc.dart';
 import '../../../wishlist/presentation/bloc/wishlist_event.dart';
+import '../../../addresses/presentation/bloc/address_cubit.dart';
+import '../../../addresses/presentation/bloc/address_state.dart';
+import '../../../addresses/data/models/address_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,6 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadProfile();
     sl<WishlistBloc>().add(const FetchWishlistEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AddressCubit>().fetchAddresses();
+      }
+    });
   }
 
   @override
@@ -75,6 +83,32 @@ class _HomeScreenState extends State<HomeScreen> {
       cartCount = cartState.summary.totalItems;
     }
 
+    final addressState = context.watch<AddressCubit>().state;
+    String deliveryAddress = 'Select Location';
+    if (addressState is AddressLoaded) {
+      final AddressModel? active = addressState.selectedAddress ??
+          (addressState.addresses.isNotEmpty
+              ? addressState.addresses.firstWhere((a) => a.isDefault, orElse: () => addressState.addresses.first)
+              : null);
+      if (active != null) {
+        final locationCity = active.city.trim().isNotEmpty
+            ? active.city.trim()
+            : active.addressLine1.trim();
+        final pin = active.postalCode.trim();
+        final type = active.addressType.trim().toUpperCase();
+
+        if (type.isNotEmpty && locationCity.isNotEmpty) {
+          deliveryAddress = pin.isNotEmpty
+              ? '$type • $locationCity, $pin'
+              : '$type • $locationCity';
+        } else if (locationCity.isNotEmpty) {
+          deliveryAddress = pin.isNotEmpty ? '$locationCity, $pin' : locationCity;
+        } else if (pin.isNotEmpty) {
+          deliveryAddress = 'Pincode $pin';
+        }
+      }
+    }
+
     return BlocProvider(
       create: (_) => sl<HomeBloc>()..add(const LoadHomeDataEvent()),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -92,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // 1. Top Fixed Header with Integrated Search (Blinkit / Zepto Style)
               HomeHeader(
                 customerName: _customerName,
-                deliveryAddress: 'Navi Mumbai, 400706',
+                deliveryAddress: deliveryAddress,
                 notificationCount: 3,
                 cartCount: cartCount,
                 onNotificationTap: () {

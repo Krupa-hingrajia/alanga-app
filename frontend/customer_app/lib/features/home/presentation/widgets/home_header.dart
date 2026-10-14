@@ -18,7 +18,7 @@ class HomeHeader extends StatefulWidget {
   const HomeHeader({
     super.key,
     required this.customerName,
-    this.deliveryAddress = 'Navi Mumbai, 400706',
+    this.deliveryAddress = 'Select Location',
     this.notificationCount = 3,
     this.cartCount = 2,
     this.onNotificationTap,
@@ -211,7 +211,10 @@ class _HomeHeaderState extends State<HomeHeader> with SingleTickerProviderStateM
                               const SizedBox(width: 2),
                               Flexible(
                                 child: Text(
-                                  'Deliver to ${widget.deliveryAddress}',
+                                  widget.deliveryAddress.isEmpty ||
+                                          widget.deliveryAddress == 'Select Location'
+                                      ? 'Select Delivery Location'
+                                      : 'Deliver to ${widget.deliveryAddress}',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,

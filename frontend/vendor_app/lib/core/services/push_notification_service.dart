@@ -157,8 +157,6 @@ class PushNotificationService {
             importance: Importance.max,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
-            largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-            color: const Color(0xFF1A3827),
             playSound: true,
             enableVibration: true,
             ticker: 'Alanga Vendor',

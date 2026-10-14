@@ -19,6 +19,11 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('FCM background message received: ${message.messageId} | ${message.data}');
 }
 
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  debugPrint('Notification tapped in background: ${notificationResponse.payload}');
+}
+
 const AndroidNotificationChannel _vendorNotificationChannel = AndroidNotificationChannel(
   'alanga_vendor_notifications',
   'Alanga Vendor Notifications',
@@ -83,6 +88,7 @@ class PushNotificationService {
       await _localNotifications.initialize(
         settings: const InitializationSettings(android: androidSettings, iOS: darwinSettings),
         onDidReceiveNotificationResponse: (response) {
+          debugPrint('Local notification tapped in foreground: ${response.payload}');
           if (response.payload != null && response.payload!.isNotEmpty) {
             try {
               final data = jsonDecode(response.payload!);
@@ -94,28 +100,48 @@ class PushNotificationService {
             }
           }
         },
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
       );
 
-      // 5. Configure Foreground presentation options
+      // 5. Check if app was launched by tapping a local notification
+      final launchDetails = await _localNotifications.getNotificationAppLaunchDetails();
+      if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
+        final payload = launchDetails.notificationResponse?.payload;
+        debugPrint('App launched via local notification tap with payload: $payload');
+        if (payload != null && payload.isNotEmpty) {
+          try {
+            final data = jsonDecode(payload);
+            if (data is Map<String, dynamic>) {
+              Future.delayed(const Duration(milliseconds: 1000), () {
+                handleNotificationTap(data);
+              });
+            }
+          } catch (e) {
+            debugPrint('Error handling launch notification payload: $e');
+          }
+        }
+      }
+
+      // 6. Configure Foreground presentation options
       await _fcm.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
       );
 
-      // 6. Listen for Foreground notifications
+      // 7. Listen for Foreground notifications
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         debugPrint('FCM Foreground message received: title=${message.notification?.title} | body=${message.notification?.body} | data=${message.data}');
         _showForegroundNotification(message);
       });
 
-      // 7. Handle notification tap when app is in Background
+      // 8. Handle notification tap when app is in Background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         debugPrint('FCM Message opened from background: ${message.data}');
         handleNotificationTap(message.data);
       });
 
-      // 8. Handle notification tap when app was completely Terminated / Killed
+      // 9. Handle notification tap when app was completely Terminated / Killed
       final initialMessage = await _fcm.getInitialMessage();
       if (initialMessage != null) {
         debugPrint('FCM App launched from terminated state via notification: ${initialMessage.data}');
@@ -124,13 +150,13 @@ class PushNotificationService {
         });
       }
 
-      // 9. Listen for token refresh events
+      // 10. Listen for token refresh events
       _fcm.onTokenRefresh.listen((newToken) {
         debugPrint('FCM Token refreshed: $newToken');
         syncTokenWithBackend(token: newToken);
       });
 
-      // 10. Automatically sync token if already logged in
+      // 11. Automatically sync token if already logged in
       syncTokenWithBackend();
 
       _isInitialized = true;
@@ -160,6 +186,8 @@ class PushNotificationService {
             playSound: true,
             enableVibration: true,
             ticker: 'Alanga Vendor',
+            autoCancel: true,
+            channelShowBadge: true,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,

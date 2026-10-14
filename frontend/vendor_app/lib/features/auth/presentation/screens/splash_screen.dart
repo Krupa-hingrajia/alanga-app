@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 
@@ -15,10 +16,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  String _appVersion = '1.0.5';
 
   @override
   void initState() {
     super.initState();
+    _loadAppVersion();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -38,6 +41,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
     _checkAuthAndNavigate();
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted && info.version.isNotEmpty) {
+        setState(() {
+          _appVersion = info.version;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -195,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             bottom: 32,
             child: Center(
               child: Text(
-                'Alanga Marketplace • Version 1.0.2',
+                'Alanga Marketplace • Version $_appVersion',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,

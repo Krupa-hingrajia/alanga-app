@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../dependency_injection/injection.dart';
@@ -43,7 +44,7 @@ class PushNotificationService {
       // 1. Register background message handler
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-      // 2. Request user permissions (especially for Android 13+ and iOS)
+      // 2. Request user permissions (Firebase & Android 13+)
       final settings = await _fcm.requestPermission(
         alert: true,
         announcement: false,
@@ -56,15 +57,23 @@ class PushNotificationService {
 
       debugPrint('FCM notification permission status: ${settings.authorizationStatus}');
 
-      // 3. Setup Android notification channel
+      // 3. Setup Android notification channel & request Android 13+ runtime permission
       if (!kIsWeb && Platform.isAndroid) {
-        await _localNotifications
-            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-            ?.createNotificationChannel(_vendorNotificationChannel);
+        final androidPlugin = _localNotifications
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+        await androidPlugin?.createNotificationChannel(_vendorNotificationChannel);
+
+        try {
+          final granted = await androidPlugin?.requestNotificationsPermission();
+          debugPrint('Android Local Notifications permission granted: $granted');
+        } catch (e) {
+          debugPrint('Error requesting Android local notification permission: $e');
+        }
       }
 
       // 4. Initialize Local Notifications for heads-up foreground presentation
-      const androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const darwinSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
@@ -96,7 +105,7 @@ class PushNotificationService {
 
       // 6. Listen for Foreground notifications
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint('FCM Foreground message: ${message.notification?.title} | ${message.notification?.body}');
+        debugPrint('FCM Foreground message received: title=${message.notification?.title} | body=${message.notification?.body} | data=${message.data}');
         _showForegroundNotification(message);
       });
 
@@ -121,6 +130,9 @@ class PushNotificationService {
         syncTokenWithBackend(token: newToken);
       });
 
+      // 10. Automatically sync token if already logged in
+      syncTokenWithBackend();
+
       _isInitialized = true;
     } catch (e) {
       debugPrint('Error initializing PushNotificationService: $e');
@@ -128,32 +140,140 @@ class PushNotificationService {
   }
 
   void _showForegroundNotification(RemoteMessage message) {
-    final title = message.notification?.title ?? message.data['title'] ?? 'Alanga Vendor Alert';
-    final body = message.notification?.body ?? message.data['body'] ?? '';
+    // 1. Show System Tray / Heads-Up notification
+    try {
+      final title = message.notification?.title ?? message.data['title'] ?? 'Alanga Vendor Alert';
+      final body = message.notification?.body ?? message.data['body'] ?? '';
 
-    _localNotifications.show(
-      id: message.hashCode,
-      title: title,
-      body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          _vendorNotificationChannel.id,
-          _vendorNotificationChannel.name,
-          channelDescription: _vendorNotificationChannel.description,
-          importance: Importance.max,
-          priority: Priority.high,
-          icon: '@mipmap/launcher_icon',
-          playSound: true,
-          enableVibration: true,
+      _localNotifications.show(
+        id: message.hashCode,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            _vendorNotificationChannel.id,
+            _vendorNotificationChannel.name,
+            channelDescription: _vendorNotificationChannel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+            ticker: 'Alanga Vendor',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      payload: jsonEncode(message.data),
-    );
+        payload: jsonEncode(message.data),
+      );
+    } catch (e) {
+      debugPrint('Error showing local notification: $e');
+    }
+
+    // 2. Show In-App Floating Banner Alert for instant visibility while app is open
+    _showInAppBanner(message);
+  }
+
+  void _showInAppBanner(RemoteMessage message) {
+    try {
+      final context = AppRouter.rootNavigatorKey.currentContext;
+      if (context == null) {
+        debugPrint('AppRouter root context is null, skipping in-app banner');
+        return;
+      }
+
+      final title = message.notification?.title ?? message.data['title'] ?? 'Alanga Vendor Alert';
+      final body = message.notification?.body ?? message.data['body'] ?? '';
+      final type = message.data['type']?.toString().toUpperCase() ?? '';
+
+      IconData iconData = Icons.notifications_active_rounded;
+      Color iconColor = const Color(0xFF229944);
+
+      if (type.contains('APPROVAL') || type.contains('VERIFIED')) {
+        iconData = Icons.check_circle_rounded;
+        iconColor = const Color(0xFF229944);
+      } else if (type.contains('REJECT')) {
+        iconData = Icons.error_outline_rounded;
+        iconColor = const Color(0xFFE6222B);
+      } else if (type.contains('ORDER')) {
+        iconData = Icons.shopping_bag_rounded;
+        iconColor = const Color(0xFFF99F1B);
+      }
+
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger != null) {
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: const Color(0xFF11261B),
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: const BorderSide(color: Color(0xFF234433), width: 1.2),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            duration: const Duration(seconds: 7),
+            content: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(iconData, color: iconColor, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (body.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          body,
+                          style: const TextStyle(
+                            color: Color(0xFFD1DDD6),
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: 'VIEW',
+              textColor: const Color(0xFFF99F1B),
+              onPressed: () {
+                handleNotificationTap(message.data);
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error presenting in-app banner: $e');
+    }
   }
 
   void handleNotificationTap(Map<String, dynamic> data) {
@@ -165,18 +285,13 @@ class PushNotificationService {
       debugPrint('Navigating for notification type: $type, orderId: $orderId, productId: $productId');
 
       if (type == 'ORDER' || type == 'ORDER_STATUS') {
-        if (orderId != null && orderId.isNotEmpty) {
-          AppRouter.router.push('/orders/$orderId');
-        } else {
-          AppRouter.router.go('/orders');
-        }
+        AppRouter.router.push('/orders');
       } else if (type == 'PRODUCT_APPROVAL' || type == 'PRODUCT_REJECTION') {
-        AppRouter.router.go('/products');
+        AppRouter.router.push('/products');
       } else if (type == 'KYC_VERIFIED' || type == 'KYC_REJECTED') {
-        AppRouter.router.push('/store-kyc');
+        AppRouter.router.push('/kyc');
       } else {
-        // Default: Open Dashboard Alerts tab
-        AppRouter.router.go('/dashboard');
+        AppRouter.router.push('/home');
       }
     } catch (e) {
       debugPrint('Error navigating on notification tap: $e');

@@ -13,13 +13,13 @@ import 'routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   try {
     await Firebase.initializeApp();
     await PushNotificationService().initialize();
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
-  await di.init();
   runApp(const MyApp());
 }
 

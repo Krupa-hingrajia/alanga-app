@@ -51,11 +51,15 @@ import '../features/brands/presentation/screens/brand_list_screen.dart';
 import '../features/brands/presentation/screens/add_edit_brand_screen.dart';
 import '../features/brands/presentation/screens/brand_detail_screen.dart';
 
+import 'package:flutter/material.dart';
 import '../core/dependency_injection/injection.dart';
 import '../core/storage/secure_storage_service.dart';
 
 class AppRouter {
+  static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
   static final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) async {
       final isSplash = state.matchedLocation == '/splash';

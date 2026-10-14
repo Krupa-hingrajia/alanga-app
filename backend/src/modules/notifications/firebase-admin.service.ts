@@ -104,6 +104,8 @@ export class FirebaseAdminService implements OnModuleInit {
           notification: {
             channelId: 'alanga_vendor_notifications',
             priority: 'max',
+            icon: 'ic_launcher',
+            color: '#1A3827',
             defaultSound: true,
             defaultVibrateTimings: true,
             clickAction: 'FLUTTER_NOTIFICATION_CLICK',

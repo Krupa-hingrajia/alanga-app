@@ -199,19 +199,21 @@ export class AuthService {
     }
 
     // New user registration via Phone OTP
-    const generatedEmail = phoneAuthDto.email?.trim().toLowerCase() || `vendor_${cleanDigits}@alanga.com`;
+    const prefix = targetRole === Role.CUSTOMER ? 'customer' : 'vendor';
+    const generatedEmail = phoneAuthDto.email?.trim().toLowerCase() || `${prefix}_${cleanDigits}@alanga.com`;
 
     let finalEmail = generatedEmail;
     const existingEmail = await this.authRepository.findUserByEmail(finalEmail);
     if (existingEmail) {
-      finalEmail = `vendor_${cleanDigits}_${Date.now()}@alanga.com`;
+      finalEmail = `${prefix}_${cleanDigits}_${Date.now()}@alanga.com`;
     }
 
     const saltRounds = 10;
     const randomPassword = Math.random().toString(36).slice(-10) + 'A1!';
     const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
 
-    const fullName = phoneAuthDto.fullName?.trim() || phoneAuthDto.businessName?.trim() || `Vendor ${cleanDigits.slice(-4)}`;
+    const defaultName = targetRole === Role.CUSTOMER ? `Customer ${cleanDigits.slice(-4)}` : `Vendor ${cleanDigits.slice(-4)}`;
+    const fullName = phoneAuthDto.fullName?.trim() || phoneAuthDto.businessName?.trim() || defaultName;
     const storeName = phoneAuthDto.businessName?.trim() || fullName;
 
     const userData: any = {

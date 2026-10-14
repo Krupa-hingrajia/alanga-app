@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346909562753",
+    "project_id": "alanga-customer",
+    "storage_bucket": "alanga-customer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346909562753:android:5f211bf95404b777f43a80",
+        "android_client_info": {
+          "package_name": "com.alanga.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnd4qJ4RotdBZ1_ykP9b-TKKX6SaRMgXw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

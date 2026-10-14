@@ -10,6 +10,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 
 class CategoryGridScreen extends StatefulWidget {
   const CategoryGridScreen({super.key});
@@ -441,25 +442,18 @@ class _CategoryGridScreenState extends State<CategoryGridScreen> {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: const Color(0xFFE4ECE8)),
           ),
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
+              ShimmerEffect.circular(
                 width: 58,
                 height: 58,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F6F4),
-                  shape: BoxShape.circle,
-                ),
               ),
-              const SizedBox(height: 12),
-              Container(
+              SizedBox(height: 12),
+              ShimmerEffect.rectangular(
                 width: 80,
                 height: 14,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F6F4),
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(6)),
               ),
             ],
           ),

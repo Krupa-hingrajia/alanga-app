@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../data/models/review_model.dart';
 import '../bloc/customer_reviews_cubit.dart';
 import '../bloc/customer_reviews_state.dart';
@@ -357,9 +358,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
       body: BlocBuilder<CustomerReviewsCubit, CustomerReviewsState>(
         builder: (context, state) {
           if (state.status == CustomerReviewsStatus.loading && state.reviews.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
+            return _buildReviewsShimmer();
           }
 
           if (state.reviews.isEmpty) {
@@ -436,6 +435,70 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildReviewsShimmer() {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE8F0EC)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const ShimmerEffect.rectangular(
+                    width: 52,
+                    height: 52,
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        ShimmerEffect.rectangular(
+                          width: 140,
+                          height: 14,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                        SizedBox(height: 6),
+                        ShimmerEffect.rectangular(
+                          width: 80,
+                          height: 12,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const ShimmerEffect.rectangular(
+                width: double.infinity,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              const SizedBox(height: 6),
+              const ShimmerEffect.rectangular(
+                width: 200,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

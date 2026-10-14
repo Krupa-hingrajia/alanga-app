@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../bloc/cart_cubit.dart';
 import '../bloc/cart_state.dart';
 import '../widgets/cart_item_card.dart';
@@ -93,9 +94,7 @@ class _CartScreenState extends State<CartScreen> {
         },
         builder: (context, state) {
           if (state is CartLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
+            return _buildCartShimmer();
           }
 
           if (state is CartError) {
@@ -192,6 +191,101 @@ class _CartScreenState extends State<CartScreen> {
           return const SizedBox.shrink();
         },
       ),
+    );
+  }
+
+  Widget _buildCartShimmer() {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE8F0EC)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ShimmerEffect.rectangular(
+                      width: 80,
+                      height: 80,
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ShimmerEffect.rectangular(
+                            width: 140,
+                            height: 14,
+                            borderRadius: BorderRadius.all(Radius.circular(4)),
+                          ),
+                          const SizedBox(height: 8),
+                          const ShimmerEffect.rectangular(
+                            width: 80,
+                            height: 10,
+                            borderRadius: BorderRadius.all(Radius.circular(4)),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              ShimmerEffect.rectangular(
+                                width: 60,
+                                height: 16,
+                                borderRadius: BorderRadius.all(Radius.circular(4)),
+                              ),
+                              ShimmerEffect.rectangular(
+                                width: 70,
+                                height: 26,
+                                borderRadius: BorderRadius.all(Radius.circular(6)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: const [
+              ShimmerEffect.rectangular(
+                height: 14,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              SizedBox(height: 10),
+              ShimmerEffect.rectangular(
+                height: 14,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              SizedBox(height: 14),
+              ShimmerEffect.rectangular(
+                height: 48,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

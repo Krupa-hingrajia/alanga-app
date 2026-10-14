@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../data/models/address_model.dart';
 import '../bloc/address_cubit.dart';
 import '../bloc/address_state.dart';
@@ -124,9 +125,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
       body: BlocBuilder<AddressCubit, AddressState>(
         builder: (context, state) {
           if (state is AddressLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
+            return _buildAddressListShimmer();
           }
 
           if (state is AddressError) {
@@ -231,6 +230,65 @@ class _AddressListScreenState extends State<AddressListScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAddressListShimmer() {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE8F0EC)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  ShimmerEffect.rectangular(
+                    width: 60,
+                    height: 22,
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                  ShimmerEffect.circular(width: 20, height: 20),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const ShimmerEffect.rectangular(
+                width: 140,
+                height: 16,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              const SizedBox(height: 8),
+              const ShimmerEffect.rectangular(
+                width: double.infinity,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              const SizedBox(height: 6),
+              const ShimmerEffect.rectangular(
+                width: 180,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              const SizedBox(height: 8),
+              const ShimmerEffect.rectangular(
+                width: 100,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

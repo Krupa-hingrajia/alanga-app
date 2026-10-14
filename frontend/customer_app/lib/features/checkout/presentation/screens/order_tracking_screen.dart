@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/order_model.dart';
 import '../../utils/customer_order_invoice_generator.dart';
@@ -194,9 +195,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           },
           builder: (context, state) {
             if (state is OrderDetailLoading && _cachedOrder == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
-              );
+              return _buildOrderTrackingShimmer();
             }
 
             if (state is OrderDetailFailure && _cachedOrder == null) {
@@ -1133,6 +1132,76 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         }
       }
     }
+  }
+
+  Widget _buildOrderTrackingShimmer() {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShimmerEffect.rectangular(width: 140, height: 16, borderRadius: BorderRadius.all(Radius.circular(4))),
+                    SizedBox(height: 8),
+                    ShimmerEffect.rectangular(width: 90, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                  ],
+                ),
+                ShimmerEffect.rectangular(width: 76, height: 26, borderRadius: BorderRadius.all(Radius.circular(14))),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ShimmerEffect.rectangular(width: 130, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                const SizedBox(height: 18),
+                ...List.generate(4, (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const ShimmerEffect.circular(width: 24, height: 24),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            ShimmerEffect.rectangular(width: 130, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                            SizedBox(height: 6),
+                            ShimmerEffect.rectangular(width: 180, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

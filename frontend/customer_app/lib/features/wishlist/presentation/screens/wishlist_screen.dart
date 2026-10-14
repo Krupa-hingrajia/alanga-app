@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../bloc/wishlist_bloc.dart';
 import '../bloc/wishlist_event.dart';
 import '../bloc/wishlist_state.dart';
@@ -288,6 +289,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   Widget _buildShimmerLoading() {
     return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: 4,
       itemBuilder: (context, index) {
@@ -304,31 +306,43 @@ class _WishlistScreenState extends State<WishlistScreen> {
             children: [
               Row(
                 children: [
-                  Container(
+                  const ShimmerEffect.rectangular(
                     width: 90,
                     height: 90,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(width: 60, height: 10, color: Colors.grey.shade200),
-                        const SizedBox(height: 8),
-                        Container(width: 150, height: 14, color: Colors.grey.shade200),
-                        const SizedBox(height: 8),
-                        Container(width: 80, height: 14, color: Colors.grey.shade200),
+                      children: const [
+                        ShimmerEffect.rectangular(
+                          width: 60,
+                          height: 10,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                        SizedBox(height: 8),
+                        ShimmerEffect.rectangular(
+                          width: 150,
+                          height: 14,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                        SizedBox(height: 8),
+                        ShimmerEffect.rectangular(
+                          width: 80,
+                          height: 14,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Container(width: double.infinity, height: 32, color: Colors.grey.shade100),
+              const SizedBox(height: 14),
+              const ShimmerEffect.rectangular(
+                height: 36,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
             ],
           ),
         );

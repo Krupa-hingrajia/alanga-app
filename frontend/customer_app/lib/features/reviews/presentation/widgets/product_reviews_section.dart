@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../domain/repositories/review_repository.dart';
 import '../bloc/review_cubit.dart';
@@ -191,11 +192,41 @@ class _ProductReviewsSectionState extends State<ProductReviewsSection> {
                 const Divider(height: 24, color: Color(0xFFEEF3F0)),
 
                 if (isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 36),
-                    child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primaryGreen),
-                    ),
+                  Column(
+                    children: List.generate(2, (index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7FAF8),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2EBE6)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: const [
+                                ShimmerEffect.circular(width: 32, height: 32),
+                                SizedBox(width: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ShimmerEffect.rectangular(width: 90, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                                    SizedBox(height: 4),
+                                    ShimmerEffect.rectangular(width: 60, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            const ShimmerEffect.rectangular(width: double.infinity, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                            const SizedBox(height: 6),
+                            const ShimmerEffect.rectangular(width: 180, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                          ],
+                        ),
+                      ),
+                    )),
                   )
                 else if (totalReviews == 0) ...[
                   // EMPTY STATE

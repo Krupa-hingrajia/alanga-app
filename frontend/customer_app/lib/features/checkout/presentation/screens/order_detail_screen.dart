@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../data/models/order_model.dart';
 import '../../utils/customer_order_invoice_generator.dart';
@@ -180,9 +181,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         body: BlocBuilder<OrderDetailCubit, OrderDetailState>(
           builder: (context, state) {
             if (state is OrderDetailLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
-              );
+              return _buildOrderDetailShimmer();
             }
 
             if (state is OrderDetailFailure) {
@@ -1171,6 +1170,109 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               side: const BorderSide(color: AppColors.primaryGreen, width: 1.2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderDetailShimmer() {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShimmerEffect.rectangular(width: 140, height: 16, borderRadius: BorderRadius.all(Radius.circular(4))),
+                    SizedBox(height: 8),
+                    ShimmerEffect.rectangular(width: 100, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                  ],
+                ),
+                ShimmerEffect.rectangular(width: 80, height: 26, borderRadius: BorderRadius.all(Radius.circular(14))),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ShimmerEffect.rectangular(width: 100, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                const SizedBox(height: 14),
+                Row(
+                  children: const [
+                    ShimmerEffect.rectangular(width: 64, height: 64, borderRadius: BorderRadius.all(Radius.circular(10))),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ShimmerEffect.rectangular(width: 160, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                          SizedBox(height: 8),
+                          ShimmerEffect.rectangular(width: 80, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerEffect.rectangular(width: 120, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                SizedBox(height: 12),
+                ShimmerEffect.rectangular(width: 180, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                SizedBox(height: 8),
+                ShimmerEffect.rectangular(width: double.infinity, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE8F0EC)),
+            ),
+            child: Column(
+              children: const [
+                ShimmerEffect.rectangular(height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                SizedBox(height: 10),
+                ShimmerEffect.rectangular(height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                SizedBox(height: 10),
+                ShimmerEffect.rectangular(height: 16, borderRadius: BorderRadius.all(Radius.circular(4))),
+              ],
             ),
           ),
         ],

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -100,10 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFF3F6F4),
-        body: Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
-      );
+      return _buildProfileShimmer(context);
     }
 
     final topPadding = MediaQuery.of(context).padding.top;
@@ -614,6 +612,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileShimmer(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7FAF8),
+      body: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(20, topPadding + 10, 20, 26),
+              decoration: const BoxDecoration(
+                gradient: AppColors.lightGreenHeaderGradient,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.circular(28),
+                ),
+              ),
+              child: Column(
+                children: const [
+                  ShimmerEffect.circular(width: 76, height: 76),
+                  SizedBox(height: 12),
+                  ShimmerEffect.rectangular(width: 140, height: 16, borderRadius: BorderRadius.all(Radius.circular(4))),
+                  SizedBox(height: 8),
+                  ShimmerEffect.rectangular(width: 190, height: 12, borderRadius: BorderRadius.all(Radius.circular(4))),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE8F0EC)),
+                ),
+                child: Column(
+                  children: List.generate(4, (index) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: const [
+                        ShimmerEffect.circular(width: 40, height: 40),
+                        SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerEffect.rectangular(width: 120, height: 14, borderRadius: BorderRadius.all(Radius.circular(4))),
+                              SizedBox(height: 6),
+                              ShimmerEffect.rectangular(width: 180, height: 10, borderRadius: BorderRadius.all(Radius.circular(4))),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

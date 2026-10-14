@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_image_view.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 import '../../data/models/order_model.dart';
 import '../bloc/order_cubit.dart';
 import '../bloc/order_state.dart';
@@ -113,9 +114,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                   : cubit.cachedOrders);
 
           if (state is OrderLoading && allOrders.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
+            return _buildOrderListShimmer();
           }
 
           if (state is OrderError && allOrders.isEmpty) {
@@ -559,6 +558,92 @@ class _OrderListScreenState extends State<OrderListScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOrderListShimmer() {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE8F0EC)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  ShimmerEffect.rectangular(
+                    width: 110,
+                    height: 14,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                  ShimmerEffect.rectangular(
+                    width: 70,
+                    height: 22,
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFF0F4F2)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const ShimmerEffect.rectangular(
+                    width: 60,
+                    height: 60,
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        ShimmerEffect.rectangular(
+                          width: 160,
+                          height: 14,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                        SizedBox(height: 8),
+                        ShimmerEffect.rectangular(
+                          width: 90,
+                          height: 10,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  ShimmerEffect.rectangular(
+                    width: 80,
+                    height: 16,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                  ShimmerEffect.rectangular(
+                    width: 90,
+                    height: 28,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

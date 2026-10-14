@@ -8,6 +8,7 @@ import '../../../products/presentation/bloc/product_state.dart';
 import '../../../products/presentation/widgets/product_card.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/dependency_injection/injection.dart';
+import '../../../../core/widgets/shimmer_effect.dart';
 
 class CategoryProductsScreen extends StatelessWidget {
   final CategoryModel category;
@@ -37,7 +38,7 @@ class CategoryProductsScreen extends StatelessWidget {
         body: BlocBuilder<ProductBloc, ProductState>(
           builder: (context, state) {
             if (state is ProductLoading) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.brandOrange));
+              return _buildProductGridShimmer();
             } else if (state is ProductLoaded) {
               final list = state.products
                   .where((p) => p.categoryId == category.id && p.status.toUpperCase() == 'ACTIVE')
@@ -130,6 +131,67 @@ class CategoryProductsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProductGridShimmer() {
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.72,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE8F0EC)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ShimmerEffect.rectangular(
+                height: 120,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              SizedBox(height: 10),
+              ShimmerEffect.rectangular(
+                width: 60,
+                height: 10,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              SizedBox(height: 6),
+              ShimmerEffect.rectangular(
+                width: 120,
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ShimmerEffect.rectangular(
+                    width: 50,
+                    height: 14,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                  ShimmerEffect.rectangular(
+                    width: 28,
+                    height: 28,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

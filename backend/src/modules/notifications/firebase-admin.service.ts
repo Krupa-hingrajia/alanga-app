@@ -4,6 +4,8 @@ import { getMessaging, MulticastMessage, SendResponse } from 'firebase-admin/mes
 import * as path from 'path';
 import * as fs from 'fs';
 
+import { ALANGA_FIREBASE_CREDENTIALS } from './firebase-credentials';
+
 @Injectable()
 export class FirebaseAdminService implements OnModuleInit {
   private readonly logger = new Logger(FirebaseAdminService.name);
@@ -22,32 +24,49 @@ export class FirebaseAdminService implements OnModuleInit {
         return;
       }
 
-      // Check for service account file in backend root or current working directory
-      const potentialPaths = [
-        path.join(process.cwd(), 'firebase-service-account.json'),
-        path.join(__dirname, '../../../firebase-service-account.json'),
-        path.join(__dirname, '../../../../firebase-service-account.json'),
-      ];
+      let serviceAccount: any = null;
 
-      let serviceAccountPath: string | null = null;
-      for (const p of potentialPaths) {
-        if (fs.existsSync(p)) {
-          serviceAccountPath = p;
-          break;
+      // 1. Check if provided via FIREBASE_SERVICE_ACCOUNT environment variable
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        try {
+          const raw = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
+          serviceAccount = raw.startsWith('{')
+            ? JSON.parse(raw)
+            : JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
+        } catch (e: any) {
+          this.logger.warn(`Failed to parse FIREBASE_SERVICE_ACCOUNT env: ${e.message}`);
         }
       }
 
-      if (serviceAccountPath) {
-        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-        this.firebaseApp = initializeApp({
-          credential: cert(serviceAccount),
-        });
-        this.logger.log(`Firebase Admin initialized successfully using service account: ${serviceAccountPath}`);
-      } else {
-        this.logger.warn(
-          'Firebase service account file (firebase-service-account.json) not found. FCM push notifications will be simulated.',
-        );
+      // 2. Check for service account file in local paths
+      if (!serviceAccount) {
+        const potentialPaths = [
+          path.join(process.cwd(), 'firebase-service-account.json'),
+          path.join(__dirname, '../../../firebase-service-account.json'),
+          path.join(__dirname, '../../../../firebase-service-account.json'),
+        ];
+
+        for (const p of potentialPaths) {
+          if (fs.existsSync(p)) {
+            try {
+              serviceAccount = JSON.parse(fs.readFileSync(p, 'utf8'));
+              this.logger.log(`Using Firebase service account from file: ${p}`);
+              break;
+            } catch (_) {}
+          }
+        }
       }
+
+      // 3. Fallback to built-in project credentials (for Cloud Run production container)
+      if (!serviceAccount) {
+        serviceAccount = ALANGA_FIREBASE_CREDENTIALS;
+        this.logger.log('Using built-in Alanga Firebase project service account credentials.');
+      }
+
+      this.firebaseApp = initializeApp({
+        credential: cert(serviceAccount),
+      });
+      this.logger.log('Firebase Admin initialized successfully.');
     } catch (error: any) {
       this.logger.error(`Error initializing Firebase Admin SDK: ${error.message}`, error.stack);
     }

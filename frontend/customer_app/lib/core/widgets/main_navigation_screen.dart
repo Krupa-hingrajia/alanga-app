@@ -24,6 +24,8 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _selectedIndex;
+  bool _isCartBannerDismissed = false;
+  int _lastCartCount = 0;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -52,7 +54,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: Scaffold(
-      body: BlocBuilder<CartCubit, CartState>(
+      body: BlocConsumer<CartCubit, CartState>(
+        listener: (context, cartState) {
+          if (cartState is CartLoaded) {
+            if (cartState.summary.totalItems != _lastCartCount) {
+              setState(() {
+                _lastCartCount = cartState.summary.totalItems;
+                _isCartBannerDismissed = false;
+              });
+            }
+          }
+        },
         builder: (context, cartState) {
           int cartCount = 0;
           double subtotal = 0.0;
@@ -72,171 +84,270 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 children: _screens,
               ),
 
-              // Modern Light Floating Bottom Cart Pill
-              if (cartCount > 0 && _selectedIndex != 3)
+              // Modern Light Floating Bottom Cart Pill (Swipeable Left/Right to Close)
+              if (cartCount > 0 && _selectedIndex != 3 && !_isCartBannerDismissed)
                 Positioned(
                   left: 14,
                   right: 14,
                   bottom: 12,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFD2E8DB),
-                        width: 1.2,
+                  child: Dismissible(
+                    key: ValueKey('floating_cart_banner_${cartCount}_${subtotal.toInt()}'),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (direction) {
+                      setState(() {
+                        _isCartBannerDismissed = true;
+                      });
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'Cart bar dismissed. Tap Cart tab below anytime.',
+                            style: TextStyle(fontSize: 12.5),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 3),
+                          action: SnackBarAction(
+                            label: 'UNDO',
+                            textColor: AppColors.brandOrange,
+                            onPressed: () {
+                              setState(() {
+                                _isCartBannerDismissed = false;
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    background: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
-                        ),
-                        BoxShadow(
-                          color: AppColors.primaryGreen.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Left: Free Delivery Progress Bar (Clean Mint Pearl Aesthetic)
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF5FAF7),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(19),
-                                bottomLeft: Radius.circular(19),
-                              ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Swipe to close',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: isFreeDelivery
-                                        ? const Color(0xFFDCFCE7)
-                                        : const Color(0xFFFEF3C7),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
+                          ),
+                        ],
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      alignment: Alignment.centerRight,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Swipe to close',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                        ],
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFFD2E8DB),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                          BoxShadow(
+                            color: AppColors.primaryGreen.withValues(alpha: 0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Left: Free Delivery Progress Bar (Clean Mint Pearl Aesthetic)
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF5FAF7),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(19),
+                                  bottomLeft: Radius.circular(19),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 34,
+                                    height: 34,
+                                    decoration: BoxDecoration(
                                       color: isFreeDelivery
-                                          ? const Color(0xFF86EFAC)
-                                          : const Color(0xFFFCD34D),
-                                      width: 1.2,
+                                          ? const Color(0xFFDCFCE7)
+                                          : const Color(0xFFFEF3C7),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isFreeDelivery
+                                            ? const Color(0xFF86EFAC)
+                                            : const Color(0xFFFCD34D),
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      isFreeDelivery
+                                          ? Icons.check_circle_rounded
+                                          : Icons.electric_bolt_rounded,
+                                      color: isFreeDelivery
+                                          ? const Color(0xFF16A34A)
+                                          : const Color(0xFFD97706),
+                                      size: 18,
                                     ),
                                   ),
-                                  child: Icon(
-                                    isFreeDelivery
-                                        ? Icons.check_circle_rounded
-                                        : Icons.electric_bolt_rounded,
-                                    color: isFreeDelivery
-                                        ? const Color(0xFF16A34A)
-                                        : const Color(0xFFD97706),
-                                    size: 18,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        isFreeDelivery
-                                            ? 'FREE DELIVERY UNLOCKED!'
-                                            : 'Add ₹${remainingAmount.toStringAsFixed(0)} for FREE Delivery',
-                                        style: TextStyle(
-                                          color: isFreeDelivery
-                                              ? const Color(0xFF15803D)
-                                              : const Color(0xFFB45309),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 11,
-                                          letterSpacing: 0.2,
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          isFreeDelivery
+                                              ? 'FREE DELIVERY UNLOCKED!'
+                                              : 'Add ₹${remainingAmount.toStringAsFixed(0)} for FREE Delivery',
+                                          style: TextStyle(
+                                            color: isFreeDelivery
+                                                ? const Color(0xFF15803D)
+                                                : const Color(0xFFB45309),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 11,
+                                            letterSpacing: 0.2,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(4),
-                                        child: LinearProgressIndicator(
-                                          value: (subtotal / freeDeliveryThreshold).clamp(0.0, 1.0),
-                                          minHeight: 4,
-                                          backgroundColor: const Color(0xFFE2EFE7),
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            isFreeDelivery
-                                                ? AppColors.primaryGreen
-                                                : AppColors.brandOrange,
+                                        const SizedBox(height: 4),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(4),
+                                          child: LinearProgressIndicator(
+                                            value: (subtotal / freeDeliveryThreshold).clamp(0.0, 1.0),
+                                            minHeight: 4,
+                                            backgroundColor: const Color(0xFFE2EFE7),
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              isFreeDelivery
+                                                  ? AppColors.primaryGreen
+                                                  : AppColors.brandOrange,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
 
-                        // Right: View Cart Button with Alanga Ribbon Gradient
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 3;
-                            });
-                          },
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(18),
-                            bottomRight: Radius.circular(18),
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                            decoration: const BoxDecoration(
-                              gradient: AppColors.logoRibbonGradient,
-                              borderRadius: BorderRadius.only(
+                          // Right: View Cart Button with Alanga Ribbon Gradient + Close Option
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedIndex = 3;
+                                });
+                              },
+                              borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(18),
                                 bottomRight: Radius.circular(18),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.shopping_bag_rounded,
-                                  color: Colors.white,
-                                  size: 18,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                decoration: const BoxDecoration(
+                                  gradient: AppColors.logoRibbonGradient,
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(18),
+                                    bottomRight: Radius.circular(18),
+                                  ),
                                 ),
-                                const SizedBox(width: 6),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text(
-                                      'View Cart',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 12,
-                                      ),
+                                    const Icon(
+                                      Icons.shopping_bag_rounded,
+                                      color: Colors.white,
+                                      size: 18,
                                     ),
-                                    Text(
-                                      '$cartCount ${cartCount == 1 ? 'item' : 'items'}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 10,
+                                    const SizedBox(width: 6),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'View Cart',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Text(
+                                          '$cartCount ${cartCount == 1 ? 'item' : 'items'}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 8),
+                                    // Direct Close "X" Button
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _isCartBannerDismissed = true;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.22),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

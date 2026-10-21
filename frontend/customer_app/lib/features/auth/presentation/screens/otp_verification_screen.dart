@@ -34,6 +34,7 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _keyboardFocusNodes = List.generate(6, (_) => FocusNode());
 
   late String _currentVerificationId;
   int? _currentResendToken;
@@ -46,6 +47,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     _currentVerificationId = widget.verificationId;
     _currentResendToken = widget.resendToken;
     _startTimer();
+
+    // Trigger UI updates when focus changes to highlight active box
+    for (final node in _focusNodes) {
+      node.addListener(_onFocusChange);
+    }
+  }
+
+  void _onFocusChange() {
+    if (mounted) setState(() {});
   }
 
   void _startTimer() {
@@ -63,10 +73,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    for (final node in _focusNodes) {
+      node.removeListener(_onFocusChange);
+      node.dispose();
+    }
     for (final c in _controllers) {
       c.dispose();
     }
-    for (final f in _focusNodes) {
+    for (final f in _keyboardFocusNodes) {
       f.dispose();
     }
     super.dispose();
@@ -96,6 +110,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         if (_otpCode.length == 6) {
           _verifyOtp(context);
         }
+      }
+    } else {
+      // If user tapped backspace and cleared the current box, move to previous box
+      if (index > 0) {
+        _focusNodes[index - 1].requestFocus();
       }
     }
   }
@@ -142,7 +161,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
 
     return BlocProvider(
       create: (_) => sl<PhoneAuthBloc>(),
@@ -179,10 +197,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.width < 360 ? 14 : 20,
+                  vertical: 24,
+                ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: isTablet ? 420 : double.infinity,
+                  constraints: const BoxConstraints(
+                    maxWidth: 420,
                   ),
                   child: BlocConsumer<PhoneAuthBloc, PhoneAuthState>(
                     listener: (context, state) {
@@ -216,9 +237,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     },
                     builder: (context, state) {
                       final isLoading = state is PhoneAuthLoading;
+                      final cardPaddingH = size.width < 360
+                          ? 14.0
+                          : (size.width < 400 ? 18.0 : 22.0);
 
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 34),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: cardPaddingH,
+                          vertical: 30,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(24),
@@ -314,60 +341,101 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             ),
                             const SizedBox(height: 28),
 
-                            // 6-digit PIN input fields
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(6, (index) {
-                                return SizedBox(
-                                  width: isTablet ? 48 : 42,
-                                  height: 52,
-                                  child: KeyboardListener(
-                                    focusNode: FocusNode(),
-                                    onKeyEvent: (event) {
-                                      if (event is KeyDownEvent &&
-                                          event.logicalKey == LogicalKeyboardKey.backspace &&
-                                          _controllers[index].text.isEmpty &&
-                                          index > 0) {
-                                        _focusNodes[index - 1].requestFocus();
-                                      }
-                                    },
-                                    child: TextField(
-                                      controller: _controllers[index],
-                                      focusNode: _focusNodes[index],
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      maxLength: 1,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF0C2417),
-                                      ),
-                                      decoration: InputDecoration(
-                                        counterText: '',
-                                        filled: true,
-                                        fillColor: const Color(0xFFF3F7F5),
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: Color(0xFFD6E2DB)),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: Color(0xFFD6E2DB)),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: Color(0xFF1A3827), width: 2),
-                                        ),
-                                      ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      onChanged: (val) => _onDigitChanged(index, val),
+                            // 6-digit PIN input fields (Guaranteed fit across all screens)
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final availableWidth = constraints.maxWidth;
+                                // Adaptive gap between boxes: 4px on narrow, 6px on medium, 8px on wide
+                                final double gap = availableWidth < 280
+                                    ? 4.0
+                                    : (availableWidth < 320 ? 6.0 : 8.0);
+                                final double totalGaps = gap * 5;
+
+                                // Calculate exact boxWidth to fit availableWidth without any overflow
+                                final double calculatedWidth =
+                                    ((availableWidth - totalGaps) / 6).floorToDouble();
+                                final double boxWidth = calculatedWidth.clamp(34.0, 48.0);
+                                final double boxHeight = (boxWidth * 1.18).clamp(44.0, 56.0);
+                                final double fontSize = (boxWidth * 0.44).clamp(16.0, 21.0);
+                                final double totalRowWidth = (boxWidth * 6) + totalGaps;
+
+                                return Center(
+                                  child: SizedBox(
+                                    width: totalRowWidth,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: List.generate(6, (index) {
+                                        final isFocused = _focusNodes[index].hasFocus;
+                                        final isFilled = _controllers[index].text.isNotEmpty;
+
+                                        return SizedBox(
+                                          width: boxWidth,
+                                          height: boxHeight,
+                                          child: KeyboardListener(
+                                            focusNode: _keyboardFocusNodes[index],
+                                            onKeyEvent: (event) {
+                                              if (event is KeyDownEvent &&
+                                                  event.logicalKey == LogicalKeyboardKey.backspace &&
+                                                  _controllers[index].text.isEmpty &&
+                                                  index > 0) {
+                                                _focusNodes[index - 1].requestFocus();
+                                              }
+                                            },
+                                            child: TextField(
+                                              controller: _controllers[index],
+                                              focusNode: _focusNodes[index],
+                                              keyboardType: TextInputType.number,
+                                              textAlign: TextAlign.center,
+                                              textAlignVertical: TextAlignVertical.center,
+                                              maxLength: 1,
+                                              style: TextStyle(
+                                                fontSize: fontSize,
+                                                fontWeight: FontWeight.bold,
+                                                color: const Color(0xFF0C2417),
+                                              ),
+                                              decoration: InputDecoration(
+                                                counterText: '',
+                                                filled: true,
+                                                fillColor: isFocused
+                                                    ? Colors.white
+                                                    : (isFilled
+                                                        ? const Color(0xFFEAF3EE)
+                                                        : const Color(0xFFF3F7F5)),
+                                                contentPadding: EdgeInsets.zero,
+                                                isDense: true,
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderSide: const BorderSide(color: Color(0xFFD6E2DB)),
+                                                ),
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderSide: BorderSide(
+                                                    color: isFilled
+                                                        ? const Color(0xFF88B39B)
+                                                        : const Color(0xFFD6E2DB),
+                                                    width: isFilled ? 1.5 : 1.0,
+                                                  ),
+                                                ),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderSide: const BorderSide(
+                                                    color: Color(0xFF1A3827),
+                                                    width: 2.0,
+                                                  ),
+                                                ),
+                                              ),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.digitsOnly,
+                                              ],
+                                              onChanged: (val) => _onDigitChanged(index, val),
+                                            ),
+                                          ),
+                                        );
+                                      }),
                                     ),
                                   ),
                                 );
-                              }),
+                              },
                             ),
                             const SizedBox(height: 28),
 

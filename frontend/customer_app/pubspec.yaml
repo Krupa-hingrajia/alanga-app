@@ -49,6 +49,8 @@ dependencies:
   package_info_plus: ^9.0.1
   firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
+  razorpay_flutter: ^1.4.7
+  flutter_cashfree_pg_sdk: ^2.5.0+53
 
 dev_dependencies:
   flutter_test:

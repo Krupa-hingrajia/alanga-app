@@ -24,7 +24,10 @@ export class OrderRepository implements IOrderRepository {
         totalAmount: data.totalAmount,
         paymentMethod: data.paymentMethod || 'COD',
         paymentStatus: data.paymentStatus || 'PENDING',
-        status: data.status || 'PENDING',
+        status: data.status || 'CONFIRMED',
+        gatewayOrderId: data.gatewayOrderId || null,
+        gatewayPaymentId: data.gatewayPaymentId || null,
+        gatewaySignature: data.gatewaySignature || null,
         notes: data.notes,
         orderItems: {
           create: data.orderItems,

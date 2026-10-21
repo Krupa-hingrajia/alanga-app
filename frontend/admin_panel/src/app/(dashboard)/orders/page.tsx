@@ -81,7 +81,9 @@ const ORDER_STATUS_FILTERS = [
 const PAYMENT_METHOD_FILTERS = [
   { value: 'ALL', label: 'All Payment Methods' },
   { value: 'COD', label: 'Cash on Delivery (COD)' },
-  { value: 'ONLINE', label: 'Online / Card Payment' },
+  { value: 'RAZORPAY', label: 'Razorpay' },
+  { value: 'CASHFREE', label: 'Cashfree' },
+  { value: 'ONLINE', label: 'All Online Payments' },
 ];
 
 const DATE_PRESETS = [
@@ -281,7 +283,12 @@ export default function OrdersPage() {
     return rawOrders.filter((order) => {
       // 1. Payment Method Filter
       if (paymentMethodFilter !== 'ALL') {
-        if (order.paymentMethod?.toUpperCase() !== paymentMethodFilter) {
+        const method = order.paymentMethod?.toUpperCase();
+        if (paymentMethodFilter === 'ONLINE') {
+          if (method !== 'ONLINE' && method !== 'RAZORPAY' && method !== 'CASHFREE') {
+            return false;
+          }
+        } else if (method !== paymentMethodFilter) {
           return false;
         }
       }

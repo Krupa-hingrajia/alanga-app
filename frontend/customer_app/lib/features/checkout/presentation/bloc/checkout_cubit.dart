@@ -38,4 +38,46 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       rethrow;
     }
   }
+
+  Future<Map<String, dynamic>> createPaymentOrder({
+    required String gateway,
+    required String addressId,
+    String? notes,
+  }) async {
+    return repository.createPaymentOrder(
+      gateway: gateway,
+      addressId: addressId,
+      notes: notes,
+    );
+  }
+
+  Future<void> verifyPayment({
+    required String gateway,
+    required String gatewayOrderId,
+    String? gatewayPaymentId,
+    String? gatewaySignature,
+    required String addressId,
+    String? notes,
+  }) async {
+    if (state is! CheckoutLoaded && state is! PlaceOrderLoading) return;
+    final currentSummary = state is CheckoutLoaded
+        ? (state as CheckoutLoaded).summary
+        : (state as PlaceOrderLoading).summary;
+
+    emit(PlaceOrderLoading(summary: currentSummary));
+    try {
+      final order = await repository.verifyPayment(
+        gateway: gateway,
+        gatewayOrderId: gatewayOrderId,
+        gatewayPaymentId: gatewayPaymentId,
+        gatewaySignature: gatewaySignature,
+        addressId: addressId,
+        notes: notes,
+      );
+      emit(PlaceOrderSuccess(order: order));
+    } catch (e) {
+      emit(CheckoutLoaded(summary: currentSummary));
+      rethrow;
+    }
+  }
 }

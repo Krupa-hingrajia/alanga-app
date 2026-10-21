@@ -178,9 +178,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
                         const Divider(height: 20, color: Color(0xFFEFF4F1)),
                         _buildDetailRow(
                           label: 'Payment Method',
-                          value: order.paymentMethod == 'COD'
-                              ? 'Cash on Delivery (COD)'
-                              : order.paymentMethod,
+                          value: order.paymentMethodDisplay,
                         ),
                         const Divider(height: 20, color: Color(0xFFEFF4F1)),
                         _buildDetailRow(

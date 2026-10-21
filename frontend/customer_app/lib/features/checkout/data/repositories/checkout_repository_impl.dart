@@ -25,6 +25,36 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
       );
 
   @override
+  Future<Map<String, dynamic>> createPaymentOrder({
+    required String gateway,
+    required String addressId,
+    String? notes,
+  }) =>
+      remoteDatasource.createPaymentOrder(
+        gateway: gateway,
+        addressId: addressId,
+        notes: notes,
+      );
+
+  @override
+  Future<OrderModel> verifyPayment({
+    required String gateway,
+    required String gatewayOrderId,
+    String? gatewayPaymentId,
+    String? gatewaySignature,
+    required String addressId,
+    String? notes,
+  }) =>
+      remoteDatasource.verifyPayment(
+        gateway: gateway,
+        gatewayOrderId: gatewayOrderId,
+        gatewayPaymentId: gatewayPaymentId,
+        gatewaySignature: gatewaySignature,
+        addressId: addressId,
+        notes: notes,
+      );
+
+  @override
   Future<List<OrderModel>> getCustomerOrders() =>
       remoteDatasource.getCustomerOrders();
 

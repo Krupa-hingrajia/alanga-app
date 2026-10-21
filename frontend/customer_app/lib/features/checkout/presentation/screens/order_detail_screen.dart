@@ -800,8 +800,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   // 6. PAYMENT INFO CARD
   // ==========================================
   Widget _buildPaymentInfoCard(OrderModel order) {
-    final isCod = order.paymentMethod == 'COD';
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -832,7 +830,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           const Divider(height: 16, color: Color(0xFFEEF3F0)),
           _buildRow(
             'Payment Method',
-            isCod ? 'Cash on Delivery (COD)' : order.paymentMethod,
+            order.paymentMethodDisplay,
           ),
           const SizedBox(height: 8),
           _buildRow(

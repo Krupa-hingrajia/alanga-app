@@ -13,6 +13,7 @@ import '../../../cart/presentation/bloc/cart_cubit.dart';
 import '../../data/models/checkout_summary_model.dart';
 import '../bloc/checkout_cubit.dart';
 import '../bloc/checkout_state.dart';
+import '../../services/payment_gateway_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -23,19 +24,96 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _notesController = TextEditingController();
+  final PaymentGatewayService _paymentService = PaymentGatewayService();
+
+  String _selectedPaymentMethod = 'RAZORPAY'; // 'RAZORPAY', 'CASHFREE', or 'COD'
   bool _isPlacingOrder = false;
+  AddressModel? _currentAddress;
 
   @override
   void initState() {
     super.initState();
     context.read<CheckoutCubit>().fetchCheckoutSummary();
     context.read<AddressCubit>().fetchAddresses();
+
+    _paymentService.initialize(
+      onSuccess: _handlePaymentSuccess,
+      onError: _handlePaymentError,
+    );
   }
 
   @override
   void dispose() {
+    _paymentService.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _handlePaymentSuccess({
+    required String gateway,
+    required String orderId,
+    String? paymentId,
+    String? signature,
+  }) async {
+    if (_currentAddress == null) {
+      setState(() => _isPlacingOrder = false);
+      return;
+    }
+
+    try {
+      await context.read<CheckoutCubit>().verifyPayment(
+            gateway: gateway,
+            gatewayOrderId: orderId,
+            gatewayPaymentId: paymentId,
+            gatewaySignature: signature,
+            addressId: _currentAddress!.id,
+            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+          );
+
+      if (mounted) {
+        context.read<CartCubit>().fetchCart();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isPlacingOrder = false);
+        final errorMessage = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment verification failed: $errorMessage'),
+            backgroundColor: AppColors.brandRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _handlePaymentError({
+    required String gateway,
+    required String message,
+  }) {
+    if (!mounted) return;
+    setState(() => _isPlacingOrder = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                '$gateway: $message',
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.brandRed,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   Future<void> _handlePlaceOrder(AddressModel? selectedAddress, CheckoutSummaryModel summary) async {
@@ -89,18 +167,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    _currentAddress = selectedAddress;
     setState(() => _isPlacingOrder = true);
 
     try {
-      await context.read<CheckoutCubit>().placeOrder(
-            addressId: selectedAddress.id,
-            paymentMethod: 'COD',
-            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-          );
+      final notesText = _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null;
 
-      // Refresh cart count across the app
-      if (mounted) {
-        context.read<CartCubit>().fetchCart();
+      if (_selectedPaymentMethod == 'COD') {
+        // Direct COD Order Placement
+        await context.read<CheckoutCubit>().placeOrder(
+              addressId: selectedAddress.id,
+              paymentMethod: 'COD',
+              notes: notesText,
+            );
+
+        if (mounted) {
+          context.read<CartCubit>().fetchCart();
+        }
+      } else if (_selectedPaymentMethod == 'RAZORPAY') {
+        // Initialize Razorpay Order
+        final paymentData = await context.read<CheckoutCubit>().createPaymentOrder(
+              gateway: 'RAZORPAY',
+              addressId: selectedAddress.id,
+              notes: notesText,
+            );
+
+        final orderId = paymentData['orderId']?.toString() ?? '';
+        final keyId = paymentData['keyId']?.toString() ?? '';
+        final amountInPaise = (paymentData['amount'] as num?) ?? (summary.grandTotal * 100);
+
+        _paymentService.openRazorpay(
+          keyId: keyId,
+          orderId: orderId,
+          amountInPaise: amountInPaise,
+          customerName: selectedAddress.fullName,
+          customerPhone: selectedAddress.mobileNumber,
+          customerEmail: 'customer@alangashop.com',
+        );
+      } else if (_selectedPaymentMethod == 'CASHFREE') {
+        // Initialize Cashfree Order
+        final paymentData = await context.read<CheckoutCubit>().createPaymentOrder(
+              gateway: 'CASHFREE',
+              addressId: selectedAddress.id,
+              notes: notesText,
+            );
+
+        final orderId = paymentData['orderId']?.toString() ?? '';
+        final sessionId = paymentData['paymentSessionId']?.toString() ?? '';
+        final env = paymentData['environment']?.toString() ?? 'TEST';
+
+        _paymentService.openCashfree(
+          orderId: orderId,
+          paymentSessionId: sessionId,
+          environment: env,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -974,65 +1094,165 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.payments_outlined, color: AppColors.primaryGreen, size: 20),
-              SizedBox(width: 8),
-              Text(
+              const Icon(Icons.payments_outlined, color: AppColors.primaryGreen, size: 20),
+              const SizedBox(width: 8),
+              const Text(
                 'Payment Method',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF11261B)),
               ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F7ED),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  '100% SECURE',
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primaryGreen),
+                ),
+              ),
             ],
           ),
-          const Divider(height: 16, color: Color(0xFFEEF3F0)),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.primaryGreen.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primaryGreen, width: 1.5),
+          const Divider(height: 20, color: Color(0xFFEEF3F0)),
+
+          // 1. Razorpay Option
+          _buildPaymentOptionTile(
+            key: 'RAZORPAY',
+            title: 'Razorpay',
+            subtitle: 'UPI (GPay, PhonePe, Paytm), Debit/Credit Cards, NetBanking',
+            badgeText: 'POPULAR & INSTANT',
+            badgeColor: const Color(0xFF0F766E),
+            icon: Icons.flash_on_rounded,
+            iconColor: const Color(0xFF0D9488),
+          ),
+          const SizedBox(height: 10),
+
+          // 2. Cashfree Option
+          _buildPaymentOptionTile(
+            key: 'CASHFREE',
+            title: 'Cashfree Payments',
+            subtitle: 'UPI, Credit/Debit Cards, NetBanking, Wallets',
+            badgeText: 'FAST & SECURE',
+            badgeColor: const Color(0xFF1D4ED8),
+            icon: Icons.account_balance_wallet_rounded,
+            iconColor: const Color(0xFF2563EB),
+          ),
+          const SizedBox(height: 10),
+
+          // 3. Cash on Delivery (COD) Option
+          _buildPaymentOptionTile(
+            key: 'COD',
+            title: 'Cash on Delivery (COD)',
+            subtitle: 'Pay with cash at your doorstep upon receiving the package.',
+            badgeText: 'PAY AT DOORSTEP',
+            badgeColor: const Color(0xFFB45309),
+            icon: Icons.money_rounded,
+            iconColor: const Color(0xFFD97706),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentOptionTile({
+    required String key,
+    required String title,
+    required String subtitle,
+    required String badgeText,
+    required Color badgeColor,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    final isSelected = _selectedPaymentMethod == key;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedPaymentMethod = key;
+        });
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryGreen.withValues(alpha: 0.05)
+              : const Color(0xFFFAFCFA),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGreen : const Color(0xFFE2EBE5),
+            width: isSelected ? 1.6 : 1.0,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(
+                isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                color: isSelected ? AppColors.primaryGreen : const Color(0xFF9CA3AF),
+                size: 20,
+              ),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.radio_button_checked_rounded, color: AppColors.primaryGreen, size: 22),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 18, color: iconColor),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Cash on Delivery (COD)',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: Color(0xFF11261B)),
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.5,
+                            color: isSelected ? const Color(0xFF11261B) : const Color(0xFF374151),
                           ),
-                          SizedBox(width: 6),
-                          Icon(Icons.money_rounded, size: 16, color: AppColors.primaryGreen),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: 3),
-                      Text(
-                        'Pay with cash at your doorstep upon receiving the package.',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF5A7265)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          badgeText,
+                          style: TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.bold,
+                            color: badgeColor,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: BorderRadius.circular(4),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF5A7265), height: 1.3),
                   ),
-                  child: const Text(
-                    'DEFAULT',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1164,19 +1384,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           width: 20,
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'PLACE ORDER',
-                              style: TextStyle(
-                                fontSize: 13.5,
+                              _selectedPaymentMethod == 'COD'
+                                  ? 'PLACE ORDER (COD)'
+                                  : _selectedPaymentMethod == 'RAZORPAY'
+                                      ? 'PAY VIA RAZORPAY'
+                                      : 'PAY VIA CASHFREE',
+                              style: const TextStyle(
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
+                                letterSpacing: 0.4,
                               ),
                             ),
-                            SizedBox(width: 6),
-                            Icon(Icons.arrow_forward_rounded, size: 16),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward_rounded, size: 16),
                           ],
                         ),
                 ),

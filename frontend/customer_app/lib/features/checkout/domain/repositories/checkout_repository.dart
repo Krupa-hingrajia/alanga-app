@@ -8,6 +8,19 @@ abstract class CheckoutRepository {
     String paymentMethod = 'COD',
     String? notes,
   });
+  Future<Map<String, dynamic>> createPaymentOrder({
+    required String gateway,
+    required String addressId,
+    String? notes,
+  });
+  Future<OrderModel> verifyPayment({
+    required String gateway,
+    required String gatewayOrderId,
+    String? gatewayPaymentId,
+    String? gatewaySignature,
+    required String addressId,
+    String? notes,
+  });
   Future<List<OrderModel>> getCustomerOrders();
   Future<OrderModel> getOrderById(String orderId);
 }

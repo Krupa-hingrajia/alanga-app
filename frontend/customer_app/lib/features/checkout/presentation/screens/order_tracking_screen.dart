@@ -835,8 +835,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   // 7. PAYMENT DETAILS
   // ==========================================
   Widget _buildPaymentDetailsCard(OrderModel order) {
-    final isCod = order.paymentMethod == 'COD';
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -865,7 +863,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
             ],
           ),
           const Divider(height: 16, color: Color(0xFFEEF3F0)),
-          _buildRow('Payment Method', isCod ? 'Cash on Delivery (COD)' : order.paymentMethod),
+          _buildRow('Payment Method', order.paymentMethodDisplay),
           const SizedBox(height: 8),
           _buildRow(
             'Payment Status',

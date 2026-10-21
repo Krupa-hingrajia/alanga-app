@@ -11,6 +11,19 @@ abstract class CheckoutRemoteDatasource {
     String paymentMethod = 'COD',
     String? notes,
   });
+  Future<Map<String, dynamic>> createPaymentOrder({
+    required String gateway,
+    required String addressId,
+    String? notes,
+  });
+  Future<OrderModel> verifyPayment({
+    required String gateway,
+    required String gatewayOrderId,
+    String? gatewayPaymentId,
+    String? gatewaySignature,
+    required String addressId,
+    String? notes,
+  });
   Future<List<OrderModel>> getCustomerOrders();
   Future<OrderModel> getOrderById(String orderId);
 }
@@ -64,6 +77,56 @@ class CheckoutRemoteDatasourceImpl implements CheckoutRemoteDatasource {
       debugPrint('================ [PLACE ORDER DIO EXCEPTION] ================');
       debugPrint('Status Code: ${e.response?.statusCode}');
       debugPrint('Error Body: ${e.response?.data}');
+      throw Exception(_extractErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> createPaymentOrder({
+    required String gateway,
+    required String addressId,
+    String? notes,
+  }) async {
+    try {
+      final payload = {
+        'gateway': gateway,
+        'addressId': addressId,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      };
+      final response = await apiService.post('/payments/create-order', data: payload);
+      if (response.data != null && response.data['data'] != null) {
+        return response.data['data'] as Map<String, dynamic>;
+      }
+      throw Exception('Failed to initialize online payment session.');
+    } on DioException catch (e) {
+      throw Exception(_extractErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<OrderModel> verifyPayment({
+    required String gateway,
+    required String gatewayOrderId,
+    String? gatewayPaymentId,
+    String? gatewaySignature,
+    required String addressId,
+    String? notes,
+  }) async {
+    try {
+      final payload = {
+        'gateway': gateway,
+        'gatewayOrderId': gatewayOrderId,
+        'gatewayPaymentId': ?gatewayPaymentId,
+        'gatewaySignature': ?gatewaySignature,
+        'addressId': addressId,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      };
+      final response = await apiService.post('/payments/verify', data: payload);
+      if (response.data != null && response.data['data'] != null) {
+        return OrderModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      }
+      throw Exception('Payment verified but order could not be retrieved.');
+    } on DioException catch (e) {
       throw Exception(_extractErrorMessage(e));
     }
   }

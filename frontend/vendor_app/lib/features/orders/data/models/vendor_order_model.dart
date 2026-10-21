@@ -228,7 +228,7 @@ class VendorOrderItemModel {
       unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
       shippingCharge: (json['shippingCharge'] as num?)?.toDouble() ?? 0.0,
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
-      status: json['status']?.toString().toUpperCase() ?? 'PENDING',
+      status: json['status']?.toString().toUpperCase() ?? 'CONFIRMED',
       productImage: img,
       courierName: json['courierName']?.toString(),
       trackingNumber: json['trackingNumber']?.toString(),
@@ -313,7 +313,7 @@ class VendorOrderModel {
     final sTotal = ((json['shippingTotal'] ?? json['shippingCharge']) as num?)?.toDouble() ?? 0.0;
     final gTotal = ((json['grandTotal'] ?? json['totalAmount']) as num?)?.toDouble() ?? 0.0;
 
-    String resolvedStatus = json['status']?.toString().toUpperCase() ?? 'PENDING';
+    String resolvedStatus = json['status']?.toString().toUpperCase() ?? 'CONFIRMED';
     if (items.isNotEmpty) {
       final itemStatuses = items.map((e) => e.status.toUpperCase()).toSet();
       if (itemStatuses.length == 1) {

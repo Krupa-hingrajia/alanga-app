@@ -35,7 +35,7 @@ export class VendorDashboardRepository implements IVendorDashboardRepository {
     const summary: any[] = await this.prisma.$queryRaw`
       SELECT 
         COUNT(DISTINCT o.id)::int as "totalOrders",
-        COUNT(DISTINCT CASE WHEN o.status = 'PENDING' THEN o.id END)::int as "pendingOrders",
+        COUNT(DISTINCT CASE WHEN o.status IN ('PENDING', 'CONFIRMED') THEN o.id END)::int as "pendingOrders",
         COUNT(DISTINCT CASE WHEN o.status IN ('PENDING', 'CONFIRMED', 'PROCESSING') THEN o.id END)::int as "ordersToDispatch",
         COUNT(DISTINCT CASE WHEN o.status IN ('COMPLETED', 'DELIVERED') THEN o.id END)::int as "completedOrders",
         COALESCE(SUM(CASE WHEN o.status != 'CANCELLED' THEN oi.total_price END), 0)::float as "totalRevenue",

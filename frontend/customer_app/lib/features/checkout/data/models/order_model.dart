@@ -138,6 +138,20 @@ class OrderModel {
     required this.orderItems,
   });
 
+  String get paymentMethodDisplay {
+    final pm = paymentMethod.toUpperCase();
+    if (pm == 'COD') return 'Cash on Delivery (COD)';
+    if (pm == 'RAZORPAY') return 'Razorpay (UPI / Card / Netbanking)';
+    if (pm == 'CASHFREE') return 'Cashfree Payments';
+    if (pm == 'ONLINE') return 'Online Payment';
+    return paymentMethod;
+  }
+
+  bool get isOnlinePayment {
+    final pm = paymentMethod.toUpperCase();
+    return pm == 'RAZORPAY' || pm == 'CASHFREE' || pm == 'ONLINE';
+  }
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final rawItems = json['orderItems'] as List? ?? [];
     final itemsList = rawItems
@@ -175,7 +189,7 @@ class OrderModel {
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentMethod: json['paymentMethod'] as String? ?? 'COD',
       paymentStatus: json['paymentStatus'] as String? ?? 'PENDING',
-      status: json['status'] as String? ?? 'PENDING',
+      status: json['status'] as String? ?? 'CONFIRMED',
       notes: json['notes'] as String?,
       courierName: courier,
       trackingNumber: tracking,

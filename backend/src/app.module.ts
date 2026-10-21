@@ -23,6 +23,7 @@ import { OrderModule } from './modules/orders/order.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { VendorProfileModule } from './modules/vendor-profile/vendor-profile.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     OrderModule,
     ReviewsModule,
     NotificationsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

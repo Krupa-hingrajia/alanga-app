@@ -28,6 +28,11 @@ ENV DATABASE_URL="postgresql://postgres:Sachit%402026@34.21.175.107:5432/postgre
 ENV DIRECT_URL="postgresql://postgres:Sachit%402026@34.21.175.107:5432/postgres?sslmode=disable"
 ENV JWT_ACCESS_SECRET="super-secret-access-token-key-change-in-production"
 ENV JWT_REFRESH_SECRET="super-secret-refresh-token-key-change-in-production"
+ENV RAZORPAY_KEY_ID="rzp_test_placeholder"
+ENV RAZORPAY_KEY_SECRET="rzp_secret_placeholder"
+ENV CASHFREE_APP_ID="cf_app_placeholder"
+ENV CASHFREE_SECRET_KEY="cf_secret_placeholder"
+ENV CASHFREE_ENV="TEST"
 
 # Create necessary directories
 RUN mkdir -p uploads logs

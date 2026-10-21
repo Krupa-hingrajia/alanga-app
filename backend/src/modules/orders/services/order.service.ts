@@ -21,7 +21,7 @@ export class OrderService {
 
   private readonly validVendorTransitions: Record<string, string[]> = {
     PENDING: ['CONFIRMED', 'CANCELLED'],
-    CONFIRMED: ['PROCESSING', 'CANCELLED'],
+    CONFIRMED: ['PROCESSING', 'PACKED', 'CANCELLED'],
     PROCESSING: ['PACKED', 'CANCELLED'],
     PACKED: ['SHIPPED', 'CANCELLED'],
     SHIPPED: ['OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'],
@@ -154,11 +154,15 @@ export class OrderService {
           unitPrice,
           shippingCharge: itemShippingFee,
           totalPrice: itemTotal,
-          status: 'PENDING',
+          status: 'CONFIRMED',
         });
       }
 
       const grandTotal = subtotal + totalShippingCharge;
+
+      const isOnlinePaid =
+        (dto.paymentMethod === 'RAZORPAY' || dto.paymentMethod === 'CASHFREE') &&
+        Boolean(dto.gatewayPaymentId || dto.gatewayOrderId);
 
       // Create Order
       const newOrder = await tx.order.create({
@@ -171,8 +175,11 @@ export class OrderService {
           shippingCharge: totalShippingCharge,
           totalAmount: grandTotal,
           paymentMethod: dto.paymentMethod || 'COD',
-          paymentStatus: dto.paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
-          status: 'PENDING',
+          paymentStatus: isOnlinePaid ? 'PAID' : 'PENDING',
+          status: 'CONFIRMED',
+          gatewayOrderId: dto.gatewayOrderId || null,
+          gatewayPaymentId: dto.gatewayPaymentId || null,
+          gatewaySignature: dto.gatewaySignature || null,
           notes: dto.notes || null,
           orderItems: {
             create: orderItemsData,
@@ -208,8 +215,8 @@ export class OrderService {
       for (const [vendorId, summary] of Object.entries(vendorTotals)) {
         await this.notificationsService.sendNotificationToUser(
           vendorId,
-          '🔔 New Order Received!',
-          `You have a new order #${result.orderNumber} for ₹${summary.total.toFixed(2)} (${summary.itemCount} items). Please prepare for dispatch.`,
+          '🔔 New Confirmed Order Received!',
+          `You have a confirmed order #${result.orderNumber} for ₹${summary.total.toFixed(2)} (${summary.itemCount} items). Please prepare for dispatch.`,
           'ORDER',
           { orderId: result.id, orderNumber: result.orderNumber },
         );
@@ -218,8 +225,8 @@ export class OrderService {
       // Notify Customer
       await this.notificationsService.sendNotificationToUser(
         customerId,
-        '🛍️ Order Placed Successfully!',
-        `Your order #${result.orderNumber} for ₹${result.totalAmount.toFixed(2)} has been placed. Thank you for shopping with Alanga!`,
+        '🛍️ Order Confirmed!',
+        `Your order #${result.orderNumber} for ₹${result.totalAmount.toFixed(2)} has been placed and confirmed. Thank you for shopping with Alanga!`,
         'ORDER',
         { orderId: result.id, orderNumber: result.orderNumber },
       );
